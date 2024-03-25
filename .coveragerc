@@ -1,0 +1,19 @@
+[run]
+branch = True
+source = RTN
+
+[report]
+omit =
+    */tests/*
+    */__init__.py
+
+# Show missing lines in report output
+show_missing = True
+
+exclude_lines =
+    pragma: no cover
+    def __repr__
+
+[html]
+# Directory where HTML reports will be saved
+directory = htmlcov
