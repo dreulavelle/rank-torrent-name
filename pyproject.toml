@@ -2,7 +2,7 @@
 name = "rank-torrent-name"
 version = "0.1.0"
 description = "Parse Torrents using PTN and Rank them according to your preferences!"
-authors = ["Spoked <Spoked@localhost>"]
+authors = ["Spoked <dreu.lavelle@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/dreulavelle/rank-torrent-name"

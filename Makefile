@@ -1,4 +1,4 @@
-.PHONY: install lint format check test clean coverage pr-ready
+.PHONY: install lint format check test clean coverage pr-ready publish
 
 SRC_DIR := ./RTN
 
@@ -38,3 +38,6 @@ coverage:
 	@poetry run coverage report -m
 
 pr-ready: clean format lint check test
+
+publish:
+	poetry publish --build
