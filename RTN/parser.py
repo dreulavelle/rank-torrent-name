@@ -62,11 +62,11 @@ class RTN:
     RTN (Rank Torrent Name) class for parsing and ranking torrent titles based on user preferences.
 
     Attributes:
-        settings (SettingsModel): The settings model with user preferences for parsing and ranking torrents.
-        ranking_model (BaseRankingModel): The model defining the ranking logic and score computation.
+        `settings` (SettingsModel): The settings model with user preferences for parsing and ranking torrents.
+        `ranking_model` (BaseRankingModel): The model defining the ranking logic and score computation.
 
     Methods:
-        rank: Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
+        `rank`: Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
     """
 
     def __init__(self, settings: SettingsModel, ranking_model: BaseRankingModel):
