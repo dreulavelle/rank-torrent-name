@@ -33,3 +33,13 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Packaging artifacts
+dist/
+build/
+*.egg-info/
+*.tar.gz
+*.whl
+
+# PyPI upload artifacts
+.pypirc

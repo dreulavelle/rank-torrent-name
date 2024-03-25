@@ -113,16 +113,16 @@ class TestSettingsModel:
             assert isinstance(pattern, regex.Pattern)
 
         test_case = "This is a 4K test"
-        assert any(pattern.search(test_case) for pattern in settings.require), "4K case-sensitive match failed"
+        assert any(pattern.search(test_case) for pattern in settings.require), "4K case-sensitive match failed" # type: ignore
 
         test_case = "1080P"
-        assert any(pattern.search(test_case) for pattern in settings.require), "1080p case-insensitive match failed"
+        assert any(pattern.search(test_case) for pattern in settings.require), "1080p case-insensitive match failed" # type: ignore
 
         test_case = "case sensitive test"
-        assert not any(pattern.search(test_case) for pattern in settings.preferred), "Case sensitive match failed"
+        assert not any(pattern.search(test_case) for pattern in settings.preferred), "Case sensitive match failed" # type: ignore
 
         test_case = "case insensitive explicit test: 1080p"
-        assert any(pattern.search(test_case) for pattern in settings.preferred), "Case insensitive explicit match failed"
+        assert any(pattern.search(test_case) for pattern in settings.preferred), "Case insensitive explicit match failed" # type: ignore
 
 
     # Test Custom Rank Updates
@@ -146,9 +146,9 @@ class TestSettingsModel:
             exclude=["CAM|TS|Telesync"],
             preferred=["BluRay", "/HDR10+/i"]
         )
-        require_matches = any(pattern.search(title) for pattern in settings.require)
-        exclude_matches = any(pattern.search(title) for pattern in settings.exclude)
-        preferred_matches = any(pattern.search(title) for pattern in settings.preferred)
+        require_matches = any(pattern.search(title) for pattern in settings.require) # type: ignore
+        exclude_matches = any(pattern.search(title) for pattern in settings.exclude) # type: ignore
+        preferred_matches = any(pattern.search(title) for pattern in settings.preferred) # type: ignore
         assert expected_match in (require_matches and not exclude_matches, preferred_matches)
 
     # Error Handling and Validation
