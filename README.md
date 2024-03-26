@@ -3,7 +3,7 @@
 # Rank Torrent Name (RTN)
 
 [![PyPI version](https://badge.fury.io/py/rank-torrent-name.svg)](https://badge.fury.io/py/rank-torrent-name) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dreulavelle/rank-torrent-name/battery.yml?style=flat) ![GitHub License](https://img.shields.io/github/license/dreulavelle/rank-torrent-name)
- [![codecov](https://codecov.io/gh/dreulavelle/rank-torrent-name/graph/badge.svg?token=V9S89GSUKM)](https://codecov.io/gh/dreulavelle/rank-torrent-name) 
+ [![Coverage Status](https://coveralls.io/repos/github/dreulavelle/rank-torrent-name/badge.svg?branch=main)](https://coveralls.io/github/dreulavelle/rank-torrent-name?branch=main)
 
 </center>
 
