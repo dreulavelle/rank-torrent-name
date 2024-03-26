@@ -37,8 +37,3 @@ jobs:
         poetry run coverage run -m pytest
         poetry run coverage xml
         poetry run coverage report -m
-    - name: Upload coverage report to Codecov
-      uses: codecov/codecov-action@v4.0.1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
