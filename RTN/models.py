@@ -7,6 +7,7 @@ from regex import Pattern
 
 class ParsedData(BaseModel):
     """Parsed data model for a torrent title."""
+
     raw_title: str
     parsed_title: str
     fetch: bool = False
@@ -65,6 +66,7 @@ class BaseRankingModel(BaseModel):
         subbed (int): The ranking value for subbed attribute.
         av1 (int): The ranking value for AV1 attribute.
     """
+
     # resolution
     uhd: int = 0
     fhd: int = 0
@@ -97,6 +99,7 @@ class BaseRankingModel(BaseModel):
 
 class DefaultRanking(BaseRankingModel):
     """Default ranking model for users to use."""
+
     uhd: int = 140
     fhd: int = 100
     hd: int = 50
@@ -110,9 +113,10 @@ class DefaultRanking(BaseRankingModel):
     webdl: int = 90
     bluray: int = -90
 
-    
+
 class CustomRank(BaseModel):
     """Custom Ranks used in SettingsModel."""
+
     enable: bool = False
     fetch: bool = False
     rank: int = 0
@@ -144,7 +148,7 @@ class SettingsModel(BaseModel):
         - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
         - Patterns enclosed in '/' with a trailing 'i' are compiled as case-insensitive.
         - Patterns not enclosed are compiled as case-insensitive by default.
-    
+
     This model supports advanced regex features, enabling powerful and precise filtering and ranking based on torrent titles and attributes.
 
     Example:
@@ -166,6 +170,7 @@ class SettingsModel(BaseModel):
         >>> print(settings.custom_ranks["uhd"].rank)
         150
     """
+
     profile: str = "default"
     require: List[Union[str, Pattern]] = []
     exclude: List[Union[str, Pattern]] = []
@@ -234,7 +239,3 @@ class SettingsModel(BaseModel):
         """Allows deletion of custom rank settings."""
         if key in self.custom_ranks:
             del self.custom_ranks[key]
-
-    def __iter__(self):
-        """Enables iteration over the keys of custom ranks."""
-        return iter(self.custom_ranks.keys())

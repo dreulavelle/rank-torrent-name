@@ -16,11 +16,11 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     if not check_trash(data.raw_title):
         return False
     if settings.require and any(
-        pattern.search(data.raw_title) for pattern in settings.require if pattern # type: ignore
+        pattern.search(data.raw_title) for pattern in settings.require if pattern  # type: ignore
     ):
         return True
     if settings.exclude and any(
-        pattern.search(data.raw_title) for pattern in settings.exclude if pattern # type: ignore
+        pattern.search(data.raw_title) for pattern in settings.exclude if pattern  # type: ignore
     ):
         return False
     return all(
@@ -32,6 +32,7 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
             fetch_other(data, settings),
         ]
     )
+
 
 def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the quality is fetchable based on user settings."""
@@ -45,6 +46,7 @@ def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
         return False
     return True
 
+
 def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the resolution is fetchable based on user settings."""
     if data.is_4k and not settings.custom_ranks["uhd"].fetch:
@@ -53,12 +55,10 @@ def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
         return False
     if "720p" in data.resolution and not settings.custom_ranks["hd"].fetch:
         return False
-    if (
-        any(res in data.resolution for res in ["576p", "480p"])
-        and not settings.custom_ranks["sd"].fetch
-    ):
+    if any(res in data.resolution for res in ["576p", "480p"]) and not settings.custom_ranks["sd"].fetch:
         return False
     return True
+
 
 def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the codec is fetchable based on user settings."""
@@ -66,6 +66,7 @@ def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
     if not settings.custom_ranks["av1"].fetch and "AV1" in data.codec:
         return False
     return True
+
 
 def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the audio is fetchable based on user settings."""
@@ -93,6 +94,7 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
     if not settings.custom_ranks["aac"].fetch and audio == "AAC":
         return False
     return True
+
 
 def fetch_other(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the other data is fetchable based on user settings."""

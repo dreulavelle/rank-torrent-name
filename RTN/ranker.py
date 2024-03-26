@@ -32,36 +32,17 @@ def get_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseR
     rank += calculate_other_ranks(parsed_data, settings, rank_model)
     rank += calculate_preferred(parsed_data, settings)
     if parsed_data.repack:
-        rank += (
-            rank_model.repack
-            if not settings.custom_ranks["repack"].enable
-            else settings.custom_ranks["repack"].rank
-        )
+        rank += rank_model.repack if not settings.custom_ranks["repack"].enable else settings.custom_ranks["repack"].rank
     if parsed_data.proper:
-        rank += (
-            rank_model.proper
-            if not settings.custom_ranks["proper"].enable
-            else settings.custom_ranks["proper"].rank
-        )
+        rank += rank_model.proper if not settings.custom_ranks["proper"].enable else settings.custom_ranks["proper"].rank
     if parsed_data.remux:
-        rank += (
-            rank_model.remux
-            if not settings.custom_ranks["remux"].enable
-            else settings.custom_ranks["remux"].rank
-        )
+        rank += rank_model.remux if not settings.custom_ranks["remux"].enable else settings.custom_ranks["remux"].rank
     if parsed_data.is_multi_audio:
-        rank += (
-            rank_model.dubbed
-            if not settings.custom_ranks["dubbed"].enable
-            else settings.custom_ranks["dubbed"].rank
-        )
+        rank += rank_model.dubbed if not settings.custom_ranks["dubbed"].enable else settings.custom_ranks["dubbed"].rank
     if parsed_data.is_multi_subtitle:
-        rank += (
-            rank_model.subbed
-            if not settings.custom_ranks["subbed"].enable
-            else settings.custom_ranks["subbed"].rank
-        )
+        rank += rank_model.subbed if not settings.custom_ranks["subbed"].enable else settings.custom_ranks["subbed"].rank
     return rank
+
 
 def calculate_preferred(parsed_data: ParsedData, settings: SettingsModel) -> int:
     """Calculate the preferred ranking of a given parsed data."""
@@ -69,13 +50,10 @@ def calculate_preferred(parsed_data: ParsedData, settings: SettingsModel) -> int
         return 0
     return (
         5000
-        if any(
-            pattern.search(parsed_data.raw_title) # type: ignore
-            for pattern in settings.preferred
-            if pattern
-        )
+        if any(pattern.search(parsed_data.raw_title) for pattern in settings.preferred if pattern)  # type: ignore
         else 0
     )
+
 
 def calculate_resolution_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the resolution ranking of the given parsed data."""
@@ -83,26 +61,16 @@ def calculate_resolution_rank(parsed_data: ParsedData, settings: SettingsModel, 
         return 0
 
     if parsed_data.is_4k:
-        return (
-            rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
-        )
+        return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
 
     resolution: str = parsed_data.resolution[0]
     match resolution:
         case "1080p":
-            return (
-                rank_model.fhd
-                if not settings.custom_ranks["fhd"].enable
-                else settings.custom_ranks["fhd"].rank
-            )
+            return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
         case "720p":
-            return (
-                rank_model.hd if not settings.custom_ranks["hd"].enable else settings.custom_ranks["hd"].rank
-            )
+            return rank_model.hd if not settings.custom_ranks["hd"].enable else settings.custom_ranks["hd"].rank
         case "576p" | "480p":
-            return (
-                rank_model.sd if not settings.custom_ranks["sd"].enable else settings.custom_ranks["sd"].rank
-            )
+            return rank_model.sd if not settings.custom_ranks["sd"].enable else settings.custom_ranks["sd"].rank
         case _:
             return 0
 
@@ -115,27 +83,12 @@ def calculate_quality_rank(parsed_data: ParsedData, settings: SettingsModel, ran
     quality = parsed_data.quality[0]
     match quality:
         case "WEB-DL":
-            return (
-                rank_model.webdl
-                if not settings.custom_ranks["webdl"].enable
-                else settings.custom_ranks["webdl"].rank
-            )
+            return rank_model.webdl if not settings.custom_ranks["webdl"].enable else settings.custom_ranks["webdl"].rank
         case "Blu-ray":
             return (
-                rank_model.bluray
-                if not settings.custom_ranks["bluray"].enable
-                else settings.custom_ranks["bluray"].rank
+                rank_model.bluray if not settings.custom_ranks["bluray"].enable else settings.custom_ranks["bluray"].rank
             )
-        case (
-            "WEBCap"
-            | "Cam"
-            | "Telesync"
-            | "Telecine"
-            | "Screener"
-            | "VODRip"
-            | "TVRip"
-            | "DVD-R"
-        ):
+        case "WEBCap" | "Cam" | "Telesync" | "Telecine" | "Screener" | "VODRip" | "TVRip" | "DVD-R":
             return -1000
         case "BDRip":
             return 5  # This one's a little better than BRRip
@@ -143,6 +96,7 @@ def calculate_quality_rank(parsed_data: ParsedData, settings: SettingsModel, ran
             return 0
         case _:
             return 0
+
 
 def calculate_codec_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the codec ranking of the given parsed data."""
@@ -154,17 +108,14 @@ def calculate_codec_rank(parsed_data: ParsedData, settings: SettingsModel, rank_
         case "Xvid" | "H.263" | "VC-1" | "MPEG-2":
             return -1000
         case "AV1":
-            return (
-                rank_model.av1
-                if not settings.custom_ranks["av1"].enable
-                else settings.custom_ranks["av1"].rank
-            )
+            return rank_model.av1 if not settings.custom_ranks["av1"].enable else settings.custom_ranks["av1"].rank
         case "H.264":
             return 3
         case "H.265" | "H.265 Main 10" | "HEVC":
             return 0
         case _:
             return 0
+
 
 def calculate_audio_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the audio ranking of the given parsed data."""
@@ -179,39 +130,21 @@ def calculate_audio_rank(parsed_data: ParsedData, settings: SettingsModel, rank_
     match audio_format:
         case "Dolby TrueHD":
             return (
-                rank_model.truehd
-                if not settings.custom_ranks["truehd"].enable
-                else settings.custom_ranks["truehd"].rank
+                rank_model.truehd if not settings.custom_ranks["truehd"].enable else settings.custom_ranks["truehd"].rank
             )
         case "Dolby Atmos":
-            return (
-                rank_model.atmos
-                if not settings.custom_ranks["atmos"].enable
-                else settings.custom_ranks["atmos"].rank
-            )
+            return rank_model.atmos if not settings.custom_ranks["atmos"].enable else settings.custom_ranks["atmos"].rank
         case "Dolby Digital":
-            return (
-                rank_model.ac3
-                if not settings.custom_ranks["ac3"].enable
-                else settings.custom_ranks["ac3"].rank
-            )
+            return rank_model.ac3 if not settings.custom_ranks["ac3"].enable else settings.custom_ranks["ac3"].rank
         case "Dolby Digital EX":
-            return (
-                rank_model.dts_x
-                if not settings.custom_ranks["dts_x"].enable
-                else settings.custom_ranks["dts_x"].rank
-            )
+            return rank_model.dts_x if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
         case "Dolby Digital Plus":
             return (
-                rank_model.ddplus
-                if not settings.custom_ranks["ddplus"].enable
-                else settings.custom_ranks["ddplus"].rank
+                rank_model.ddplus if not settings.custom_ranks["ddplus"].enable else settings.custom_ranks["ddplus"].rank
             )
         case "DTS":
             return (
-                rank_model.dts_hd
-                if not settings.custom_ranks["dts_hd"].enable
-                else settings.custom_ranks["dts_hd"].rank
+                rank_model.dts_hd if not settings.custom_ranks["dts_hd"].enable else settings.custom_ranks["dts_hd"].rank
             )
         case "DTS-HD":
             return (
@@ -238,39 +171,20 @@ def calculate_audio_rank(parsed_data: ParsedData, settings: SettingsModel, rank_
                 else settings.custom_ranks["dts_x"].rank
             )
         case "AAC":
-            return (
-                rank_model.aac
-                if not settings.custom_ranks["aac"].enable
-                else settings.custom_ranks["aac"].rank
-            )
+            return rank_model.aac if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "AAC-LC":
-            return (
-                (rank_model.aac + 2)
-                if not settings.custom_ranks["aac"].enable
-                else settings.custom_ranks["aac"].rank
-            )
+            return (rank_model.aac + 2) if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "HE-AAC":
-            return (
-                (rank_model.aac + 5)
-                if not settings.custom_ranks["aac"].enable
-                else settings.custom_ranks["aac"].rank
-            )
+            return (rank_model.aac + 5) if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "HE-AAC v2":
-            return (
-                (rank_model.aac + 10)
-                if not settings.custom_ranks["aac"].enable
-                else settings.custom_ranks["aac"].rank
-            )
+            return (rank_model.aac + 10) if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "AC3":
-            return (
-                rank_model.ac3
-                if not settings.custom_ranks["ac3"].enable
-                else settings.custom_ranks["ac3"].rank
-            )
+            return rank_model.ac3 if not settings.custom_ranks["ac3"].enable else settings.custom_ranks["ac3"].rank
         case "FLAC" | "OGG":
             return -1000
         case _:
             return 0
+
 
 def calculate_other_ranks(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate all the other rankings of the given parsed data."""
@@ -282,14 +196,10 @@ def calculate_other_ranks(parsed_data: ParsedData, settings: SettingsModel, rank
         total_rank += 2
     if parsed_data.hdr:
         if parsed_data.hdr == "HDR":
-            total_rank += (
-                settings.custom_ranks["hdr"].rank if settings.custom_ranks["hdr"].enable else rank_model.hdr
-            )
+            total_rank += settings.custom_ranks["hdr"].rank if settings.custom_ranks["hdr"].enable else rank_model.hdr
         elif parsed_data.hdr == "HDR10+":
             total_rank += (
-                settings.custom_ranks["hdr10"].rank
-                if settings.custom_ranks["hdr10"].enable
-                else rank_model.hdr10
+                settings.custom_ranks["hdr10"].rank if settings.custom_ranks["hdr10"].enable else rank_model.hdr10
             )
         elif parsed_data.hdr == "DV":
             total_rank += (

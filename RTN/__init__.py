@@ -17,5 +17,5 @@ __all__ = [
     "ParsedData",
     "BaseRankingModel",
     "DefaultRanking",
-    "SettingsModel"
+    "SettingsModel",
 ]

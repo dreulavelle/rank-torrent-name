@@ -1,0 +1,54 @@
+name: "\U0001F41E Bug Report"
+labels: ["kind/maintainer", "status/triage"]
+description: "Want to help in the development of Rank Torrent Name (RTN)?"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to file a complete bug report.
+
+  - type: dropdown
+    attributes:
+      label: Experience
+      description: |
+        Do you have experience in Python?
+      options:
+        - "Yes"
+        - "No"
+        - "Willing to learn"
+        - "I bring experience in another area"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Operating System
+      description: |
+        What Operating System are you using?
+      options:
+        - "Windows"
+        - "macOS"
+        - "Linux"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: |
+        What can you do to help in the development of RTN? Feel free to use markdown syntax.
+
+        Do you have experience in testing, documentation, or any other area that can help in development?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: What can you do?
+      description: |
+        Please describe what you can do to help in the development of RTN.
+    validations:
+      required: true

@@ -16,12 +16,12 @@ class Torrent(BaseModel):
     Represents a torrent with metadata parsed from its title and additional computed properties.
 
     Attributes:
-        raw_title (str): The original title of the torrent.
-        infohash (str): The SHA-1 hash identifier of the torrent.
-        parsed_data (ParsedData): Metadata extracted from the torrent title including PTN parsing and additional extras.
-        fetch (bool): Indicates whether the torrent meets the criteria for fetching based on user settings.
-        rank (int): The computed ranking score of the torrent based on user-defined preferences.
-        lev_ratio (float): The Levenshtein ratio comparing the parsed title and the raw title for similarity.
+        `raw_title` (str): The original title of the torrent.
+        `infohash` (str): The SHA-1 hash identifier of the torrent.
+        `parsed_data` (ParsedData): Metadata extracted from the torrent title including PTN parsing and additional extras.
+        `fetch` (bool): Indicates whether the torrent meets the criteria for fetching based on user settings.
+        `rank` (int): The computed ranking score of the torrent based on user-defined preferences.
+        `lev_ratio` (float): The Levenshtein ratio comparing the parsed title and the raw title for similarity.
 
     Methods:
         __eq__: Determines equality based on the infohash of the torrent, allowing for easy comparison.
@@ -99,7 +99,7 @@ class RTN:
             parsed_data=parsed_data,
             fetch=check_fetch(parsed_data, self.settings),
             rank=get_rank(parsed_data, self.settings, self.ranking_model),
-            lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower())
+            lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower()),
         )
 
 
@@ -115,13 +115,14 @@ def parse(raw_title: str) -> ParsedData:
     """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
-    
+
     parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)  # Imagine this returns a dict
-    extras: dict[str, Any] = parse_extras(raw_title)    # Returns additional fields as a dict
+    extras: dict[str, Any] = parse_extras(raw_title)  # Returns additional fields as a dict
     full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with extras
     full_data["raw_title"] = raw_title  # Add the raw title to the data
     full_data["parsed_title"] = parsed_dict.get("title")  # Add the parsed title to the data
     return ParsedData(**full_data)
+
 
 def title_match(correct_title: str, raw_title: str, threshold: float = 0.9) -> bool:
     """
@@ -140,6 +141,7 @@ def title_match(correct_title: str, raw_title: str, threshold: float = 0.9) -> b
     if not isinstance(correct_title, str) or not isinstance(raw_title, str):
         raise TypeError("Both titles must be strings.")
     return Levenshtein.ratio(correct_title.lower(), raw_title.lower()) >= threshold
+
 
 def sort(torrents: List[Torrent]) -> List[Torrent]:
     """
