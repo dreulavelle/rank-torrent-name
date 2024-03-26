@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry
-        poetry install --no-root --extras "dev"
+        poetry install --no-root --with dev
     - name: Lint with Ruff
       run: poetry run ruff check ./RTN
     - name: Check imports with isort
