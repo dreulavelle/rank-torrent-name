@@ -1,4 +1,11 @@
+<center> 
+
 # Rank Torrent Name (RTN)
+
+[![PyPI version](https://badge.fury.io/py/rank-torrent-name.svg)](https://badge.fury.io/py/rank-torrent-name) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dreulavelle/rank-torrent-name/battery.yml?style=flat) ![GitHub License](https://img.shields.io/github/license/dreulavelle/rank-torrent-name)
+ [![codecov](https://codecov.io/gh/dreulavelle/rank-torrent-name/graph/badge.svg?token=V9S89GSUKM)](https://codecov.io/gh/dreulavelle/rank-torrent-name) 
+
+</center>
 
 **Rank Torrent Name (RTN)** is a Python library designed to parse and rank torrent names based on customizable criteria. It allows users to define their preferences for filtering and ranking torrents, providing a detailed analysis of each torrent's metadata. RTN is perfect for automating the selection of torrents based on quality, resolution, audio, and more.
 
