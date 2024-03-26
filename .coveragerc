@@ -13,6 +13,9 @@ show_missing = True
 exclude_lines =
     pragma: no cover
     def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
 
 [html]
 # Directory where HTML reports will be saved

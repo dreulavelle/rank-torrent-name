@@ -37,3 +37,6 @@ jobs:
         poetry run coverage run -m pytest
         poetry run coverage xml
         poetry run coverage report -m
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2.2.3
+  
