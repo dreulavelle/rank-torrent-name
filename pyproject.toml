@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rank-torrent-name"
-version = "0.1.0"
+version = "0.1.1"
 description = "Parse Torrents using PTN and Rank them according to your preferences!"
 authors = ["Spoked <dreu.lavelle@gmail.com>"]
 license = "MIT"
@@ -19,6 +19,7 @@ coverage = "^7.4.3"
 pyright = "^1.1.352"
 pyperf = "^2.2.0"
 ruff = "^0.3.0"
+isort = "^5.10.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
