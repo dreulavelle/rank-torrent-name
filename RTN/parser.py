@@ -19,7 +19,7 @@ class Torrent(BaseModel):
     Attributes:
         `raw_title` (str): The original title of the torrent.
         `infohash` (str): The SHA-1 hash identifier of the torrent.
-        `parsed_data` (ParsedData): Metadata extracted from the torrent title including PTN parsing and additional extras.
+        `data` (ParsedData): Metadata extracted from the torrent title including PTN parsing and additional extras.
         `fetch` (bool): Indicates whether the torrent meets the criteria for fetching based on user settings.
         `rank` (int): The computed ranking score of the torrent based on user-defined preferences.
         `lev_ratio` (float): The Levenshtein ratio comparing the parsed title and the raw title for similarity.
@@ -30,7 +30,7 @@ class Torrent(BaseModel):
 
     raw_title: str
     infohash: str
-    parsed_data: ParsedData
+    data: ParsedData
     fetch: bool = False
     rank: int = 0
     lev_ratio: float = 0.0
@@ -38,10 +38,8 @@ class Torrent(BaseModel):
     @validator("raw_title", "infohash")
     def validate_strings(cls, v):
         """Ensures raw_title and infohash are strings."""
-        if not v:
-            raise ValueError("Value cannot be empty.")
-        if not isinstance(v, str):
-            raise ValueError("Value must be a string.")
+        if not v or not isinstance(v, str):
+            raise TypeError("The title and infohash must be non-empty strings.")
         return v
 
     @validator("infohash")
@@ -92,12 +90,10 @@ class RTN:
             raise ValueError("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
         parsed_data = parse(raw_title)
-        if not parsed_data:
-            raise ValueError(f"Failed to parse the title: {raw_title}")
         return Torrent(
             raw_title=raw_title,
             infohash=infohash,
-            parsed_data=parsed_data,
+            data=parsed_data,
             fetch=check_fetch(parsed_data, self.settings),
             rank=get_rank(parsed_data, self.settings, self.ranking_model),
             lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower()),
@@ -117,11 +113,11 @@ def parse(raw_title: str) -> ParsedData:
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
 
-    parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)  # Imagine this returns a dict
-    extras: dict[str, Any] = parse_extras(raw_title)  # Returns additional fields as a dict
-    full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with extras
-    full_data["raw_title"] = raw_title  # Add the raw title to the data
-    full_data["parsed_title"] = parsed_dict.get("title")  # Add the parsed title to the data
+    parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
+    extras: dict[str, Any] = parse_extras(raw_title)
+    full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with RTN extras.
+    full_data["raw_title"] = raw_title
+    full_data["parsed_title"] = parsed_dict.get("title")
     return ParsedData(**full_data)
 
 
@@ -130,20 +126,21 @@ def parse_chunk(chunk: List[str]) -> List[ParsedData]:
     return [parse(title) for title in chunk]
 
 
-def batch_parse(titles: List[str], chunk_size: int = 50) -> List[ParsedData]:
+def batch_parse(titles: List[str], chunk_size: int = 50, max_workers: int = 4) -> List[ParsedData]:
     """
     Parses a list of torrent titles in batches for improved performance.
 
     Args:
         titles (List[str]): A list of torrent titles to parse.
         chunk_size (int): The number of titles to process in each batch.
+        max_workers (int): The maximum number of worker threads to use for parsing.
 
     Returns:
         List[ParsedData]: A list of ParsedData objects for each title.
     """
     chunks = [titles[i : i + chunk_size] for i in range(0, len(titles), chunk_size)]
     parsed_data = []
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_chunk = {executor.submit(parse_chunk, chunk): chunk for chunk in chunks}
         for future in as_completed(future_to_chunk):
             chunk_result = future.result()
@@ -163,10 +160,12 @@ def title_match(correct_title: str, raw_title: str, threshold: float = 0.9) -> b
     Returns:
         bool: True if the titles are similar above the specified threshold; False otherwise.
     """
-    if not correct_title or not raw_title:
+    if not (correct_title or raw_title):
         raise ValueError("Both titles must be provided.")
     if not isinstance(correct_title, str) or not isinstance(raw_title, str):
         raise TypeError("Both titles must be strings.")
+    if not isinstance(threshold, (int, float)) or not 0 <= threshold <= 1:
+        raise ValueError("The threshold must be a float between 0 and 1.")
     return Levenshtein.ratio(correct_title.lower(), raw_title.lower()) >= threshold
 
 

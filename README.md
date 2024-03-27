@@ -1,11 +1,21 @@
-<center> 
+<div align="center">
 
-# Rank Torrent Name (RTN)
+<h1>Rank Torrent Name (RTN)</h1>
 
-[![PyPI version](https://badge.fury.io/py/rank-torrent-name.svg)](https://badge.fury.io/py/rank-torrent-name) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/dreulavelle/rank-torrent-name/battery.yml?style=flat) ![GitHub License](https://img.shields.io/github/license/dreulavelle/rank-torrent-name)
- [![Coverage Status](https://coveralls.io/repos/github/dreulavelle/rank-torrent-name/badge.svg?branch=main)](https://coveralls.io/github/dreulavelle/rank-torrent-name?branch=main)
+<a href="https://codecov.io/gh/dreulavelle/rank-torrent-name"> 
+ <img src="https://codecov.io/gh/dreulavelle/rank-torrent-name/graph/badge.svg?token=V9S89GSUKM"/> 
+</a>
 
-</center>
+<a href="https://badge.fury.io/py/rank-torrent-name">
+    <img src="https://badge.fury.io/py/rank-torrent-name.svg" alt="PyPI version" />
+</a>
+
+<img src="https://img.shields.io/github/actions/workflow/status/dreulavelle/rank-torrent-name/battery.yml" alt="GitHub Actions Workflow Status" />
+
+<img src="https://img.shields.io/github/license/dreulavelle/rank-torrent-name" alt="GitHub License" />
+
+</div>
+<br>
 
 **Rank Torrent Name (RTN)** is a Python library designed to parse and rank torrent names based on customizable criteria. It allows users to define their preferences for filtering and ranking torrents, providing a detailed analysis of each torrent's metadata. RTN is perfect for automating the selection of torrents based on quality, resolution, audio, and more.
 
@@ -79,10 +89,10 @@ We cover a lot already, so users are able to add their own custom regex patterns
 #### Understanding Fetch and Enable:
 
 - `fetch`: Determines if RTN should consider a torrent for downloading based on the attribute. True means RTN will fetch torrents matching this criterion.
-- `enable`: Controls whether the custom rank value is used in the overall ranking calculation. Disabling it reverts to the default ranking for that attribute.
+- `enable`: Controls whether the custom rank value is used in the overall ranking calculation. Disabling it reverts to using the ranking model you set instead. This is useful for toggling custom ranks on and off from a users perspective.
 - `rank`: Sets the rank at which that item is graded with.
 
-For instance, if we detect a title is **4K** or **2160p** then we use the `uhd` ranking, and add **+120** points. The same goes for the rest of the strings in `custom_ranks`.
+For example, if we detect a title is **4K** or **2160p** then we use the `uhd` ranking, and add **+120** points. The same goes for the rest of the strings in `custom_ranks`.
 
 Settings can be easily adjusted at runtime if needed. To enable or disable a specific rank dynamically:
 
@@ -105,7 +115,7 @@ torrent = rtn.rank("Example.Movie.2020.1080p.BluRay.x264-Example", "infohash1234
 3. **Inspecting the Torrent Object:** The returned `Torrent` object includes parsed data and a rank. Access its properties to understand its quality:
 
 ```python
-print(f"Title: {torrent.parsed_data.parsed_title}, Rank: {torrent.rank}")
+print(f"Title: {torrent.data.parsed_title}, Rank: {torrent.rank}")
 ```
 
 ### Sorting Torrents
@@ -125,7 +135,7 @@ A `Torrent` object encapsulates metadata about a torrent, such as its title, par
 Torrent(
     raw_title="Example.Movie.2020.1080p.BluRay.x264-Example",
     infohash="infohash123456",
-    parsed_data=ParsedData(parsed_title='Example Movie', ...),
+    data=ParsedData(parsed_title='Example Movie', ...),
     fetch=True,
     rank=150,
     lev_ratio=0.95
@@ -269,9 +279,9 @@ Using the example above:
 from RTN import parse
 parsed = parse("Example.Movie.2020.1080p.BluRay.x264-Example")
 
-print(parsed.parsed_data.raw_title)    # Output: "Example.Movie.2020.1080p.BluRay.x264-Example"
-print(parsed.parsed_data.parsed_title) # Output: "Example Movie"
-print(parsed.parsed_data.year)         # Output: [2020]
+print(parsed.data.raw_title)    # Output: "Example.Movie.2020.1080p.BluRay.x264-Example"
+print(parsed.data.parsed_title) # Output: "Example Movie"
+print(parsed.data.year)         # Output: [2020]
 ```
 
 > :warning: We also set **coherent_types** to `True` from the PTN data that get's combined with RTN parsed metadata.
@@ -336,12 +346,14 @@ rtn = RTN(settings=settings, ranking_model=DefaultRanking())
 
 # Example usage
 for torrent in sorted_torrents:
-    print(f"Title: {torrent.parsed_data.parsed_title}, Infohash: {torrent.infohash}, Rank: {torrent.rank}")
+    print(f"Title: {torrent.data.parsed_title}, Infohash: {torrent.infohash}, Rank: {torrent.rank}")
 ```
 
 # ParsedData Structure
 
-Here is all of the attributes of `parsed_data` along with their default values:
+Here is all of the attributes of `data` from the `Torrent` object, along with their default values.
+
+This is accessible at `torrent.data` in the `Torrent` object. Ex: `torrent.data.resolution`
 
 ```py
 class ParsedData(BaseModel):

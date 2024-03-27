@@ -9,7 +9,7 @@ from RTN.models import (
     ParsedData,
     SettingsModel,
 )
-from RTN.parser import batch_parse, title_match
+from RTN.parser import RTN, batch_parse, sort, title_match
 from RTN.patterns import (
     COMPLETE_SERIES_COMPILED,
     MULTI_AUDIO_COMPILED,
@@ -52,6 +52,32 @@ def rank_model():
     return DefaultRanking()
 
 
+@pytest.fixture
+def test_titles():
+    return [
+        "The.Matrix.1999.1080p.BluRay.x264",
+        "Inception.2010.720p.BRRip.x264",
+        "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+        "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+        "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+        "The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+        "The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+        "The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+        "House MD All Seasons (1-8) 720p Ultra-Compressed"
+        "The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)"
+        "Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World"
+        "Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]"
+        "4-13 Cursed (HD)"
+        "Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR"
+        "[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]"
+        "BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p"
+        "[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ"
+        "Bleach 10º Temporada - 215 ao 220 - [DB-BR]"
+        "Naruto Shippuden - 107 - Strange Bedfellows"
+        "[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]"
+        "[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]"
+    ]
+
 ## Define Tests
 
 def test_default_ranking_model(rank_model):
@@ -77,16 +103,17 @@ def test_default_parse_return(custom_settings, rank_model):
     assert isinstance(parsed, ParsedData)
     assert parsed.parsed_title == "The Big Bang Theory"
 
+    # Test preferred
     rank = get_rank(parsed, custom_settings, rank_model)
     assert rank > 5000, f"Rank was {rank} instead."
 
     # Test invalid title
     with pytest.raises(TypeError):
-        parse(12345) # type: ignore
+        assert parse(12345) # type: ignore
 
     # Test invalid title
     with pytest.raises(TypeError):
-        parse() # type: ignore
+        assert parse() # type: ignore
 
 def test_default_title_matching():
     """Test the title_match function"""
@@ -102,34 +129,21 @@ def test_default_title_matching():
     ]
     for title, query, expected in test_cases:
         assert title_match(title, query) == expected, f"Failed for {title} and {query}"
+    
+    # test not correct_title or not raw_title
+    with pytest.raises(TypeError):
+        assert title_match("The Simpsons", 12345)
+    # test valid threshold
+    assert title_match("The Simpsons", "The Simpsons", threshold=0.9)
+    # test invalid threshold
+    with pytest.raises(ValueError):
+        assert title_match("The Simpsons", "The Simpsons", threshold=1.1)
+    # test not correct_title or not raw_title
+    with pytest.raises(ValueError):
+        assert title_match(None, None)
 
-
-def test_batch_parse_processing():
+def test_batch_parse_processing(test_titles):
     # Test batch parsing retuns a list of ParsedData objects
-    test_titles = [
-        "The.Matrix.1999.1080p.BluRay.x264",
-        "Inception.2010.720p.BRRip.x264",
-        "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "House MD All Seasons (1-8) 720p Ultra-Compressed"
-        "The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)"
-        "Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World"
-        "Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]"
-        "4-13 Cursed (HD)"
-        "Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR"
-        "[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]"
-        "BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p"
-        "[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ"
-        "Bleach 10º Temporada - 215 ao 220 - [DB-BR]"
-        "Naruto Shippuden - 107 - Strange Bedfellows"
-        "[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]"
-        "[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]"
-    ]
-
     # Verify that each item in the result is an instance of ParsedData
     # and its raw_title matches the corresponding input title
     parsed_results = batch_parse(test_titles, chunk_size=5)
@@ -225,3 +239,35 @@ def test_check_if_string_is_trash():
     ]
     for test_string, expected in test_cases:
         assert check_trash(test_string) == expected
+
+def test_sort_function(test_titles, settings_model, rank_model):
+    processed = batch_parse(test_titles)
+    # Lambda approach at creating mass torrent list
+    rtn = RTN(settings_model, rank_model)
+    torrents = [rtn.rank(data.raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") for data in processed]
+    sort(torrents)
+
+    # Test if the list is sorted in reverse
+    assert all(torrents[i].rank <= torrents[i + 1].rank for i in range(len(torrents) - 1))
+
+def test_compare_two_torrent_objs(settings_model, rank_model):
+    # create 2 torrent objects and check __eq__ method
+    rtn = RTN(settings_model, rank_model)
+    # valid
+    torrent1 = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
+    torrent2 = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
+    # invalid
+    invalid_torrent = "The Walking Dead S08E02 720p HDTV x264-ASAP[ettv]"
+    
+    assert torrent1 == torrent2
+    assert torrent1 != invalid_torrent
+
+def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
+    # create a torrent object and check if the infohash is valid
+    rtn = RTN(settings_model, rank_model)
+    with pytest.raises(ValueError):
+        # Missing infohash
+        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", None)
+    with pytest.raises(ValueError):
+        # Missing title and infohash
+        rtn.rank(None, None)

@@ -3,12 +3,12 @@ import regex
 from .models import BaseRankingModel, ParsedData, SettingsModel
 
 
-def get_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def get_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """
     Calculate the ranking of the given parsed data.
 
     Parameters:
-        parsed_data (ParsedData): The parsed data object containing information about the torrent title.
+        data (ParsedData): The parsed data object containing information about the torrent title.
         settings (SettingsModel): The user settings object containing custom ranking models.
         rank_model (BaseRankingModel): The base ranking model used for calculating the ranking.
 
@@ -19,47 +19,47 @@ def get_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseR
         ValueError: If the parsed data is empty.
         TypeError: If the parsed data is not a ParsedData object.
     """
-    if not parsed_data:
+    if not data:
         raise ValueError("Parsed data cannot be empty.")
-    if not isinstance(parsed_data, ParsedData):
+    if not isinstance(data, ParsedData):
         raise TypeError("Parsed data must be an instance of ParsedData.")
 
-    rank: int = calculate_resolution_rank(parsed_data, settings, rank_model)
-    rank += calculate_quality_rank(parsed_data, settings, rank_model)
-    rank += calculate_codec_rank(parsed_data, settings, rank_model)
-    rank += calculate_audio_rank(parsed_data, settings, rank_model)
-    rank += calculate_other_ranks(parsed_data, settings, rank_model)
-    rank += calculate_preferred(parsed_data, settings)
-    if parsed_data.repack:
+    rank: int = calculate_resolution_rank(data, settings, rank_model)
+    rank += calculate_quality_rank(data, settings, rank_model)
+    rank += calculate_codec_rank(data, settings, rank_model)
+    rank += calculate_audio_rank(data, settings, rank_model)
+    rank += calculate_other_ranks(data, settings, rank_model)
+    rank += calculate_preferred(data, settings)
+    if data.repack:
         rank += rank_model.repack if not settings.custom_ranks["repack"].enable else settings.custom_ranks["repack"].rank
-    if parsed_data.proper:
+    if data.proper:
         rank += rank_model.proper if not settings.custom_ranks["proper"].enable else settings.custom_ranks["proper"].rank
-    if parsed_data.remux:
+    if data.remux:
         rank += rank_model.remux if not settings.custom_ranks["remux"].enable else settings.custom_ranks["remux"].rank
-    if parsed_data.is_multi_audio:
+    if data.is_multi_audio:
         rank += rank_model.dubbed if not settings.custom_ranks["dubbed"].enable else settings.custom_ranks["dubbed"].rank
-    if parsed_data.is_multi_subtitle:
+    if data.is_multi_subtitle:
         rank += rank_model.subbed if not settings.custom_ranks["subbed"].enable else settings.custom_ranks["subbed"].rank
     return rank
 
 
-def calculate_preferred(parsed_data: ParsedData, settings: SettingsModel) -> int:
+def calculate_preferred(data: ParsedData, settings: SettingsModel) -> int:
     """Calculate the preferred ranking of a given parsed data."""
     if not settings.preferred or all(pattern is None for pattern in settings.preferred):
         return 0
     return (
         5000
-        if any(pattern.search(parsed_data.raw_title) for pattern in settings.preferred if pattern)  # type: ignore
+        if any(pattern.search(data.raw_title) for pattern in settings.preferred if pattern)  # type: ignore
         else 0
     )
 
 
-def calculate_resolution_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the resolution ranking of the given parsed data."""
-    if not parsed_data.resolution:
+    if not data.resolution:
         return 0
 
-    resolution: str = parsed_data.resolution[0]
+    resolution: str = data.resolution[0]
     match resolution:
         case "4K":
             return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
@@ -77,12 +77,12 @@ def calculate_resolution_rank(parsed_data: ParsedData, settings: SettingsModel, 
             return 0
 
 
-def calculate_quality_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the quality ranking of the given parsed data."""
-    if not parsed_data.quality:
+    if not data.quality:
         return 0
 
-    quality = parsed_data.quality[0]
+    quality = data.quality[0]
     match quality:
         case "WEB-DL":
             return rank_model.webdl if not settings.custom_ranks["webdl"].enable else settings.custom_ranks["webdl"].rank
@@ -100,12 +100,12 @@ def calculate_quality_rank(parsed_data: ParsedData, settings: SettingsModel, ran
             return 0
 
 
-def calculate_codec_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def calculate_codec_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the codec ranking of the given parsed data."""
-    if not parsed_data.codec:
+    if not data.codec:
         return 0
 
-    codec = parsed_data.codec[0]
+    codec = data.codec[0]
     match codec:
         case "Xvid" | "H.263" | "VC-1" | "MPEG-2":
             return -1000
@@ -119,12 +119,12 @@ def calculate_codec_rank(parsed_data: ParsedData, settings: SettingsModel, rank_
             return 0
 
 
-def calculate_audio_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate the audio ranking of the given parsed data."""
-    if not parsed_data.audio:
+    if not data.audio:
         return 0
 
-    audio_format: str = parsed_data.audio[0]
+    audio_format: str = data.audio[0]
 
     # Remove any unwanted audio formats. We dont support surround sound formats yet.
     # These also make it harder to compare audio formats.
@@ -188,31 +188,31 @@ def calculate_audio_rank(parsed_data: ParsedData, settings: SettingsModel, rank_
             return 0
 
 
-def calculate_other_ranks(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate all the other rankings of the given parsed data."""
-    if not ["bitDepth"] and not parsed_data.hdr and not parsed_data.is_complete:
+    if not ["bitDepth"] and not data.hdr and not data.is_complete:
         return 0
 
     total_rank = 0
-    if parsed_data.bitDepth and parsed_data.bitDepth[0] > 8:
+    if data.bitDepth and data.bitDepth[0] > 8:
         total_rank += 2
-    if parsed_data.hdr:
-        if parsed_data.hdr == "HDR":
+    if data.hdr:
+        if data.hdr == "HDR":
             total_rank += settings.custom_ranks["hdr"].rank if settings.custom_ranks["hdr"].enable else rank_model.hdr
-        elif parsed_data.hdr == "HDR10+":
+        elif data.hdr == "HDR10+":
             total_rank += (
                 settings.custom_ranks["hdr10"].rank if settings.custom_ranks["hdr10"].enable else rank_model.hdr10
             )
-        elif parsed_data.hdr == "DV":
+        elif data.hdr == "DV":
             total_rank += (
                 settings.custom_ranks["dolby_video"].rank
                 if settings.custom_ranks["dolby_video"].enable
                 else rank_model.dolby_video
             )
-    if parsed_data.is_complete:
+    if data.is_complete:
         total_rank += 100
-    if parsed_data.season:
-        total_rank += 100 * len(parsed_data.season)
-    if parsed_data.episode:
-        total_rank += 10 * len(parsed_data.episode)
+    if data.season:
+        total_rank += 100 * len(data.season)
+    if data.episode:
+        total_rank += 10 * len(data.episode)
     return total_rank

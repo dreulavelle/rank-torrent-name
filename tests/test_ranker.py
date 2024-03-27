@@ -68,11 +68,11 @@ def test_valid_torrent_from_title(settings_model, ranking_model):
                        "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
 
     assert isinstance(torrent, Torrent)
-    assert isinstance(torrent.parsed_data, ParsedData)
+    assert isinstance(torrent.data, ParsedData)
     assert torrent.raw_title == "The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]"
     assert torrent.infohash == "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"
-    assert torrent.parsed_data.parsed_title == "The Walking Dead"
-    assert torrent.parsed_data.fetch is False
+    assert torrent.data.parsed_title == "The Walking Dead"
+    assert torrent.data.fetch is False
     assert torrent.rank > 0, f"Rank was {torrent.rank} instead of 163"
     assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
 
@@ -100,6 +100,29 @@ def test_invalid_torrent_from_title(settings_model, ranking_model):
     with pytest.raises(ValueError):
         # Invalid infohash length
         rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c0886")
+    with pytest.raises(ValueError):
+        # test if not parsed_data
+        rtn.rank("", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") # type: ignore
+
+def test_valid_rtn_object(settings_model, ranking_model):
+    rtn = RTN(settings_model, ranking_model)
+    assert isinstance(rtn, RTN)
+    assert isinstance(rtn.settings, SettingsModel)
+    assert isinstance(rtn.ranking_model, BaseRankingModel)
+
+def test_invalid_rtn_object(settings_model, ranking_model):
+    with pytest.raises(ValueError):
+        # Missing settings
+        RTN(None, ranking_model) # type: ignore
+    with pytest.raises(ValueError):
+        # Missing ranking_model
+        RTN(settings_model, None) # type: ignore
+    with pytest.raises(TypeError):
+        # Invalid settings type
+        RTN(123, ranking_model) # type: ignore
+    with pytest.raises(TypeError):
+        # Invalid ranking_model type
+        RTN(settings_model, 123) # type: ignore
 
 def test_rank_calculation_accuracy(settings_model, ranking_model):
     parsed_data = ParsedData(

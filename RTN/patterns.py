@@ -7,7 +7,7 @@ def compile_patterns(patterns):
     return [regex.compile(pattern, regex.IGNORECASE) for pattern in patterns]
 
 
-# Pattern for identifying unwanted quality. This will set `parsed_data.fetch`.
+# Pattern for identifying unwanted quality. This will set `data.fetch`.
 IS_TRASH_COMPILED = compile_patterns(
     [
         r"\b(?:H[DQ][ .-]*)?CAM(?:H[DQ])?(?:[ .-]*Rip)?\b",
