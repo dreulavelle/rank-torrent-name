@@ -1,4 +1,5 @@
 
+from pydantic import ValidationError
 import pytest
 
 from RTN import check_trash, get_rank, parse
@@ -9,7 +10,7 @@ from RTN.models import (
     ParsedData,
     SettingsModel,
 )
-from RTN.parser import RTN, batch_parse, sort, title_match
+from RTN.parser import RTN, Torrent, batch_parse, sort, title_match
 from RTN.patterns import (
     COMPLETE_SERIES_COMPILED,
     MULTI_AUDIO_COMPILED,
@@ -242,7 +243,6 @@ def test_check_if_string_is_trash():
 
 def test_sort_function(test_titles, settings_model, rank_model):
     processed = batch_parse(test_titles)
-    # Lambda approach at creating mass torrent list
     rtn = RTN(settings_model, rank_model)
     torrents = [rtn.rank(data.raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") for data in processed]
     sort(torrents)
@@ -253,17 +253,15 @@ def test_sort_function(test_titles, settings_model, rank_model):
 def test_compare_two_torrent_objs(settings_model, rank_model):
     # create 2 torrent objects and check __eq__ method
     rtn = RTN(settings_model, rank_model)
-    # valid
+    # test valid comparison
     torrent1 = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
     torrent2 = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
-    # invalid
+    # test invalid comparison
     invalid_torrent = "The Walking Dead S08E02 720p HDTV x264-ASAP[ettv]"
-    
     assert torrent1 == torrent2
     assert torrent1 != invalid_torrent
 
 def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
-    # create a torrent object and check if the infohash is valid
     rtn = RTN(settings_model, rank_model)
     with pytest.raises(ValueError):
         # Missing infohash
@@ -271,3 +269,11 @@ def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
     with pytest.raises(ValueError):
         # Missing title and infohash
         rtn.rank(None, None)
+    with pytest.raises(ValueError):
+        # Invalid infohash length
+        data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
+        Torrent(raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", infohash="c08a9ee8ce3a5c2c08", data=data)
+    with pytest.raises(ValidationError):
+        # Invalid strings or not instance of str
+        data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
+        Torrent(raw_title=12345, infohash=12345, data=data)
