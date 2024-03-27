@@ -47,11 +47,7 @@ def calculate_preferred(data: ParsedData, settings: SettingsModel) -> int:
     """Calculate the preferred ranking of a given parsed data."""
     if not settings.preferred or all(pattern is None for pattern in settings.preferred):
         return 0
-    return (
-        5000
-        if any(pattern.search(data.raw_title) for pattern in settings.preferred if pattern)  # type: ignore
-        else 0
-    )
+    return 5000 if any(pattern.search(data.raw_title) for pattern in settings.preferred if pattern) else 0  # type: ignore
 
 
 def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
