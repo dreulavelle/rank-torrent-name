@@ -12,9 +12,6 @@ show_missing = False
 
 exclude_lines =
     pragma: no cover
-    raise AssertionError
-    raise NotImplementedError
-    if __name__ == .__main__.:
 
 [html]
 # Directory where HTML reports will be saved

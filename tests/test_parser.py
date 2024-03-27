@@ -80,6 +80,13 @@ def test_default_parse_return(custom_settings, rank_model):
     rank = get_rank(parsed, custom_settings, rank_model)
     assert rank > 5000, f"Rank was {rank} instead."
 
+    # Test invalid title
+    with pytest.raises(TypeError):
+        parse(12345) # type: ignore
+
+    # Test invalid title
+    with pytest.raises(TypeError):
+        parse() # type: ignore
 
 def test_default_title_matching():
     """Test the title_match function"""
