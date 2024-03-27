@@ -65,7 +65,7 @@ class BaseRankingModel(BaseModel):
         `dubbed` (int): The ranking value for dubbed attribute.
         `subbed` (int): The ranking value for subbed attribute.
         `av1` (int): The ranking value for AV1 attribute.
-    
+
     Note:
         - The higher the ranking value, the better the quality of the media item.
         - The default ranking values are set to 0, which means that the attribute does not affect the overall rank.
@@ -73,8 +73,8 @@ class BaseRankingModel(BaseModel):
     """
 
     # resolution
-    uhd: int = 0 # 4K
-    fhd: int = 0 # 1080p
+    uhd: int = 0  # 4K
+    fhd: int = 0  # 1080p
     hd: int = 0  # 720p
     sd: int = 0  # 480p
     # quality
@@ -214,11 +214,11 @@ class SettingsModel(BaseModel):
             compiled_patterns = []
             for pattern in raw_patterns:
                 if isinstance(pattern, str):
-                    if pattern.startswith("/") and pattern.endswith("/i"): # case-insensitive
+                    if pattern.startswith("/") and pattern.endswith("/i"):  # case-insensitive
                         compiled_patterns.append(regex.compile(pattern[1:-2], regex.IGNORECASE))
-                    elif pattern.startswith("/") and pattern.endswith("/"): # case-sensitive
+                    elif pattern.startswith("/") and pattern.endswith("/"):  # case-sensitive
                         compiled_patterns.append(regex.compile(pattern[1:-1]))
-                    else: # case-insensitive by default
+                    else:  # case-insensitive by default
                         compiled_patterns.append(regex.compile(pattern, regex.IGNORECASE))
                 elif isinstance(pattern, regex.Pattern):
                     # Keep already compiled patterns as is

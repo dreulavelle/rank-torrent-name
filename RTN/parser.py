@@ -141,7 +141,7 @@ def batch_parse(titles: List[str], chunk_size: int = 50) -> List[ParsedData]:
     Returns:
         List[ParsedData]: A list of ParsedData objects for each title.
     """
-    chunks = [titles[i:i + chunk_size] for i in range(0, len(titles), chunk_size)]
+    chunks = [titles[i : i + chunk_size] for i in range(0, len(titles), chunk_size)]
     parsed_data = []
     with ThreadPoolExecutor() as executor:
         future_to_chunk = {executor.submit(parse_chunk, chunk): chunk for chunk in chunks}

@@ -21,6 +21,7 @@ pyperf = "^2.2.0"
 ruff = "^0.3.0"
 isort = "^5.10.1"
 pytest = "^8.1.1"
+codecov = "^2.1.13"
 
 [build-system]
 requires = ["poetry-core"]
