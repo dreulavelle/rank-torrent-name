@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, List
+from typing import Any, List, Tuple
 
 import Levenshtein
 import PTN
@@ -99,6 +99,11 @@ class RTN:
             lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower()),
         )
 
+    def batch_rank(self, torrents: List[Tuple[str, str]], max_workers: int = 4) -> List[Torrent]:
+        """Ranks a batch of torrents in parallel using multiple threads."""
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            return list(executor.map(lambda t: self.rank(t[0], t[1]), torrents))
+
 
 def parse(raw_title: str) -> ParsedData:
     """
@@ -114,6 +119,7 @@ def parse(raw_title: str) -> ParsedData:
         raise TypeError("The input title must be a non-empty string.")
 
     parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
+    parsed_dict["year"] = parsed_dict["year"][0] if parsed_dict.get("year") else 0
     extras: dict[str, Any] = parse_extras(raw_title)
     full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with RTN extras.
     full_data["raw_title"] = raw_title

@@ -1,6 +1,6 @@
 
-from pydantic import ValidationError
 import pytest
+from pydantic import ValidationError
 
 from RTN import check_trash, get_rank, parse
 from RTN.models import (
@@ -133,7 +133,7 @@ def test_default_title_matching():
     
     # test not correct_title or not raw_title
     with pytest.raises(TypeError):
-        assert title_match("The Simpsons", 12345)
+        assert title_match("The Simpsons", 12345) # type: ignore
     # test valid threshold
     assert title_match("The Simpsons", "The Simpsons", threshold=0.9)
     # test invalid threshold
@@ -141,7 +141,7 @@ def test_default_title_matching():
         assert title_match("The Simpsons", "The Simpsons", threshold=1.1)
     # test not correct_title or not raw_title
     with pytest.raises(ValueError):
-        assert title_match(None, None)
+        assert title_match(None, None) # type: ignore
 
 def test_batch_parse_processing(test_titles):
     # Test batch parsing retuns a list of ParsedData objects
@@ -265,15 +265,15 @@ def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
     rtn = RTN(settings_model, rank_model)
     with pytest.raises(ValueError):
         # Missing infohash
-        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", None)
+        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", None)  # type: ignore
     with pytest.raises(ValueError):
         # Missing title and infohash
-        rtn.rank(None, None)
+        rtn.rank(None, None)  # type: ignore
     with pytest.raises(ValueError):
         # Invalid infohash length
         data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
-        Torrent(raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", infohash="c08a9ee8ce3a5c2c08", data=data)
+        Torrent(raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", infohash="c08a9ee8ce3a5c2c08", data=data)  # type: ignore
     with pytest.raises(ValidationError):
         # Invalid strings or not instance of str
         data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
-        Torrent(raw_title=12345, infohash=12345, data=data)
+        Torrent(raw_title=12345, infohash=12345, data=data)  # type: ignore

@@ -132,7 +132,7 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
         quality=["Blu-ray"],
         codec=["H.264"],
         audio=["Dolby Digital"],
-        hdr=True,
+        hdr="HDR10",
         is_complete=True,
         season=[1],
         episode=[1],

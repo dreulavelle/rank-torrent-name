@@ -221,6 +221,6 @@ def parse_extras(raw_title: str) -> Dict[str, Any]:
         "is_multi_audio": check_pattern(MULTI_AUDIO_COMPILED, raw_title),
         "is_multi_subtitle": check_pattern(MULTI_SUBTITLE_COMPILED, raw_title),
         "is_complete": check_pattern(COMPLETE_SERIES_COMPILED, raw_title),
-        "hdr": check_hdr_dolby_video(raw_title) or False,
+        "hdr": check_hdr_dolby_video(raw_title) or "",
         "episode": extract_episodes(raw_title),
     }

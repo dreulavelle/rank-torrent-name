@@ -15,7 +15,7 @@ class ParsedData(BaseModel):
     is_multi_audio: bool = False
     is_multi_subtitle: bool = False
     is_complete: bool = False
-    year: List[int] = []
+    year: int = 0
     resolution: List[str] = []
     quality: List[str] = []
     season: List[int] = []
@@ -25,7 +25,7 @@ class ParsedData(BaseModel):
     subtitles: List[str] = []
     language: List[str] = []
     bitDepth: List[int] = []
-    hdr: str | bool = False
+    hdr: str = ""
     proper: bool = False
     repack: bool = False
     remux: bool = False
@@ -33,7 +33,6 @@ class ParsedData(BaseModel):
     remastered: bool = False
     directorsCut: bool = False
     extended: bool = False
-    excess: list = []
 
 
 class BaseRankingModel(BaseModel):
