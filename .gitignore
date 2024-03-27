@@ -6,6 +6,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.ruff_cache/
 
 # Unit test / coverage reports
 htmlcov/

@@ -89,9 +89,9 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
         return False
     if not settings.custom_ranks["ddplus"].fetch and audio == "Dolby Digital Plus":
         return False
-    if not settings.custom_ranks["dts_hd"].fetch and audio == "DTS":
-        return False
     if not settings.custom_ranks["dts_hd_ma"].fetch and audio == "DTS-HD MA":
+        return False
+    if not settings.custom_ranks["dts_hd"].fetch and audio == "DTS":
         return False
     if not settings.custom_ranks["aac"].fetch and audio == "AAC":
         return False

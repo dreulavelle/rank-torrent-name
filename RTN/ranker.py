@@ -18,10 +18,9 @@ def get_rank(parsed_data: ParsedData, settings: SettingsModel, rank_model: BaseR
     Raises:
         ValueError: If the parsed data is empty.
         TypeError: If the parsed data is not a ParsedData object.
-
     """
     if not parsed_data:
-        raise ValueError("Parsed data is empty.")
+        raise ValueError("Parsed data cannot be empty.")
     if not isinstance(parsed_data, ParsedData):
         raise TypeError("Parsed data must be an instance of ParsedData.")
 
