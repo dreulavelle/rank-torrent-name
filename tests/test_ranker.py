@@ -1,94 +1,107 @@
-# import pytest
-# from PTN import (
-#     BaseRankingModel,
-#     DefaultRanking,
-#     ParsedData,
-#     SettingsModel,
-#     Torrent,
-#     get_rank,
-#     parse,
-# )
+import pytest
+
+from RTN import RTN
+from RTN.models import (
+    BaseRankingModel,
+    CustomRank,
+    DefaultRanking,
+    ParsedData,
+    SettingsModel,
+)
+from RTN.parser import Torrent
 
 
-# @pytest.fixture
-# def settings_model():
-#     return SettingsModel()
+@pytest.fixture
+def ranking_model():
+    return DefaultRanking()
 
-# @pytest.fixture
-# def custom_settings():
-#     return SettingsModel(
-#         profile="custom",
-#         require=[],
-#         exclude=[],
-#         preferred=[r"\bS\d+"],
-#         custom_ranks={
-#             "uhd": {"enable": True, "fetch": True, "rank": -200},
-#             "fhd": {"enable": True, "fetch": True, "rank": 90},
-#             "hd": {"enable": True, "fetch": True, "rank": 60},
-#             "sd": {"enable": True, "fetch": True, "rank": -120},
-#             "dolby_video": {"enable": True, "fetch": True, "rank": -1000},
-#             "hdr": {"enable": True, "fetch": True, "rank": -1000},
-#             "hdr10": {"enable": True, "fetch": True, "rank": -1000},
-#             "aac": {"enable": True, "fetch": True, "rank": 70},
-#             "ac3": {"enable": True, "fetch": True, "rank": 50},
-#             "remux": {"enable": False, "fetch": True, "rank": -75},
-#             "webdl": {"enable": True, "fetch": True, "rank": 90},
-#             "bluray": {"enable": True, "fetch": True, "rank": -90},
-#         },
-#     )
+@pytest.fixture
+def custom_ranking_model():
+    return BaseRankingModel(
+        uhd=140,
+        fhd=100,
+        hd=50,
+        sd=-100,
+        dolby_video=-1000,
+        hdr=-1000,
+        hdr10=-1000,
+        aac=70,
+        ac3=50,
+        remux=-75,
+        webdl=90,
+        bluray=-90,
+    )
+
+@pytest.fixture
+def settings_model():
+    return SettingsModel()
+
+@pytest.fixture
+def custom_settings_model():
+    return SettingsModel(
+        profile="custom",
+        require=[],
+        exclude=[],
+        preferred=["BluRay", r"/\bS\d+/", "/HDR|HDR10/i"],
+        custom_ranks={
+            "uhd": CustomRank(enable=True, fetch=True, rank=-200),
+            "fhd": CustomRank(enable=True, fetch=True, rank=90),
+            "hd": CustomRank(enable=True, fetch=True, rank=60),
+            "sd": CustomRank(enable=True, fetch=True, rank=-120),
+            "dolby_video": CustomRank(enable=True, fetch=True, rank=-1000),
+            "hdr": CustomRank(enable=True, fetch=True, rank=-1000),
+            "hdr10": CustomRank(enable=True, fetch=True, rank=-1000),
+            "aac": CustomRank(enable=True, fetch=True, rank=70),
+            "ac3": CustomRank(enable=True, fetch=True, rank=50),
+            "remux": CustomRank(enable=False, fetch=True, rank=-75),
+            "webdl": CustomRank(enable=True, fetch=True, rank=90),
+            "bluray": CustomRank(enable=True, fetch=True, rank=-90),
+        },
+    )
 
 
-# test_data = [
-#     (
-#         "Jumanji (1995) RM4K (1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
-#         {
-#             "raw_title": "Jumanji (1995) RM4K (1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
-#             "parsed_title": "Jumanji",
-#             "fetch": True,
-#             "year": [1995],
-#             "resolution": ["1080p"],
-#             "quality": ["Blu-ray"],
-#             "codec": ["H.265"],
-#             "audio": ["AAC 5.1"],
-#             "bitDepth": [10],
-#         },
-#     ),
-#     (
-#         "The Simpsons - Complete Seasons S01 to S28 (1080p, 720p, DVDRip)",
-#         {
-#             "raw_title": "The Simpsons - Complete Seasons S01 to S28 (1080p, 720p, DVDRip)",
-#             "parsed_title": "The Simpsons",
-#             "fetch": True,
-#             "is_complete": True,
-#             "resolution": ["1080p"],
-#             "quality": ["DVD-Rip"],
-#             "season": list(range(1, 29)),
-#         },
-#     ),
-# ]
+def test_valid_torrent_from_title(settings_model, ranking_model):
+    rtn = RTN(settings_model, ranking_model)
 
-# test_ids = ["FullQualityCheck", "SeasonRangeCheck"]
+    torrent = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
+                       "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
 
-# def test_valid_torrent_from_item():
-#     ranking_model = DefaultRanking()
-#     torrent = Torrent(
-#         ranking_model=ranking_model,
-#         raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
-#         infohash="1234567890",
-#     )
+    assert isinstance(torrent, Torrent)
+    assert isinstance(torrent.parsed_data, ParsedData)
+    assert torrent.raw_title == "The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]"
+    assert torrent.infohash == "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"
+    assert torrent.parsed_data.parsed_title == "The Walking Dead"
+    assert torrent.parsed_data.fetch is False
+    assert torrent.rank > 0, f"Rank was {torrent.rank} instead of 163"
+    assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
 
-#     assert isinstance(torrent, Torrent)
-#     assert isinstance(torrent.parsed_data, ParsedMediaItem)
-#     assert torrent.raw_title == "The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]"
-#     assert torrent.infohash == "1234567890"
-#     assert torrent.parsed_data.parsed_title == "The Walking Dead"
-#     assert torrent.parsed_data.fetch is True
-#     assert torrent.rank == 163, f"Rank was {torrent.rank} instead of 163"
+def test_invalid_torrent_from_title(settings_model, ranking_model):
+    rtn = RTN(settings_model, ranking_model)
 
-# @pytest.mark.parametrize("raw_title, expected", test_data, ids=test_ids)
-# def test_parsed_media_item_properties(raw_title: str, expected: dict):
-#     item = ParsedMediaItem(raw_title=raw_title)
-#     for key, value in expected.items():
-#         assert (
-#             getattr(item, key) == value
-#         ), f"Attribute {key} failed for raw_title: {raw_title}"
+    with pytest.raises(TypeError):
+        # Missing 2 string arguments
+        rtn.rank("c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") # type: ignore
+
+    with pytest.raises(ValueError):
+        # Missing title
+        rtn.rank(None, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") # type: ignore
+
+    with pytest.raises(ValueError):
+        # Missing infohash
+        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", None) # type: ignore
+
+    with pytest.raises(ValueError):
+        # Missing title and infohash
+        rtn.rank(None, None) # type: ignore
+
+    with pytest.raises(TypeError):
+        # Invalid title type
+        rtn.rank(123, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") # type: ignore
+
+    with pytest.raises(TypeError):
+        # Invalid infohash type
+        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", 123) # type: ignore
+
+    with pytest.raises(ValueError):
+        # Invalid infohash length
+        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c0886")

@@ -131,35 +131,6 @@ Torrent(
     lev_ratio=0.95
 )
 ```
-## Torrent Parser
-
-You can also parse a torrent title similar to how PTN works. This is an enhanced version of PTN that combines RTN's parsing as well. This also includes enhanced episode parsing as well that covers a much better range of titles.
-
-Using the example above:
-
-```py
-from RTN import parse
-parsed = parse("Example.Movie.2020.1080p.BluRay.x264-Example")
-
-print(parsed.parsed_title) # Output: "Example Movie"
-print(parsed.year)         # Output: [2020]
-```
-
-We also set **coherent_types** to `True` from the PTN data that get's combined with RTN parsed metadata.
-
-## Checking Title Similarity
-
-Sometimes, you might just want to check if two titles match closely enough, without going through the entire ranking process. RTN provides a simple function, title_match, for this purpose:
-
-```py
-from RTN import title_match
-
-# Check if two titles are similar above a threshold of 0.9
-match = title_match("Correct Movie Title 2020", "Correct Movie Title (2020)")
-print(match)  # Output: True if similarity is above 0.9, otherwise False
-```
-
-This functionality is especially useful when you have a list of potential titles and want to find the best match for a given reference title.
 
 ## Understanding SettingsModel and RankingModel
 
@@ -286,26 +257,76 @@ Keep in mind that these are explicitly set within RTN and are needed in order fo
 
 Create as many `SettingsModel` and `RankingModel` as you like to use anywhere in your code. They are mean't to be used as a way to version settings for your users. 
 
-## Real World Example
+# Extras
+
+## Torrent Parser
+
+You can also parse a torrent title similar to how PTN works. This is an enhanced version of PTN that combines RTN's parsing as well. This also includes enhanced episode parsing as well that covers a much better range of titles.
+
+Using the example above:
+
+```py
+from RTN import parse
+parsed = parse("Example.Movie.2020.1080p.BluRay.x264-Example")
+
+print(parsed.parsed_data.raw_title)    # Output: "Example.Movie.2020.1080p.BluRay.x264-Example"
+print(parsed.parsed_data.parsed_title) # Output: "Example Movie"
+print(parsed.parsed_data.year)         # Output: [2020]
+```
+
+> :warning: We also set **coherent_types** to `True` from the PTN data that get's combined with RTN parsed metadata.
+> This just ensures that all the types are uniform. **Everything is either a list of string or int's, or it's a boolean.**
+
+## Checking Title Similarity
+
+Sometimes, you might just want to check if two titles match closely enough, without going through the entire ranking process. RTN provides a simple function, title_match, for this purpose:
+
+```py
+from RTN import title_match
+
+# Check if two titles are similar above a threshold of 0.9
+match = title_match("Correct Movie Title 2020", "Correct Movie Title (2020)")
+print(match)  # Output: True if similarity is above 0.9, otherwise False
+```
+
+This functionality is especially useful when you have a list of potential titles and want to find the best match for a given reference title.
+
+## Trash Check
+
+Maybe you just want to use our own garbage collector to weed out bad titles in your current scraping setup?
+
+```py
+from RTN import check_trash
+
+if check_trash(raw_title):
+    # You can safely remove any title or item from being scraped if this returns True!
+    ...
+```
+
+# Real World Example
 
 Here is a crude example of how you could use RTN in scraping.
 
 ```py
 from RTN import RTN, Torrent, DefaultRanking
 
-# Assuming 'settings' is defined somewhere and passed correctly
+# Assuming 'settings' is defined somewhere and passed correctly.
 rtn = RTN(settings=settings, ranking_model=DefaultRanking())
 ...
-# Define some function for scraping for results..
+# Define some function for scraping for results from some API.
     if response.ok:
         torrents = set()
         for stream in response.streams:
             if not stream.infohash or not title_match(correct_title, stream.title):
-                # Skip results that don't match the query
+                # Skip results that don't match the query.
+                # We want to do this first to weed out torrents
+                # that are below the 90% match criteria. (Default is 90%)
                 continue
             torrent: Torrent = rtn.rank(stream.title, stream.infohash)
             if torrent and torrent.fetch:
-                # Skip trash torrents by checking torrent.fetch
+                # Skip trash torrents by checking `torrent.fetch`.
+                # If torrent.fetch is True, then it's a good torrent,
+                # as considered by your ranking profile and settings model.
                 torrents.add(torrent)
 
         # Sort the list of torrents based on their rank in descending order
@@ -317,6 +338,46 @@ rtn = RTN(settings=settings, ranking_model=DefaultRanking())
 for torrent in sorted_torrents:
     print(f"Title: {torrent.parsed_data.parsed_title}, Infohash: {torrent.infohash}, Rank: {torrent.rank}")
 ```
+
+# ParsedData Structure
+
+Here is all of the attributes of `parsed_data` along with their default values:
+
+```py
+class ParsedData(BaseModel):
+    """Parsed data model for a torrent title."""
+
+    raw_title: str
+    parsed_title: str
+    fetch: bool = False
+    is_4k: bool = False
+    is_multi_audio: bool = False
+    is_multi_subtitle: bool = False
+    is_complete: bool = False
+    year: List[int] = []
+    resolution: List[str] = []
+    quality: List[str] = []
+    season: List[int] = []
+    episode: List[int] = []
+    codec: List[str] = []
+    audio: List[str] = []
+    subtitles: List[str] = []
+    language: List[str] = []
+    bitDepth: List[int] = []
+    hdr: str | bool = False
+    proper: bool = False
+    repack: bool = False
+    remux: bool = False
+    upscaled: bool = False
+    remastered: bool = False
+    directorsCut: bool = False
+    extended: bool = False
+    excess: list = []
+```
+
+This will continue to grow though as we expand on functionality, so keep checking back for this list!
+
+> :warning: Don't see something you want in the list? Submit a [Feature Request](https://github.com/dreulavelle/rank-torrent-name/issues/new?assignees=dreulavelle&labels=kind%2Ffeature%2Cstatus%2Ftriage&projects=&template=---feature-request.yml) to have it added!
 
 ## Contributing
 

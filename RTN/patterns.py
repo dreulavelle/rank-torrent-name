@@ -8,7 +8,7 @@ def compile_patterns(patterns):
 
 
 # Pattern for identifying unwanted quality. This will set `parsed_data.fetch`.
-TRASH_COMPILED = compile_patterns(
+IS_TRASH_COMPILED = compile_patterns(
     [
         r"\b(?:H[DQ][ .-]*)?CAM(?:H[DQ])?(?:[ .-]*Rip)?\b",
         r"\b(?:H[DQ][ .-]*)?S[ .-]*print\b",
@@ -27,7 +27,6 @@ TRASH_COMPILED = compile_patterns(
         r"\bTrailers?\b",
         r"\b((Half.)?SBS|3D)\b",
         r"\bWEB[ .-]?DL[ .-]?Rip\b",
-        r"\bUm Actually|Captive Audience|Copycat Killers\b",
     ]
 )
 

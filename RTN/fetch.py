@@ -1,19 +1,21 @@
 import regex
 
 from .models import ParsedData, SettingsModel
-from .patterns import TRASH_COMPILED
+from .patterns import IS_TRASH_COMPILED
 
 
 def check_trash(raw_title: str) -> bool:
     """Check if the title contains unwanted patterns."""
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
-    return not any(pattern.search(raw_title) for pattern in TRASH_COMPILED)
+    # True if we find any of the trash patterns in the title.
+    # You can safely remove any title from being scraped if this returns True!
+    return any(pattern.search(raw_title) for pattern in IS_TRASH_COMPILED)
 
 
 def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     """Check user settings and unwanted quality to determine if torrent should be fetched."""
-    if not check_trash(data.raw_title):
+    if check_trash(data.raw_title):
         return False
     if settings.require and any(
         pattern.search(data.raw_title) for pattern in settings.require if pattern  # type: ignore

@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, List
 
 import Levenshtein
@@ -122,6 +123,32 @@ def parse(raw_title: str) -> ParsedData:
     full_data["raw_title"] = raw_title  # Add the raw title to the data
     full_data["parsed_title"] = parsed_dict.get("title")  # Add the parsed title to the data
     return ParsedData(**full_data)
+
+
+def parse_chunk(chunk: List[str]) -> List[ParsedData]:
+    """Parses a chunk of torrent titles."""
+    return [parse(title) for title in chunk]
+
+
+def batch_parse(titles: List[str], chunk_size: int = 50) -> List[ParsedData]:
+    """
+    Parses a list of torrent titles in batches for improved performance.
+
+    Args:
+        titles (List[str]): A list of torrent titles to parse.
+        chunk_size (int): The number of titles to process in each batch.
+
+    Returns:
+        List[ParsedData]: A list of ParsedData objects for each title.
+    """
+    chunks = [titles[i:i + chunk_size] for i in range(0, len(titles), chunk_size)]
+    parsed_data = []
+    with ThreadPoolExecutor() as executor:
+        future_to_chunk = {executor.submit(parse_chunk, chunk): chunk for chunk in chunks}
+        for future in as_completed(future_to_chunk):
+            chunk_result = future.result()
+            parsed_data.extend(chunk_result)
+    return parsed_data
 
 
 def title_match(correct_title: str, raw_title: str, threshold: float = 0.9) -> bool:

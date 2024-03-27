@@ -1,6 +1,9 @@
 name: "\U0001F381 Feature Request"
-labels: ["kind/feature", "status/triage"]
 description: "Did you find bugs, errors, or anything that isn't straightforward in the documentation?"
+title: "[Feature]: "
+labels: ["kind/feature", "status/triage"]
+assignees:
+  - dreulavelle
 
 body:
   - type: markdown

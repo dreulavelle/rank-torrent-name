@@ -1,6 +1,9 @@
 name: "\U0001F41E Bug Report"
-labels: ["kind/bug", "status/triage"]
 description: "Rank Torrent Name (RTN) not working the way it is documented?"
+title: "[Bug]: "
+labels: ["kind/bug", "status/triage"]
+assignees:
+  - dreulavelle
 
 body:
   - type: markdown

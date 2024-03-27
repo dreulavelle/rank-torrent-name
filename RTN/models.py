@@ -42,36 +42,41 @@ class BaseRankingModel(BaseModel):
     The ranking values are used to determine the quality of a media item based on its attributes.
 
     Attributes:
-        uhd (int): The ranking value for Ultra HD (4K) resolution.
-        fhd (int): The ranking value for Full HD (1080p) resolution.
-        hd (int): The ranking value for HD (720p) resolution.
-        sd (int): The ranking value for SD (480p) resolution.
-        bluray (int): The ranking value for Blu-ray quality.
-        hdr (int): The ranking value for HDR quality.
-        hdr10 (int): The ranking value for HDR10 quality.
-        dolby_video (int): The ranking value for Dolby video quality.
-        dts_x (int): The ranking value for DTS:X audio quality.
-        dts_hd (int): The ranking value for DTS-HD audio quality.
-        dts_hd_ma (int): The ranking value for DTS-HD Master Audio audio quality.
-        atmos (int): The ranking value for Dolby Atmos audio quality.
-        truehd (int): The ranking value for Dolby TrueHD audio quality.
-        ddplus (int): The ranking value for Dolby Digital Plus audio quality.
-        ac3 (int): The ranking value for AC3 audio quality.
-        aac (int): The ranking value for AAC audio quality.
-        remux (int): The ranking value for remux attribute.
-        webdl (int): The ranking value for web-dl attribute.
-        repack (int): The ranking value for repack attribute.
-        proper (int): The ranking value for proper attribute.
-        dubbed (int): The ranking value for dubbed attribute.
-        subbed (int): The ranking value for subbed attribute.
-        av1 (int): The ranking value for AV1 attribute.
+        `uhd` (int): The ranking value for Ultra HD (4K) resolution.
+        `fhd` (int): The ranking value for Full HD (1080p) resolution.
+        `hd` (int): The ranking value for HD (720p) resolution.
+        `sd` (int): The ranking value for SD (480p) resolution.
+        `bluray` (int): The ranking value for Blu-ray quality.
+        `hdr` (int): The ranking value for HDR quality.
+        `hdr10` (int): The ranking value for HDR10 quality.
+        `dolby_video` (int): The ranking value for Dolby video quality.
+        `dts_x` (int): The ranking value for DTS:X audio quality.
+        `dts_hd` (int): The ranking value for DTS-HD audio quality.
+        `dts_hd_ma` (int): The ranking value for DTS-HD Master Audio audio quality.
+        `atmos` (int): The ranking value for Dolby Atmos audio quality.
+        `truehd` (int): The ranking value for Dolby TrueHD audio quality.
+        `ddplus` (int): The ranking value for Dolby Digital Plus audio quality.
+        `ac3` (int): The ranking value for AC3 audio quality.
+        `aac` (int): The ranking value for AAC audio quality.
+        `remux` (int): The ranking value for remux attribute.
+        `webdl` (int): The ranking value for web-dl attribute.
+        `repack` (int): The ranking value for repack attribute.
+        `proper` (int): The ranking value for proper attribute.
+        `dubbed` (int): The ranking value for dubbed attribute.
+        `subbed` (int): The ranking value for subbed attribute.
+        `av1` (int): The ranking value for AV1 attribute.
+    
+    Note:
+        - The higher the ranking value, the better the quality of the media item.
+        - The default ranking values are set to 0, which means that the attribute does not affect the overall rank.
+        - Users can customize the ranking values based on their preferences and requirements by using inheritance.
     """
 
     # resolution
-    uhd: int = 0
-    fhd: int = 0
-    hd: int = 0
-    sd: int = 0
+    uhd: int = 0 # 4K
+    fhd: int = 0 # 1080p
+    hd: int = 0  # 720p
+    sd: int = 0  # 480p
     # quality
     bluray: int = 0
     hdr: int = 0
@@ -98,7 +103,7 @@ class BaseRankingModel(BaseModel):
 
 
 class DefaultRanking(BaseRankingModel):
-    """Default ranking model for users to use."""
+    """Default ranking model preset that should cover most common use cases."""
 
     uhd: int = 140
     fhd: int = 100
@@ -209,12 +214,11 @@ class SettingsModel(BaseModel):
             compiled_patterns = []
             for pattern in raw_patterns:
                 if isinstance(pattern, str):
-                    # Compile the pattern, taking into account your custom syntax for options like case-sensitivity
-                    if pattern.startswith("/") and pattern.endswith("/i"):
+                    if pattern.startswith("/") and pattern.endswith("/i"): # case-insensitive
                         compiled_patterns.append(regex.compile(pattern[1:-2], regex.IGNORECASE))
-                    elif pattern.startswith("/") and pattern.endswith("/"):
+                    elif pattern.startswith("/") and pattern.endswith("/"): # case-sensitive
                         compiled_patterns.append(regex.compile(pattern[1:-1]))
-                    else:
+                    else: # case-insensitive by default
                         compiled_patterns.append(regex.compile(pattern, regex.IGNORECASE))
                 elif isinstance(pattern, regex.Pattern):
                     # Keep already compiled patterns as is
@@ -226,16 +230,3 @@ class SettingsModel(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-
-    def __getitem__(self, key: str) -> CustomRank:
-        """Allows direct access to custom rank settings."""
-        return self.custom_ranks.get(key, CustomRank())
-
-    def __setitem__(self, key: str, value: CustomRank):
-        """Enables setting custom rank settings."""
-        self.custom_ranks[key] = value
-
-    def __delitem__(self, key: str):
-        """Allows deletion of custom rank settings."""
-        if key in self.custom_ranks:
-            del self.custom_ranks[key]
