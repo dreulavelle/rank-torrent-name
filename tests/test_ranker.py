@@ -22,7 +22,7 @@ def custom_ranking_model():
         uhd=140,
         fhd=100,
         hd=50,
-        sd=-100,
+        sd=-10,
         dolby_video=-1000,
         hdr=-1000,
         hdr10=-1000,
@@ -116,30 +116,43 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
     )
 
     rank = get_rank(parsed_data, settings_model, ranking_model)
-    assert rank == 90, f"Expected rank did not match, got {rank}"
+    assert rank == 273, f"Expected rank did not match, got {rank}"
 
-def test_preference_handling(custom_settings_model, custom_ranking_model):
-    custom_settings_model.preferred.append("/Example/")
-    parsed_data = ParsedData(raw_title="Example.Movie.2020", parsed_title="Example Movie")
-    rank_with_preference = get_rank(parsed_data, custom_settings_model, custom_ranking_model)
-
-    custom_settings_model.preferred = []  # Remove preference
-    rank_without_preference = get_rank(parsed_data, custom_settings_model, custom_ranking_model)
-
+def test_preference_handling(custom_settings_model, ranking_model):
+    # Test with preferred title with a preference for Season number in title
+    # to make sure we can check before-after case. User should be able to set
+    # their own preferred patterns dynamically.
+    parsed_data = ParsedData(raw_title="Example.Series.S2.2020", parsed_title="Example Series")
+    rank_with_preference = get_rank(parsed_data, custom_settings_model, ranking_model)
+    assert rank_with_preference == 5000, "Preferred title should have rank 5000"
+    custom_settings_model.preferred = []
+    rank_without_preference = get_rank(parsed_data, custom_settings_model, ranking_model)
     assert rank_with_preference > rank_without_preference, "Preferred title should have higher rank"
 
-def test_resolution_ranking(custom_settings_model, custom_ranking_model):
-    parsed_data_1080p = ParsedData(raw_title="1080p", parsed_title="1080p", resolution=["1080p"])
+
+def test_resolution_ranking(settings_model, ranking_model):
+    # Test Valid Resolutions
     parsed_data_4k = ParsedData(raw_title="4K", parsed_title="4K", resolution=["4K"])
+    parsed_data_2160p = ParsedData(raw_title="2160p", parsed_title="2160p", resolution=["2160p"])
+    parsed_data_1440p = ParsedData(raw_title="1440p", parsed_title="1440p", resolution=["1440p"])
+    parsed_data_1080p = ParsedData(raw_title="1080p", parsed_title="1080p", resolution=["1080p"])
     parsed_data_720p = ParsedData(raw_title="720p", parsed_title="720p", resolution=["720p"])
     parsed_data_480p = ParsedData(raw_title="480p", parsed_title="480p", resolution=["480p"])
+    # Test Invalid Resolution
+    parsed_data_none = ParsedData(raw_title="None", parsed_title="None", resolution=[])
 
-    rank_1080p = get_rank(parsed_data_1080p, custom_settings_model, custom_ranking_model)
-    rank_4k = get_rank(parsed_data_4k, custom_settings_model, custom_ranking_model)
-    rank_720p = get_rank(parsed_data_720p, custom_settings_model, custom_ranking_model)
-    rank_480p = get_rank(parsed_data_480p, custom_settings_model, custom_ranking_model)
+    rank_4k = get_rank(parsed_data_4k, settings_model, ranking_model)
+    rank_2160p = get_rank(parsed_data_2160p, settings_model, ranking_model)
+    rank_1440p = get_rank(parsed_data_1440p, settings_model, ranking_model)
+    rank_1080p = get_rank(parsed_data_1080p, settings_model, ranking_model)
+    rank_720p = get_rank(parsed_data_720p, settings_model, ranking_model)
+    rank_480p = get_rank(parsed_data_480p, settings_model, ranking_model)
+    rank_none = get_rank(parsed_data_none, settings_model, ranking_model)
 
     assert rank_4k > rank_1080p, "4K resolution should have higher rank than 1080p"
+    assert rank_2160p > rank_1080p, "2160p resolution should have higher rank than 1080p"
+    assert rank_1440p > rank_1080p, "1440p resolution should have higher rank than 1080p"
     assert rank_1080p > rank_720p, "1080p resolution should have higher rank than 720p"
     assert rank_720p > rank_480p, "720p resolution should have higher rank than 480p"
-    assert rank_480p > 0, "480p resolution should have positive rank"
+    assert rank_480p < 0, "480p resolution should have negative rank"
+    assert rank_none == 0, "No resolution should have rank 0"

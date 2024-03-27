@@ -97,7 +97,8 @@ def test_default_title_matching():
         assert title_match(title, query) == expected, f"Failed for {title} and {query}"
 
 
-def test_batch_parse_returns_correct_parsed_data_objects():
+def test_batch_parse_processing():
+    # Test batch parsing retuns a list of ParsedData objects
     test_titles = [
         "The.Matrix.1999.1080p.BluRay.x264",
         "Inception.2010.720p.BRRip.x264",

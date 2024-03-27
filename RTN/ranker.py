@@ -59,11 +59,14 @@ def calculate_resolution_rank(parsed_data: ParsedData, settings: SettingsModel, 
     if not parsed_data.resolution:
         return 0
 
-    if parsed_data.is_4k:
-        return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
-
     resolution: str = parsed_data.resolution[0]
     match resolution:
+        case "4K":
+            return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
+        case "2160p":
+            return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
+        case "1440p":
+            return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
         case "1080p":
             return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
         case "720p":
