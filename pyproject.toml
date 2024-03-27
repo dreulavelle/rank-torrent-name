@@ -20,8 +20,10 @@ pyright = "^1.1.352"
 pyperf = "^2.2.0"
 ruff = "^0.3.0"
 isort = "^5.10.1"
-pytest = "^8.1.1"
 codecov = "^2.1.13"
+pytest = "^8.1.1"
+black = "^24.3.0"
+pytest-cov = "^5.0.0"
 
 [build-system]
 requires = ["poetry-core"]

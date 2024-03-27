@@ -4,7 +4,6 @@ on: [push, pull_request]
 
 jobs:
   battery:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,29 +11,40 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4.1.2
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.1.0
       with:
         python-version: ${{ matrix.python-version }}
+
+    - name: Cache Poetry dependencies
+      uses: actions/cache@v4.0.2
+      with:
+        path: |
+          ~/.cache/pypoetry
+          .venv
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
     - name: Install dependencies
       run: |
         pip install poetry
         poetry install --no-root --with dev
-    - name: Lint with Ruff
-      run: poetry run ruff check ./RTN
-    - name: Check imports with isort
-      run: poetry run isort --check-only ./RTN
+
+    - name: Ruff & Isort Check
+      run: |
+        poetry run ruff check ./RTN
+        poetry run isort --check-only ./RTN
+
     - name: Type check
       run: poetry run pyright
-    - name: Run Tests
-      run: poetry run pytest
-    - name: Coverage Report
-      run: |
-        poetry run coverage run -m pytest
-        poetry run coverage xml
-        poetry run coverage report -m
+
+    - name: Run Tests & Coverage
+      run: poetry run pytest --cov=./RTN --cov-report=xml
+
     - name: Upload Coverage Report to Codecov
-      uses: codecov/codecov-action@v4.0.1
+      uses: codecov/codecov-action@v4.1.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml

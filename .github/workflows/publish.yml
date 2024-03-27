@@ -11,12 +11,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.2
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.1.0
       with:
         python-version: '3.11.2'
 
     - name: Cache Poetry
-      uses: actions/cache@v2
+      uses: actions/cache@v4.0.2
       with:
         path: ~/.cache/pypoetry
         key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
@@ -26,9 +26,10 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry
-        poetry install
+        poetry install --no-dev
 
     - name: Publish to PyPI
       run: poetry publish --build
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+      continue-on-error: true
