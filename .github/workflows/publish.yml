@@ -32,4 +32,4 @@ jobs:
       run: poetry publish --build
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-      continue-on-error: true  # Still want coverage tests to be ran even if publishing fails
+      # continue-on-error: true  # Still want coverage tests to be ran even if publishing fails
