@@ -390,6 +390,87 @@ This will continue to grow though as we expand on functionality, so keep checkin
 
 > :warning: Don't see something you want in the list? Submit a [Feature Request](https://github.com/dreulavelle/rank-torrent-name/issues/new?assignees=dreulavelle&labels=kind%2Ffeature%2Cstatus%2Ftriage&projects=&template=---feature-request.yml) to have it added!
 
+## Performance Benchmarks
+
+Here, we dive into the heart of RTN's efficiency, showcasing how it performs under various loads. Whether you're parsing a single title or ranking thousands, understanding these benchmarks will help you optimize your use of RTN.
+
+### Benchmark Categories
+
+We categorize benchmarks into two main processes:
+- **Parsing**: Measures the time to parse a title and return a `ParsedData` object.
+- **Ranking**: A comprehensive process that includes parsing and then evaluates the title based on defined criteria. This represents a more "real-world" scenario and is crucial for developers looking to integrate RTN effectively.
+
+### Benchmark Results
+
+To facilitate comparison, we've compiled the results into a single table:
+
+| Operation                                  | Items Count | Mean Time    | Standard Deviation |
+|--------------------------------------------|-------------|--------------|--------------------|
+| **Parsing Benchmark (Single item)**        | 1           | 620 us       | 35 us              |
+| **Batch Parse Benchmark (Small batch)**    | 10          | 6.06 ms      | 0.11 ms            |
+| **Batch Parse Benchmark (Large batch)**    | 1000        | 640 ms       | 8 ms               |
+| **Ranking Benchmark (Single item)**        | 1           | 660 us       | 38 us              |
+| **Batch Rank Benchmark (Small batch)**     | 10          | 24.6 ms      | 4.1 ms             |
+| **Batch Rank Benchmark (Large batch)**     | 1000        | 3.13 s       | 0.15 s             |
+
+### Benchmark Settings
+
+- **Small batch parsing** used a `chunk_size` of `10`.
+- **Large batch parsing** handled `chunk_size` of `500`.
+- **Small batch ranking** operated with the default `max_workers` of `4`.
+- **Large batch ranking** escalated concurrency with `max_workers` of `8`.
+
+This data underscores RTN's robust capability to efficiently process both small and extensive datasets.
+
+To help developers optimize their use of RTN based on the performance benchmarks, consider adding a section on performance tweaking. Here's how you might include it in your README.md:
+
+## Optimizing RTN Performance
+
+The performance benchmarks provided give a glimpse into how RTN handles different loads, from parsing single titles to ranking thousands. For developers looking to integrate RTN into their applications efficiently, here are some tips on tweaking performance:
+
+### 1. Adjusting Chunk Size for Batch Parsing
+The `batch_parse` function allows you to parse titles in batches, significantly reducing processing time for large datasets. However, the optimal `chunk_size` can vary depending on the dataset size and your system's resources.
+
+- For smaller datasets, a lower `chunk_size` might suffice, keeping overhead low.
+- For larger datasets, increasing `chunk_size` can reduce the number of batches processed and potentially lower overall processing time.
+
+Experiment with different `chunk_size` values to find the sweet spot for your particular use case.
+
+### 2. Tuning Concurrency in Batch Ranking
+The `batch_rank` function uses multiple threads to rank torrents in parallel, which can significantly speed up processing for large numbers of torrents.
+
+- The default `max_workers` value is set to `4`, but this might not be optimal for all systems.
+- Systems with higher CPU core counts might benefit from increasing `max_workers`, allowing more torrents to be processed simultaneously.
+- However, setting `max_workers` too high can lead to diminishing returns and increased overhead. Monitor your system's resource utilization to find an optimal setting.
+
+### 3. Leveraging ThreadPoolExecutor
+Both `batch_parse` and `batch_rank` utilize `ThreadPoolExecutor` for parallel processing. Adjusting the `max_workers` parameter can help manage how many threads are used for these operations, impacting performance and resource utilization.
+
+### 4. Custom Settings and Ranking Models
+Customizing `SettingsModel` and `RankingModel` allows you to tailor the parsing and ranking criteria to your needs, potentially streamlining the processing by focusing only on relevant data.
+
+- Evaluate which torrent attributes are essential for your application and adjust your settings model accordingly.
+- Consider disabling unnecessary custom ranks or attributes in the ranking model to simplify the ranking process.
+
+### Example: Tweaking Performance for Large Datasets
+
+Suppose you're processing a dataset of 10,000 torrent titles. You might start with a default `chunk_size` of `50` and `max_workers` of `4`. Through experimentation, you find that increasing `chunk_size` to `500` and `max_workers` to `8` cuts your processing time in half.
+
+```python
+from RTN import RTN, SettingsModel, DefaultRanking, batch_parse
+
+# Setup
+settings = SettingsModel()
+ranking_model = DefaultRanking()
+rtn = RTN(settings=settings, ranking_model=ranking_model)
+
+# Optimized batch parsing
+optimized_titles = ["Title 1", "Title 2", ..., "Title 10000"]
+parsed_data = batch_parse(optimized_titles, chunk_size=500, max_workers=8)
+```
+
+By monitoring performance and adjusting parameters based on your specific requirements and system capabilities, you can significantly enhance RTN's efficiency in your projects.
+
 ## Contributing
 
 Contributions to RTN are welcomed! Feel free to submit pull requests or open issues to suggest features or report bugs. As we grow, more features will be coming to RTN, there's already a lot planned!

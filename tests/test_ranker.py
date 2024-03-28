@@ -141,6 +141,23 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
     rank = get_rank(parsed_data, settings_model, ranking_model)
     assert rank == 273, f"Expected rank did not match, got {rank}"
 
+def test_batch_ranking(settings_model, ranking_model):
+    rtn = RTN(settings_model, ranking_model)
+    torrents = [
+        ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"),
+        ("Example.Movie.2020.1080p.BluRay.x264-Example", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e8"),
+        ("Example.Series.S2.2020", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e9"),
+    ]
+
+    ranked_torrents = rtn.batch_rank(torrents)
+    assert len(ranked_torrents) == 3
+    for torrent in ranked_torrents:
+        assert isinstance(torrent, Torrent)
+        assert isinstance(torrent.data, ParsedData)
+        assert torrent.fetch is True
+        assert torrent.rank > 0, f"Rank was {torrent.rank} instead of > 0"
+        assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
+
 def test_preference_handling(custom_settings_model, ranking_model):
     # Test with preferred title with a preference for Season number in title
     # to make sure we can check before-after case. User should be able to set

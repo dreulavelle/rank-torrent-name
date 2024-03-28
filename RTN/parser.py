@@ -100,7 +100,43 @@ class RTN:
         )
 
     def batch_rank(self, torrents: List[Tuple[str, str]], max_workers: int = 4) -> List[Torrent]:
-        """Ranks a batch of torrents in parallel using multiple threads."""
+        """
+        Ranks a batch of torrents in parallel using multiple threads.
+
+        Parameters:
+            `torrents` (List[Tuple[str, str]]): A list of tuples containing the raw title and infohash of each torrent.
+            `max_workers` (int, optional): The maximum number of worker threads to use for parallel processing. Defaults to 4.
+
+        Returns:
+            List[Torrent]: A list of Torrent objects representing the ranked torrents.
+
+        Raises:
+            ValueError: If the title or infohash is not provided for any torrent.
+            TypeError: If the title or infohash is not a string.
+            ValueError: If the infohash is not a valid SHA-1 hash and 40 characters in length.
+
+        Example:
+            >>> torrents = [
+            ...     ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"),
+            ...     ("Example.Movie.2020.1080p.BluRay.x264-Example", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e8"),
+            ...     ("Example.Series.S2.2020", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e9"),
+            ... ]
+
+            >>> rtn = RTN(settings_model, ranking_model)
+            >>> ranked_torrents = rtn.batch_rank(torrents)
+            >>> len(ranked_torrents)
+            3
+            >>> isinstance(ranked_torrents[0], Torrent)
+            True
+            >>> isinstance(ranked_torrents[0].data, ParsedData)
+            True
+            >>> ranked_torrents[0].fetch
+            True
+            >>> ranked_torrents[0].rank > 0
+            True
+            >>> ranked_torrents[0].lev_ratio > 0.0
+            True
+        """
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             return list(executor.map(lambda t: self.rank(t[0], t[1]), torrents))
 
@@ -128,7 +164,15 @@ def parse(raw_title: str) -> ParsedData:
 
 
 def parse_chunk(chunk: List[str]) -> List[ParsedData]:
-    """Parses a chunk of torrent titles."""
+    """
+    Parses a chunk of torrent titles.
+
+    Args:
+        chunk (List[str]): A list of torrent titles to parse.
+
+    Returns:
+        List[ParsedData]: A list of ParsedData objects containing the parsed metadata from the torrent titles.
+    """
     return [parse(title) for title in chunk]
 
 

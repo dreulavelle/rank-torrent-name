@@ -36,7 +36,7 @@ coverage: clean
 	@poetry run pytest --cov=$(SRC_DIR) --cov-report=xml --cov-report=html --cov-report=term
 
 benchmark:
-	@poetry run python benchmarks/rank.py
+	@poetry run python benchmarks/rank.py --quiet
 
 pr-ready: clean format lint check test
 
