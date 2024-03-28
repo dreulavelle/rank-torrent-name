@@ -17,13 +17,9 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     """Check user settings and unwanted quality to determine if torrent should be fetched."""
     if check_trash(data.raw_title):
         return False
-    if settings.require and any(
-        pattern.search(data.raw_title) for pattern in settings.require if pattern  # type: ignore
-    ):
+    if settings.require and any(pattern.search(data.raw_title) for pattern in settings.require if pattern):  # type: ignore
         return True
-    if settings.exclude and any(
-        pattern.search(data.raw_title) for pattern in settings.exclude if pattern  # type: ignore
-    ):
+    if settings.exclude and any(pattern.search(data.raw_title) for pattern in settings.exclude if pattern):  # type: ignore
         return False
     return all(
         [
@@ -41,10 +37,6 @@ def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
     if not settings.custom_ranks["webdl"].fetch and "WEB-DL" in data.quality:
         return False
     if not settings.custom_ranks["remux"].fetch and data.remux:
-        return False
-    if not settings.custom_ranks["ddplus"].fetch and "Dolby Digital Plus" in data.audio:
-        return False
-    if not settings.custom_ranks["aac"].fetch and "AAC" in data.audio:
         return False
     return True
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rank-torrent-name"
-version = "0.1.6"
+version = "0.1.7"
 description = "Parse Torrents using PTN and Rank them according to your preferences!"
 authors = ["Spoked <dreu.lavelle@gmail.com>"]
 license = "MIT"
@@ -36,7 +36,7 @@ include = "RTN"
 profile = "black"
 
 [tool.black]
-line-length = 122
+line-length = 129
 target-version = ['py311']
 include = '\.pyi?$'
 exclude = '''

@@ -19,10 +19,10 @@ def get_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingM
         ValueError: If the parsed data is empty.
         TypeError: If the parsed data is not a ParsedData object.
     """
-    if not data:
-        raise ValueError("Parsed data cannot be empty.")
     if not isinstance(data, ParsedData):
         raise TypeError("Parsed data must be an instance of ParsedData.")
+    if not data.raw_title:
+        raise ValueError("Parsed data cannot be empty.")
 
     rank: int = calculate_resolution_rank(data, settings, rank_model)
     rank += calculate_quality_rank(data, settings, rank_model)
@@ -83,9 +83,7 @@ def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model
         case "WEB-DL":
             return rank_model.webdl if not settings.custom_ranks["webdl"].enable else settings.custom_ranks["webdl"].rank
         case "Blu-ray":
-            return (
-                rank_model.bluray if not settings.custom_ranks["bluray"].enable else settings.custom_ranks["bluray"].rank
-            )
+            return rank_model.bluray if not settings.custom_ranks["bluray"].enable else settings.custom_ranks["bluray"].rank
         case "WEBCap" | "Cam" | "Telesync" | "Telecine" | "Screener" | "VODRip" | "TVRip" | "DVD-R":
             return -1000
         case "BDRip":
@@ -127,9 +125,7 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
     audio_format = regex.sub(r"7.1|5.1|Dual|Mono|Original|LiNE", "", audio_format).strip()
     match audio_format:
         case "Dolby TrueHD":
-            return (
-                rank_model.truehd if not settings.custom_ranks["truehd"].enable else settings.custom_ranks["truehd"].rank
-            )
+            return rank_model.truehd if not settings.custom_ranks["truehd"].enable else settings.custom_ranks["truehd"].rank
         case "Dolby Atmos":
             return rank_model.atmos if not settings.custom_ranks["atmos"].enable else settings.custom_ranks["atmos"].rank
         case "Dolby Digital":
@@ -137,18 +133,12 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
         case "Dolby Digital EX":
             return rank_model.dts_x if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
         case "Dolby Digital Plus":
-            return (
-                rank_model.ddplus if not settings.custom_ranks["ddplus"].enable else settings.custom_ranks["ddplus"].rank
-            )
+            return rank_model.ddplus if not settings.custom_ranks["ddplus"].enable else settings.custom_ranks["ddplus"].rank
         case "DTS":
-            return (
-                rank_model.dts_hd if not settings.custom_ranks["dts_hd"].enable else settings.custom_ranks["dts_hd"].rank
-            )
+            return rank_model.dts_hd if not settings.custom_ranks["dts_hd"].enable else settings.custom_ranks["dts_hd"].rank
         case "DTS-HD":
             return (
-                (rank_model.dts_hd + 5)
-                if not settings.custom_ranks["dts_hd"].enable
-                else settings.custom_ranks["dts_hd"].rank
+                (rank_model.dts_hd + 5) if not settings.custom_ranks["dts_hd"].enable else settings.custom_ranks["dts_hd"].rank
             )
         case "DTS-HD MA":
             return (
@@ -157,25 +147,17 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
                 else settings.custom_ranks["dts_hd_ma"].rank
             )
         case "DTS-ES" | "DTS-EX":
-            return (
-                (rank_model.dts_x + 5)
-                if not settings.custom_ranks["dts_x"].enable
-                else settings.custom_ranks["dts_x"].rank
-            )
+            return rank_model.dts_x + 5 if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
         case "DTS:X":
-            return (
-                (rank_model.dts_x + 10)
-                if not settings.custom_ranks["dts_x"].enable
-                else settings.custom_ranks["dts_x"].rank
-            )
+            return rank_model.dts_x + 10 if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
         case "AAC":
             return rank_model.aac if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "AAC-LC":
-            return (rank_model.aac + 2) if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
+            return rank_model.aac + 2 if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "HE-AAC":
-            return (rank_model.aac + 5) if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
+            return rank_model.aac + 5 if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "HE-AAC v2":
-            return (rank_model.aac + 10) if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
+            return rank_model.aac + 10 if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
         case "AC3":
             return rank_model.ac3 if not settings.custom_ranks["ac3"].enable else settings.custom_ranks["ac3"].rank
         case "FLAC" | "OGG":
@@ -186,19 +168,17 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
 
 def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate all the other rankings of the given parsed data."""
-    if not ["bitDepth"] and not data.hdr and not data.is_complete:
+    if not data.bitDepth and not data.hdr and not data.is_complete and not data.season and not data.episode:
         return 0
 
     total_rank = 0
-    if data.bitDepth and data.bitDepth[0] > 8:
+    if data.bitDepth and data.bitDepth[0] >= 8:
         total_rank += 2
     if data.hdr:
         if data.hdr == "HDR":
             total_rank += settings.custom_ranks["hdr"].rank if settings.custom_ranks["hdr"].enable else rank_model.hdr
         elif data.hdr == "HDR10+":
-            total_rank += (
-                settings.custom_ranks["hdr10"].rank if settings.custom_ranks["hdr10"].enable else rank_model.hdr10
-            )
+            total_rank += settings.custom_ranks["hdr10"].rank if settings.custom_ranks["hdr10"].enable else rank_model.hdr10
         elif data.hdr == "DV":
             total_rank += (
                 settings.custom_ranks["dolby_video"].rank
@@ -207,8 +187,8 @@ def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model:
             )
     if data.is_complete:
         total_rank += 100
-    if data.season:
+    if len(data.season) > 0:
         total_rank += 100 * len(data.season)
-    if data.episode:
+    if len(data.episode) > 0:
         total_rank += 10 * len(data.episode)
     return total_rank

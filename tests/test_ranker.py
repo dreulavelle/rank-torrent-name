@@ -9,7 +9,7 @@ from RTN.models import (
     SettingsModel,
 )
 from RTN.parser import Torrent
-from RTN.ranker import get_rank
+from RTN.ranker import calculate_preferred, get_rank
 
 
 @pytest.fixture
@@ -31,6 +31,33 @@ def custom_ranking_model():
         remux=-75,
         webdl=90,
         bluray=-90,
+    )
+
+@pytest.fixture
+def enabled_ranking_model():
+    return BaseRankingModel(
+        uhd=4,
+        fhd=3,
+        hd=2,
+        sd=-1,
+        bluray=1,
+        hdr=1,
+        hdr10=1,
+        dolby_video=1,
+        dts_x=1,
+        dts_hd=1,
+        dts_hd_ma=1,
+        atmos=1,
+        truehd=1,
+        ddplus=1,
+        ac3=1,
+        remux=1,
+        webdl=1,
+        repack=1,
+        proper=1,
+        dubbed=1,
+        subbed=1,
+        av1=1,
     )
 
 @pytest.fixture
@@ -57,6 +84,40 @@ def custom_settings_model():
             "remux": CustomRank(enable=False, fetch=True, rank=-75),
             "webdl": CustomRank(enable=True, fetch=True, rank=90),
             "bluray": CustomRank(enable=True, fetch=True, rank=-90),
+        },
+    )
+
+@pytest.fixture
+def enabled_settings_model():
+    return SettingsModel(
+        profile="default",
+        require=[],
+        exclude=[],
+        preferred=[],
+        custom_ranks={
+            "uhd": CustomRank(enable=True, fetch=True, rank=4),
+            "fhd": CustomRank(enable=True, fetch=True, rank=3),
+            "hd": CustomRank(enable=True, fetch=True, rank=2),
+            "sd": CustomRank(enable=True, fetch=True, rank=-1),
+            "bluray": CustomRank(enable=True, fetch=True, rank=1),
+            "hdr": CustomRank(enable=True, fetch=True, rank=1),
+            "hdr10": CustomRank(enable=True, fetch=True, rank=1),
+            "dolby_video": CustomRank(enable=True, fetch=True, rank=1),
+            "dts_x": CustomRank(enable=True, fetch=True, rank=1),
+            "dts_hd": CustomRank(enable=True, fetch=True, rank=1),
+            "dts_hd_ma": CustomRank(enable=True, fetch=True, rank=1),
+            "atmos": CustomRank(enable=True, fetch=True, rank=1),
+            "truehd": CustomRank(enable=True, fetch=True, rank=1),
+            "ddplus": CustomRank(enable=True, fetch=True, rank=1),
+            "aac": CustomRank(enable=True, fetch=True, rank=1),
+            "ac3": CustomRank(enable=True, fetch=True, rank=1),
+            "remux": CustomRank(enable=True, fetch=True, rank=1),
+            "webdl": CustomRank(enable=True, fetch=True, rank=1),
+            "repack": CustomRank(enable=True, fetch=True, rank=1),
+            "proper": CustomRank(enable=True, fetch=True, rank=1),
+            "dubbed": CustomRank(enable=True, fetch=True, rank=1),
+            "subbed": CustomRank(enable=True, fetch=True, rank=1),
+            "av1": CustomRank(enable=True, fetch=True, rank=1),
         },
     )
 
@@ -141,12 +202,63 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
     rank = get_rank(parsed_data, settings_model, ranking_model)
     assert rank == 273, f"Expected rank did not match, got {rank}"
 
-def test_batch_ranking(settings_model, ranking_model):
-    rtn = RTN(settings_model, ranking_model)
+def test_get_rank_validity(settings_model, ranking_model):
+    parsed_data = ParsedData(
+        raw_title="Example.Movie.2020.1080p.BluRay.x264-Example",
+        parsed_title="Example Movie",
+        resolution=["1080p"],
+        quality=["Blu-ray"],
+        codec=["H.264"],
+        audio=["Dolby Digital"],
+        hdr="HDR10",
+        is_complete=True,
+        repack=True,
+        proper=True,
+        remux=True,
+        season=[1],
+        episode=[1],
+    )
+
+    rank = get_rank(parsed_data, settings_model, ranking_model)
+    assert isinstance(rank, int)
+    assert rank < 0  # Remux is -1000 by default
+
+    # test invalid get_rank with missing parsed_data
+    parsed_data = ParsedData(
+        raw_title="",
+        parsed_title="Example Movie",
+    )
+    with pytest.raises(ValueError):
+        get_rank(parsed_data, settings_model, ranking_model)
+
+    # test invalid get_rank instance of ParsedData
+    with pytest.raises(TypeError):
+        get_rank(None, settings_model, ranking_model) # type: ignore
+
+def test_valid_preferred_calculation(custom_settings_model):
+    # use calculate_preferred function
+    parsed_data = ParsedData(
+        raw_title="Example.Series.S2.2020.Bluray",
+        parsed_title="Example Series",
+    )
+    # test if preferred is not empty
+    rank = calculate_preferred(parsed_data, custom_settings_model)
+    assert rank == 5000, f"Expected rank did not match, got {rank}"
+
+    parsed_data = ParsedData(
+        raw_title="Example.Movie.2020.1080p-Example",
+        parsed_title="Example Movie",
+    )
+    # test if preferred is empty
+    rank = calculate_preferred(parsed_data, custom_settings_model)
+    assert rank == 0, f"Expected rank did not match, got {rank}"
+
+def test_batch_ranking(settings_model, custom_ranking_model):
+    rtn = RTN(settings_model, custom_ranking_model)
     torrents = [
         ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"),
         ("Example.Movie.2020.1080p.BluRay.x264-Example", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e8"),
-        ("Example.Series.S2.2020", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e9"),
+        ("Example.Series.S2.2020.1080p", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e9"),
     ]
 
     ranked_torrents = rtn.batch_rank(torrents)
@@ -170,29 +282,141 @@ def test_preference_handling(custom_settings_model, ranking_model):
     assert rank_with_preference > rank_without_preference, "Preferred title should have higher rank"
 
 
-def test_resolution_ranking(settings_model, ranking_model):
-    # Test Valid Resolutions
-    parsed_data_4k = ParsedData(raw_title="4K", parsed_title="4K", resolution=["4K"])
-    parsed_data_2160p = ParsedData(raw_title="2160p", parsed_title="2160p", resolution=["2160p"])
-    parsed_data_1440p = ParsedData(raw_title="1440p", parsed_title="1440p", resolution=["1440p"])
-    parsed_data_1080p = ParsedData(raw_title="1080p", parsed_title="1080p", resolution=["1080p"])
-    parsed_data_720p = ParsedData(raw_title="720p", parsed_title="720p", resolution=["720p"])
-    parsed_data_480p = ParsedData(raw_title="480p", parsed_title="480p", resolution=["480p"])
-    # Test Invalid Resolution
-    parsed_data_none = ParsedData(raw_title="None", parsed_title="None", resolution=[])
+# def test_resolution_ranking(settings_model, ranking_model):
+#     # Test Valid Resolutions
+#     rank_4k = get_rank(ParsedData(raw_title="4K", parsed_title="4K", resolution=["4K"]), settings_model, ranking_model)
+#     rank_2160p = get_rank(ParsedData(raw_title="2160p", parsed_title="2160p", resolution=["2160p"]), settings_model, ranking_model)
+#     rank_1440p = get_rank(ParsedData(raw_title="1440p", parsed_title="1440p", resolution=["1440p"]), settings_model, ranking_model)
+#     rank_1080p = get_rank(ParsedData(raw_title="1080p", parsed_title="1080p", resolution=["1080p"]), settings_model, ranking_model)
+#     rank_720p = get_rank(ParsedData(raw_title="720p", parsed_title="720p", resolution=["720p"]), settings_model, ranking_model)
+#     rank_480p = get_rank(ParsedData(raw_title="480p", parsed_title="480p", resolution=["480p"]), settings_model, ranking_model)
+#     # Test Invalid Resolution
+#     rank_none = get_rank(ParsedData(raw_title="None", parsed_title="None", resolution=[]), settings_model, ranking_model)
+#     rank_8k = get_rank(ParsedData(raw_title="8K", parsed_title="8K", resolution=["8K"]), settings_model, ranking_model)
 
-    rank_4k = get_rank(parsed_data_4k, settings_model, ranking_model)
-    rank_2160p = get_rank(parsed_data_2160p, settings_model, ranking_model)
-    rank_1440p = get_rank(parsed_data_1440p, settings_model, ranking_model)
-    rank_1080p = get_rank(parsed_data_1080p, settings_model, ranking_model)
-    rank_720p = get_rank(parsed_data_720p, settings_model, ranking_model)
-    rank_480p = get_rank(parsed_data_480p, settings_model, ranking_model)
-    rank_none = get_rank(parsed_data_none, settings_model, ranking_model)
+#     assert rank_4k > rank_1080p, "4K resolution should have higher rank than 1080p"
+#     assert rank_2160p > rank_1080p, "2160p resolution should have higher rank than 1080p"
+#     assert rank_1440p > rank_1080p, "1440p resolution should have higher rank than 1080p"
+#     assert rank_1080p > rank_720p, "1080p resolution should have higher rank than 720p"
+#     assert rank_720p > rank_480p, "720p resolution should have higher rank than 480p"
+#     assert rank_480p < 0, "480p resolution should have negative rank"
+#     assert rank_none == 0, "No resolution should have rank 0"
+#     assert rank_8k == 0, "8K resolution should have rank 0"
 
-    assert rank_4k > rank_1080p, "4K resolution should have higher rank than 1080p"
-    assert rank_2160p > rank_1080p, "2160p resolution should have higher rank than 1080p"
-    assert rank_1440p > rank_1080p, "1440p resolution should have higher rank than 1080p"
-    assert rank_1080p > rank_720p, "1080p resolution should have higher rank than 720p"
-    assert rank_720p > rank_480p, "720p resolution should have higher rank than 480p"
-    assert rank_480p < 0, "480p resolution should have negative rank"
-    assert rank_none == 0, "No resolution should have rank 0"
+def test_resolution_ranking(enabled_settings_model, ranking_model):
+    test_dict = {
+        "4K": 4,
+        "2160p": 4,
+        "1440p": 4,
+        "1080p": 3,
+        "720p": 2,
+        "576p": -1,
+        "480p": -1,
+    }
+
+    for key, rank in test_dict.items():
+        parsed_data = ParsedData(raw_title=key, parsed_title=key, resolution=[key])
+        assert get_rank(parsed_data, enabled_settings_model, ranking_model) == rank, f"{key} resolution should have rank {rank}"
+    assert get_rank(ParsedData(raw_title="Other", parsed_title="Other", resolution=["Other"]), enabled_settings_model, ranking_model) == 0, "Other resolution should have rank 0"
+    assert get_rank(ParsedData(raw_title="None", parsed_title="None", resolution=[]), enabled_settings_model, ranking_model) == 0, "No resolution should have rank 0"
+
+
+def test_quality_ranking(enabled_settings_model, ranking_model):
+    test_dict = {
+        "WEB-DL": 1,
+        "Blu-ray": 1,
+        "BDRip": 5,
+        "BRRip": 0,
+        "WEBCap": -1000,
+        "Cam": -1000,
+        "Telesync": -1000,
+        "Telecine": -1000,
+        "Screener": -1000,
+        "VODRip": -1000,
+        "TVRip": -1000,
+        "DVD-R": -1000,
+    }
+
+    for key, rank in test_dict.items():
+        parsed_data = ParsedData(raw_title=key, parsed_title=key, quality=[key])
+        assert get_rank(parsed_data, enabled_settings_model, ranking_model) == rank, f"{key} quality should have rank {rank}"
+    assert get_rank(ParsedData(raw_title="Other", parsed_title="Other", quality=["Other"]), enabled_settings_model, ranking_model) == 0, "Other quality should have rank 0"
+    assert get_rank(ParsedData(raw_title="None", parsed_title="None", quality=[]), enabled_settings_model, ranking_model) == 0, "No quality should have rank 0"
+
+
+def test_codec_ranking(enabled_settings_model, ranking_model):
+    test_dict = {
+        "Xvid": -1000,
+        "H.263": -1000,
+        "VC-1": -1000,
+        "MPEG-2": -1000,
+        "AV1": 1,
+        "H.264": 3,
+        "H.265": 0,
+        "H.265 Main 10": 0,
+        "HEVC": 0,
+    }
+
+    for key, rank in test_dict.items():
+        parsed_data = ParsedData(raw_title=key, parsed_title=key, codec=[key])
+        assert get_rank(parsed_data, enabled_settings_model, ranking_model) == rank, f"{key} codec should have rank {rank}"
+    assert get_rank(ParsedData(raw_title="Other", parsed_title="Other", codec=["Other"]), enabled_settings_model, ranking_model) == 0, "Other codec should have rank 0"
+    assert get_rank(ParsedData(raw_title="None", parsed_title="None", codec=[]), enabled_settings_model, ranking_model) == 0, "No codec should have rank 0"
+
+
+def test_audio_ranking(enabled_settings_model, enabled_ranking_model):
+    test_dict = {
+        "Dolby TrueHD": 1,
+        "Dolby Atmos": 1,
+        "Dolby Digital": 1,
+        "Dolby Digital EX": 1,
+        "Dolby Digital Plus": 1,
+        "DTS": 1,
+        "DTS-HD": 1,
+        "DTS-HD MA": 1,
+        "DTS-EX": 1,
+        "DTS:X": 1,
+        "AAC": 1,
+        "AAC-LC": 1,
+        "HE-AAC": 1,
+        "HE-AAC v2": 1,
+        "AC3": 1,
+    }
+
+    for key, rank in test_dict.items():
+        parsed_data = ParsedData(raw_title=key, parsed_title=key, audio=[key])
+        assert get_rank(parsed_data, enabled_settings_model, enabled_ranking_model) == rank, f"{key} audio should have rank {rank}"
+    assert get_rank(ParsedData(raw_title="FLAC", parsed_title="FLAC", audio=["FLAC"]), enabled_settings_model, enabled_ranking_model) == -1000, "FLAC audio should have rank -1000"
+    assert get_rank(ParsedData(raw_title="OGG", parsed_title="OGG", audio=["OGG"]), enabled_settings_model, enabled_ranking_model) == -1000, "OGG audio should have rank -1000"
+    assert get_rank(ParsedData(raw_title="Other", parsed_title="Other", audio=["Other"]), enabled_settings_model, enabled_ranking_model) == 0, "Other audio should have rank 0"
+    assert get_rank(ParsedData(raw_title="None", parsed_title="None", audio=[]), enabled_settings_model, enabled_ranking_model) == 0, "No audio should have rank 0"
+
+
+def test_other_ranks_calculation(enabled_settings_model, ranking_model):
+    # Test Valid Data
+    rank_8bit = ParsedData(raw_title="8bit", parsed_title="8bit", bitDepth=[8])
+    rank_10bit = ParsedData(raw_title="10bit", parsed_title="10bit", bitDepth=[10])
+    rank_hdr = ParsedData(raw_title="HDR", parsed_title="HDR", hdr="HDR")
+    rank_hdr10 = ParsedData(raw_title="HDR10+", parsed_title="HDR10+", hdr="HDR10+")
+    rank_dv = ParsedData(raw_title="DV", parsed_title="DV", hdr="DV")
+    rank_complete = ParsedData(raw_title="Complete", parsed_title="Complete", is_complete=True)
+    rank_season = ParsedData(raw_title="Season 1", parsed_title="Season 1", season=[1])
+    rank_episode = ParsedData(raw_title="Episode", parsed_title="Episode", episode=[1, 2, 3, 4, 5])
+    # Test Invalid Data
+    rank_none = ParsedData(raw_title="None", parsed_title="None")
+
+    test_dict = {
+        "8bit": rank_8bit,
+        "10bit": rank_10bit,
+        "HDR": rank_hdr,
+        "HDR10+": rank_hdr10,
+        "DV": rank_dv,
+        "Complete": rank_complete,
+        "Season": rank_season,
+        "Episode": rank_episode,
+    }
+
+    for key, data in test_dict.items():
+        rank = get_rank(data, enabled_settings_model, ranking_model)
+        assert rank > 0, f"{key} data should have positive rank"
+    assert get_rank(rank_none, enabled_settings_model, ranking_model) == 0, "No data should have rank 0"

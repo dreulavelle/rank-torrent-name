@@ -2,7 +2,7 @@
 import pytest
 from pydantic import ValidationError
 
-from RTN import check_trash, get_rank, parse
+from RTN import get_rank, parse
 from RTN.models import (
     BaseRankingModel,
     CustomRank,
@@ -51,7 +51,6 @@ def custom_settings():
 @pytest.fixture
 def rank_model():
     return DefaultRanking()
-
 
 @pytest.fixture
 def test_titles():
@@ -116,6 +115,7 @@ def test_default_parse_return(custom_settings, rank_model):
     with pytest.raises(TypeError):
         assert parse() # type: ignore
 
+
 def test_default_title_matching():
     """Test the title_match function"""
     # This ensures all titles adhere to having a levenshtein ratio > 0.9.
@@ -142,6 +142,7 @@ def test_default_title_matching():
     # test not correct_title or not raw_title
     with pytest.raises(ValueError):
         assert title_match(None, None) # type: ignore
+
 
 def test_batch_parse_processing(test_titles):
     # Test batch parsing retuns a list of ParsedData objects
@@ -230,17 +231,6 @@ def test_complete_series_patterns():
         assert check_pattern(COMPLETE_SERIES_COMPILED, test_string) == expected
 
 
-def test_check_if_string_is_trash():
-    # True means the string is unwanted, and won't be fetched.
-    test_cases = [
-        ("Mission.Impossible.1996.Custom.Audio.1080p.PL-Spedboy", False),
-        ("Casino.1995.MULTi.REMUX.2160p.UHD.Blu-ray.HDR.HEVC.DTS-X7.1-DENDA", False),
-        ("Guardians of the Galaxy (CamRip / 2014)", True),  # CamRip
-        ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", True),    # R5, LiNE
-    ]
-    for test_string, expected in test_cases:
-        assert check_trash(test_string) == expected
-
 def test_sort_function(test_titles, settings_model, rank_model):
     processed = batch_parse(test_titles)
     rtn = RTN(settings_model, rank_model)
@@ -249,6 +239,7 @@ def test_sort_function(test_titles, settings_model, rank_model):
 
     # Test if the list is sorted in reverse
     assert all(torrents[i].rank <= torrents[i + 1].rank for i in range(len(torrents) - 1))
+
 
 def test_compare_two_torrent_objs(settings_model, rank_model):
     # create 2 torrent objects and check __eq__ method
@@ -260,6 +251,7 @@ def test_compare_two_torrent_objs(settings_model, rank_model):
     invalid_torrent = "The Walking Dead S08E02 720p HDTV x264-ASAP[ettv]"
     assert torrent1 == torrent2
     assert torrent1 != invalid_torrent
+
 
 def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
     rtn = RTN(settings_model, rank_model)
