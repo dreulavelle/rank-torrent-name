@@ -15,8 +15,10 @@ from RTN.patterns import (
     COMPLETE_SERIES_COMPILED,
     MULTI_AUDIO_COMPILED,
     MULTI_SUBTITLE_COMPILED,
+    check_hdr_dolby_video,
     check_pattern,
     extract_episodes,
+    parse_extras,
 )
 
 ## Define Fixtures
@@ -269,3 +271,19 @@ def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
         # Invalid strings or not instance of str
         data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
         Torrent(raw_title=12345, infohash=12345, data=data)  # type: ignore
+
+# test parse_extras function
+def test_parse_extras_invalid():
+    with pytest.raises(TypeError):
+        assert parse_extras(12345), "Should raise TypeError" # type: ignore
+
+# test check_hdr_dolby_video function for valid return
+def test_check_hdr_dolby_video():
+    test_cases = [
+        ("Mission.Impossible.1996.Dolby.Vision.Custom.Audio.1080p.PL-Spedboy", "DV"),
+        ("Casino.1995.MULTi.REMUX.2160p.UHD.Blu-ray.HDR.HEVC.DTS-X7.1-DENDA", "HDR"),
+        ("Guardians of the Galaxy.HDR10plus", "HDR10+"),
+        ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", ""),
+    ]
+    for test_string, expected in test_cases:
+        assert check_hdr_dolby_video(test_string) == expected

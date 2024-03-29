@@ -187,11 +187,7 @@ def extract_episodes(raw_title: str) -> List[int]:
         matches = compiled_pattern.findall(raw_title)
         for match in matches:
             if transform == "range":
-                if isinstance(match, tuple):
-                    for m in match:
-                        episodes.update(range_transform(m))
-                else:
-                    episodes.update(range_transform(match))
+                episodes.update(range_transform(match))
             elif transform == "array(integer)":
                 normalized_match = [match] if isinstance(match, str) else match
                 episodes.update(int(m) for m in normalized_match if m.isdigit())

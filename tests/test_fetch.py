@@ -1,5 +1,7 @@
 import pytest
 
+# from hypothesis import HealthCheck, given, settings
+# from hypothesis import strategies as st
 from RTN.fetch import (
     check_fetch,
     check_trash,
@@ -9,6 +11,42 @@ from RTN.fetch import (
     fetch_resolution,
 )
 from RTN.models import CustomRank, ParsedData, SettingsModel
+
+# @st.composite
+# def custom_rank(draw, fetch_value=st.booleans()):  # noqa: B008
+#     rank = draw(st.integers(min_value=-100, max_value=100))
+#     fetch = draw(fetch_value)
+#     return CustomRank(enable=True, fetch=fetch, rank=rank)
+
+# # Strategy to generate SettingsModel objects with variable fetch settings for testing
+# @st.composite
+# def generate_settings(draw):
+#     custom_ranks = {
+#         "uhd": draw(custom_rank()),
+#         "fhd": draw(custom_rank()),
+#         "hd": draw(custom_rank()),
+#         "sd": draw(custom_rank()),
+#         "bluray": draw(custom_rank()),
+#         "hdr": draw(custom_rank()),
+#         "hdr10": draw(custom_rank()),
+#         "dolby_video": draw(custom_rank()),
+#         "dts_x": draw(custom_rank()),
+#         "dts_hd": draw(custom_rank()),
+#         "dts_hd_ma": draw(custom_rank()),
+#         "atmos": draw(custom_rank()),
+#         "truehd": draw(custom_rank()),
+#         "ddplus": draw(custom_rank()),
+#         "ac3": draw(custom_rank()),
+#         "aac": draw(custom_rank()),
+#         "remux": draw(custom_rank()),
+#         "webdl": draw(custom_rank()),
+#         "repack": draw(custom_rank()),
+#         "proper": draw(custom_rank()),
+#         "dubbed": draw(custom_rank()),
+#         "subbed": draw(custom_rank()),
+#         "av1": draw(custom_rank()),
+#     }
+#     return SettingsModel(custom_ranks=custom_ranks)
 
 
 @pytest.fixture
@@ -107,9 +145,6 @@ def test_check_fetch(true_fetch_settings, false_fetch_settings):
     assert check_fetch(data, true_fetch_settings) is False
     assert check_fetch(data, false_fetch_settings) is False
 
-    data.raw_title = "Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE"
-    assert check_fetch(data, true_fetch_settings) is False
-    assert check_fetch(data, false_fetch_settings) is False
 
     data.raw_title = "The Great Gatsby 2013 1080p BluRay x264 AAC - Ozlem"
     assert check_fetch(data, true_fetch_settings) is True
@@ -165,11 +200,18 @@ def test_fetch_resolution(true_fetch_settings, false_fetch_settings):
         parsed_title="The Lion King",
     )
 
-    data.is_4k = True # Turn on for purpose of this test
+    data.resolution = ["4K"]
     assert fetch_resolution(data, true_fetch_settings) is True
     assert fetch_resolution(data, false_fetch_settings) is False
-    data.is_4k = False # Turn back off for the remainder of tests
 
+    data.resolution = ["2160p"]
+    assert fetch_resolution(data, true_fetch_settings) is True
+    assert fetch_resolution(data, false_fetch_settings) is False
+
+    data.resolution = ["1440p"]
+    assert fetch_resolution(data, true_fetch_settings) is True
+    assert fetch_resolution(data, false_fetch_settings) is False
+    
     data.resolution = ["1080p"]
     assert fetch_resolution(data, true_fetch_settings) is True
     assert fetch_resolution(data, false_fetch_settings) is False

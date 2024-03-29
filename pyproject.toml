@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rank-torrent-name"
-version = "0.1.8"
+version = "0.1.9"
 description = "Parse Torrents using PTN and Rank them according to your preferences!"
 authors = ["Spoked <dreu.lavelle@gmail.com>"]
 license = "MIT"
