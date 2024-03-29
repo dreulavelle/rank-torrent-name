@@ -404,25 +404,32 @@ We categorize benchmarks into two main processes:
 
 To facilitate comparison, we've compiled the results into a single table:
 
-| Operation                                  | Items Count | Mean Time    | Standard Deviation |
-|--------------------------------------------|-------------|--------------|--------------------|
-| **Parsing Benchmark (Single item)**        | 1           | 620 us       | 35 us              |
-| **Batch Parse Benchmark (Small batch)**    | 10          | 6.06 ms      | 0.11 ms            |
-| **Batch Parse Benchmark (Large batch)**    | 1000        | 640 ms       | 8 ms               |
-| **Ranking Benchmark (Single item)**        | 1           | 660 us       | 38 us              |
-| **Batch Rank Benchmark (Small batch)**     | 10          | 24.6 ms      | 4.1 ms             |
-| **Batch Rank Benchmark (Large batch)**     | 1000        | 3.13 s       | 0.15 s             |
+| Operation                                    | Items Count | Mean Time    | Standard Deviation |
+|----------------------------------------------|-------------|--------------|--------------------|
+| **Parsing Benchmark (Single item)**          | 1           | 583 us       | 10 us              |
+| **Batch Parse Benchmark (Small batch)**      | 10          | 6.24 ms      | 0.16 ms            |
+| **Batch Parse Benchmark (Large batch)**      | 1000        | 1.57 s       | 0.06 s             |
+| **Batch Parse Benchmark (XLarge batch)**     | 2000        | 3.62 s       | 0.11 s             |
+| **Ranking Benchmark (Single item)**          | 1           | 616 us       | 11 us              |
+| **Batch Rank Benchmark (Small batch)**       | 10          | 24.6 ms      | 2.4 ms             |
+| **Batch Rank Benchmark (Large batch)**       | 1000        | 3.13 s       | 0.15 s             |
+| **Batch Rank Benchmark (XLarge batch)**      | 2000        | 6.27 s       | 0.13 s             |
+
+> :warning: Test Bench consisted of **R9 5900X CPU** and **64GB DDR4 RAM** - Your mileage may vary.
+
+To run your own benchmark, you can clone the repo and run `make benchmark` from inside the root of the repository.
 
 ### Benchmark Settings
 
 - **Small batch parsing** used a `chunk_size` of `10`.
-- **Large batch parsing** handled `chunk_size` of `500`.
-- **Small batch ranking** operated with the default `max_workers` of `4`.
-- **Large batch ranking** escalated concurrency with `max_workers` of `8`.
+- **Large batch parsing** handled `chunk_size` of `200`.
+- **XLarge batch parsing** handled `chunk_size` of `500`.
+- **Small batch ranking** operated with the default `max_workers` of `4` and used a `chunk_size` of `10`.
+- **Large batch ranking** escalated concurrency with `max_workers` of `8` and handled a `chunk_size` of `200`.
+- **XLarge batch ranking** escalated concurrency with `max_workers` of `16` and handled a `chunk_size` of `500`.
 
-This data underscores RTN's robust capability to efficiently process both small and extensive datasets.
 
-To help developers optimize their use of RTN based on the performance benchmarks, consider adding a section on performance tweaking. Here's how you might include it in your README.md:
+This data shows RTN's robust capability to efficiently process both small and extensive datasets.
 
 ## Optimizing RTN Performance
 

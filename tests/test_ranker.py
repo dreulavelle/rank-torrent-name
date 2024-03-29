@@ -282,27 +282,6 @@ def test_preference_handling(custom_settings_model, ranking_model):
     assert rank_with_preference > rank_without_preference, "Preferred title should have higher rank"
 
 
-# def test_resolution_ranking(settings_model, ranking_model):
-#     # Test Valid Resolutions
-#     rank_4k = get_rank(ParsedData(raw_title="4K", parsed_title="4K", resolution=["4K"]), settings_model, ranking_model)
-#     rank_2160p = get_rank(ParsedData(raw_title="2160p", parsed_title="2160p", resolution=["2160p"]), settings_model, ranking_model)
-#     rank_1440p = get_rank(ParsedData(raw_title="1440p", parsed_title="1440p", resolution=["1440p"]), settings_model, ranking_model)
-#     rank_1080p = get_rank(ParsedData(raw_title="1080p", parsed_title="1080p", resolution=["1080p"]), settings_model, ranking_model)
-#     rank_720p = get_rank(ParsedData(raw_title="720p", parsed_title="720p", resolution=["720p"]), settings_model, ranking_model)
-#     rank_480p = get_rank(ParsedData(raw_title="480p", parsed_title="480p", resolution=["480p"]), settings_model, ranking_model)
-#     # Test Invalid Resolution
-#     rank_none = get_rank(ParsedData(raw_title="None", parsed_title="None", resolution=[]), settings_model, ranking_model)
-#     rank_8k = get_rank(ParsedData(raw_title="8K", parsed_title="8K", resolution=["8K"]), settings_model, ranking_model)
-
-#     assert rank_4k > rank_1080p, "4K resolution should have higher rank than 1080p"
-#     assert rank_2160p > rank_1080p, "2160p resolution should have higher rank than 1080p"
-#     assert rank_1440p > rank_1080p, "1440p resolution should have higher rank than 1080p"
-#     assert rank_1080p > rank_720p, "1080p resolution should have higher rank than 720p"
-#     assert rank_720p > rank_480p, "720p resolution should have higher rank than 480p"
-#     assert rank_480p < 0, "480p resolution should have negative rank"
-#     assert rank_none == 0, "No resolution should have rank 0"
-#     assert rank_8k == 0, "8K resolution should have rank 0"
-
 def test_resolution_ranking(enabled_settings_model, ranking_model):
     test_dict = {
         "4K": 4,
