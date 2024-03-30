@@ -297,6 +297,7 @@ from RTN import title_match
 # Check if two titles are similar above a threshold of 0.9
 match = title_match("Correct Movie Title 2020", "Correct Movie Title (2020)")
 print(match)  # Output: True if similarity is above 0.9, otherwise False
+>>> True
 ```
 
 This functionality is especially useful when you have a list of potential titles and want to find the best match for a given reference title.
@@ -311,6 +312,28 @@ from RTN import check_trash
 if check_trash(raw_title):
     # You can safely remove any title or item from being scraped if this returns True!
     ...
+```
+
+## Movie Check
+
+Now you can check if a raw torrent title is a `movie` or a `show` type!
+
+```py
+from RTN.parser import get_type, parse
+
+parsed_data = parse("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd", remove_trash = False)
+print(parsed_data.type)
+>>> "movie"
+```
+
+Alternatively, if you prefer a boolean, you can use `is_movie` instead, like so:
+
+```py
+from RTN.parser import is_movie, parse
+
+parsed_data = parse("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd", remove_trash = False)
+print(is_movie(parsed_data))
+>>> True
 ```
 
 # Real World Example
