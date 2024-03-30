@@ -89,7 +89,7 @@ def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
 
     if not data.codec:
         return True
-    
+
     match data.codec[0]:
         case "AV1":
             return settings.custom_ranks["av1"].fetch
@@ -123,7 +123,7 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
         case "AAC":
             return settings.custom_ranks["aac"].fetch
         case _:
-            # If the audio format isn't specifically mentioned, default to True, 
+            # If the audio format isn't specifically mentioned, default to True,
             # meaning it's considered fetchable unless explicitly excluded.
             return True
 
