@@ -319,6 +319,7 @@ Here is a crude example of how you could use RTN in scraping.
 
 ```py
 from RTN import RTN, Torrent, DefaultRanking
+from RTN.exceptions import GarbageTorrent
 
 # Assuming 'settings' is defined somewhere and passed correctly.
 rtn = RTN(settings=settings, ranking_model=DefaultRanking())
@@ -332,9 +333,14 @@ rtn = RTN(settings=settings, ranking_model=DefaultRanking())
                 # We want to do this first to weed out torrents
                 # that are below the 90% match criteria. (Default is 90%)
                 continue
-            torrent: Torrent = rtn.rank(stream.title, stream.infohash)
+            try:
+                torrent: Torrent = rtn.rank(stream.title, stream.infohash)
+            except GarbageTorrent:
+                # One thing to note is that as we parse titles, we also get rid of garbage.
+                # Feel free to add your own logic when this happens!
+                # You can bypass this by setting `remove_trash` to `False` in `rank` or `parse`.
+                pass
             if torrent and torrent.fetch:
-                # Skip trash torrents by checking `torrent.fetch`.
                 # If torrent.fetch is True, then it's a good torrent,
                 # as considered by your ranking profile and settings model.
                 torrents.add(torrent)

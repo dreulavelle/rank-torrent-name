@@ -6,6 +6,7 @@ import PTN
 import regex
 from pydantic import BaseModel, validator
 
+from RTN.exceptions import GarbageTorrent
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
 from .patterns import parse_extras
@@ -150,7 +151,7 @@ def parse(raw_title: str, remove_trash: bool = True) -> ParsedData:
 
     if remove_trash:  # noqa: SIM102
         if check_trash(raw_title):
-            raise ValueError("This title is trash and should be ignored by the scraper.")
+            raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
     parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
     parsed_dict["year"] = parsed_dict["year"][0] if parsed_dict.get("year") else 0
