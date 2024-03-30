@@ -7,7 +7,6 @@ import regex
 from pydantic import BaseModel, validator
 
 from RTN.exceptions import GarbageTorrent
-
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
 from .patterns import parse_extras
