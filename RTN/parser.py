@@ -137,7 +137,7 @@ class RTN:
             return list(executor.map(lambda t: self.rank(t[0], t[1], remove_trash), torrents))
 
 
-def parse(raw_title: str, remove_trash: bool = True) -> ParsedData:
+def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
     """
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
 
@@ -156,12 +156,16 @@ def parse(raw_title: str, remove_trash: bool = True) -> ParsedData:
             raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
     parsed_dict: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
+    if not parsed_dict:
+        raise ValueError("The title could not be parsed by PTN")
     parsed_dict["year"] = parsed_dict["year"][0] if parsed_dict.get("year") else 0
     extras: dict[str, Any] = parse_extras(raw_title)
     full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with RTN extras.
     full_data["raw_title"] = raw_title
     full_data["parsed_title"] = parsed_dict.get("title")
     full_data["type"] = get_type(ParsedData(**full_data))
+    if not full_data:
+        raise ValueError("The title could not be parsed by RTN.")
     return ParsedData(**full_data)
 
 
