@@ -4,6 +4,8 @@ import regex
 from pydantic import BaseModel, root_validator
 from regex import Pattern
 
+from RTN.patterns import IS_MOVIE_COMPILED
+
 
 class ParsedData(BaseModel):
     """Parsed data model for a torrent title."""
@@ -34,6 +36,13 @@ class ParsedData(BaseModel):
     directorsCut: bool = False
     extended: bool = False
 
+    @property
+    def type(self) -> str:
+        """Returns the type of the torrent based on its attributes."""
+        movie = not any(pattern.search(self.raw_title) for pattern in IS_MOVIE_COMPILED) and not self.episode and self.year != 0
+        if movie:
+            return "movie"
+        return "show"
 
 class BaseRankingModel(BaseModel):
     """

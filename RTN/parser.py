@@ -10,7 +10,7 @@ from RTN.exceptions import GarbageTorrent
 
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
-from .patterns import parse_extras
+from .patterns import IS_MOVIE_COMPILED, parse_extras
 from .ranker import get_rank
 
 
@@ -85,11 +85,13 @@ class RTN:
             raise ValueError("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
         parsed_data = parse(raw_title, remove_trash)
+        fetch = check_fetch(parsed_data, self.settings)
+        parsed_data.fetch = fetch
         return Torrent(
             raw_title=raw_title,
             infohash=infohash,
             data=parsed_data,
-            fetch=check_fetch(parsed_data, self.settings),
+            fetch=fetch,
             rank=get_rank(parsed_data, self.settings, self.ranking_model),
             lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower()),
         )
@@ -160,6 +162,7 @@ def parse(raw_title: str, remove_trash: bool = True) -> ParsedData:
     full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with RTN extras.
     full_data["raw_title"] = raw_title
     full_data["parsed_title"] = parsed_dict.get("title")
+    full_data["type"] = get_type(ParsedData(**full_data))
     return ParsedData(**full_data)
 
 
@@ -231,4 +234,45 @@ def sort(torrents: List[Torrent]) -> List[Torrent]:
     Returns:
         List[Torrent]: The sorted list of Torrent objects by rank.
     """
+    if not isinstance(torrents, list) or not all(isinstance(t, Torrent) for t in torrents):
+        raise TypeError("The input must be a list of Torrent objects.")
     return sorted(torrents, key=lambda t: t.rank, reverse=True)
+
+
+def is_movie(data: ParsedData) -> bool:
+    """
+    Determine if the item is a movie based on the absence of typical show indicators in the title,
+    the absence of an episode number, and specific year considerations.
+
+    Parameters:
+    - `data`: ParsedData instance containing information about the item, including `raw_title`, `year`, and `episode`.
+
+    Returns:
+    - bool: True if the item is likely a movie, False otherwise.
+
+    Raises:
+    - ValueError: If no parsed data is provided.
+    """
+    if not isinstance(data, ParsedData):
+        raise TypeError("Parsed data must be provided.")
+    if not data.raw_title:
+        raise ValueError("The raw title must be a non-empty string.")
+    return not any(pattern.search(data.raw_title) for pattern in IS_MOVIE_COMPILED) and not data.episode and data.year != 0
+
+
+def get_type(data: ParsedData) -> str:
+    """
+    Determine the type of media based on the parsed data.
+
+    Parameters:
+    - `data`: ParsedData instance containing information about the item, including `raw_title`.
+
+    Returns:
+    - str: The type of media based on the parsed data. "movie" if it's a movie, "show" otherwise.
+
+    Raises:
+    - ValueError: If no parsed data is provided.
+    """
+    if is_movie(data):
+        return "movie"
+    return "show"
