@@ -3,6 +3,7 @@ import pytest
 from pydantic import ValidationError
 
 from RTN import get_rank, parse
+from RTN.exceptions import GarbageTorrent
 from RTN.models import (
     BaseRankingModel,
     CustomRank,
@@ -159,7 +160,7 @@ def test_batch_parse_processing(test_titles):
 
 def test_batch_parse_trash_processing(test_titles):
     # Some of these titles are trash, so we should remove them.
-    with pytest.raises(ValueError):
+    with pytest.raises(GarbageTorrent):
         assert batch_parse(test_titles, remove_trash=True, chunk_size=5)
 
 
