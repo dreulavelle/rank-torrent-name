@@ -33,13 +33,13 @@ test:
 
 # Run tests with coverage
 coverage: clean
-	@poetry run pytest --cov=$(SRC_DIR) --cov-report=xml --cov-report=html --cov-report=term
+	@poetry run pytest --cov=$(SRC_DIR) --cov-report=xml --cov-report=term
 	@poetry run pyright $(SRC_DIR)
 
 benchmark:
 	@poetry run python benchmarks/rank.py --quiet
 
-pr-ready: clean format lint check test
+pr-ready: clean format lint test
 
 publish:
 	@poetry publish --build

@@ -2,7 +2,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, List, Tuple
 
 import Levenshtein
-import PTN
 import regex
 from pydantic import BaseModel, validator
 
@@ -10,7 +9,7 @@ from RTN.exceptions import GarbageTorrent
 
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
-from .patterns import IS_MOVIE_COMPILED, parse_extras
+from .patterns import IS_MOVIE_COMPILED, PTN_PARSER, extract_episodes, parse_extras
 from .ranker import get_rank
 
 
@@ -156,7 +155,7 @@ def parse(raw_title: str, remove_trash: bool = True) -> ParsedData:
         if check_trash(raw_title):
             raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
-    parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
+    parsed_dict: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
     parsed_dict["year"] = parsed_dict["year"][0] if parsed_dict.get("year") else 0
     extras: dict[str, Any] = parse_extras(raw_title)
     full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with RTN extras.
@@ -276,3 +275,31 @@ def get_type(data: ParsedData) -> str:
     if is_movie(data):
         return "movie"
     return "show"
+
+
+def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
+    """
+    Only return episode numbers if the season number is found in the title
+    and the season number matches the input season number.
+
+    Parameters:
+    - `raw_title` (str): The original title of the torrent to analyze.
+    - `season_num` (int): The season number to extract episodes for.
+
+    Returns:
+    - List[int]: A list of extracted episode numbers for the specified season.
+    """
+    if not raw_title:
+        raise ValueError("The input title must be a non-empty string.")
+    if not isinstance(raw_title, str):
+        raise TypeError("The title must be a string.")
+    if not isinstance(season_num, int) or season_num <= 0:
+        raise TypeError("The season number must be a positive integer.")
+    
+    data: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
+    season_from_title: List[str] = data.get("season", [])
+    if isinstance(season_from_title, list) and season_num in season_from_title or season_from_title == season_num:
+        eps = extract_episodes(raw_title)
+        if eps:
+            return eps
+    return []

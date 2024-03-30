@@ -1,6 +1,14 @@
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, DefaultRanking, ParsedData, SettingsModel
-from .parser import RTN, Torrent, batch_parse, parse, sort, title_match
+from .parser import (
+    RTN,
+    Torrent,
+    batch_parse,
+    episodes_from_season,
+    parse,
+    sort,
+    title_match,
+)
 from .patterns import parse_extras
 from .ranker import get_rank
 
@@ -19,4 +27,5 @@ __all__ = [
     "BaseRankingModel",
     "DefaultRanking",
     "SettingsModel",
+    "episodes_from_season",
 ]

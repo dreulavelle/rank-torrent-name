@@ -1,11 +1,15 @@
 from typing import Any, Dict, List
 
 import regex
+from PTN import PTN
 
 
 def compile_patterns(patterns):
+    """Compile a list of patterns and return them as a list of regex.Pattern objects."""
     return [regex.compile(pattern, regex.IGNORECASE) for pattern in patterns]
 
+# Instantiate it early so it can compile it's own patterns.
+PTN_PARSER = PTN()
 
 # Pattern for identifying unwanted quality. This will set `data.fetch`.
 IS_TRASH_COMPILED = compile_patterns(
@@ -76,7 +80,7 @@ COMPLETE_SERIES_COMPILED = compile_patterns(
 )
 
 # Patterns for parsing episodes.
-EPISODE_PATTERNS = [
+EPISODE_PATTERNS_COMPILED = [
     (regex.compile(r"(?:[\W\d]|^)e[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|e){1,2}[ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
     (regex.compile(r"(?:[\W\d]|^)ep[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|ep){1,2}[ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
     (regex.compile(r"(?:[\W\d]|^)\d+[xх][ .]?[([]?(\d{1,3}(?:[ .]?[xх][ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
@@ -148,7 +152,7 @@ def range_transform(raw_title: str) -> set[int]:
 def extract_episodes(raw_title: str) -> List[int]:
     """Extract episode numbers from the title."""
     episodes = set()
-    for compiled_pattern, transform in EPISODE_PATTERNS:
+    for compiled_pattern, transform in EPISODE_PATTERNS_COMPILED:
         matches = compiled_pattern.findall(raw_title)
         for match in matches:
             if transform == "range":
@@ -156,6 +160,8 @@ def extract_episodes(raw_title: str) -> List[int]:
             elif transform == "array(integer)":
                 normalized_match = [match] if isinstance(match, str) else match
                 episodes.update(int(m) for m in normalized_match if m.isdigit())
+            else:
+                return []
     return sorted(episodes)
 
 

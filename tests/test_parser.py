@@ -11,7 +11,16 @@ from RTN.models import (
     ParsedData,
     SettingsModel,
 )
-from RTN.parser import RTN, Torrent, batch_parse, get_type, is_movie, sort, title_match
+from RTN.parser import (
+    RTN,
+    Torrent,
+    batch_parse,
+    episodes_from_season,
+    get_type,
+    is_movie,
+    sort,
+    title_match,
+)
 from RTN.patterns import (
     COMPLETE_SERIES_COMPILED,
     MULTI_AUDIO_COMPILED,
@@ -368,3 +377,39 @@ def test_is_movie_and_get_type():
     with pytest.raises(TypeError):
         assert is_movie(test_invalid_data) # type: ignore
         assert get_type(test_invalid_data) # type: ignore
+
+
+def test_extract_episode_from_season():
+    raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+    episodes = episodes_from_season(raw_title, 1)
+    assert episodes == [1, 2], "Should return [1, 2] because it detects Season 1"
+
+    episodes = episodes_from_season(raw_title, 2)
+    assert episodes == [], "Should return empty list"
+
+    raw_title = ""
+    with pytest.raises(ValueError):
+        episodes = episodes_from_season(raw_title, 1)
+        assert episodes == [], "Should raise ValueError"
+    
+    raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+    with pytest.raises(TypeError):
+        episodes = episodes_from_season(raw_title, "rice") # type: ignore
+        assert episodes == [], "Should raise TypeError"
+
+    raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+    with pytest.raises(TypeError):
+        episodes = episodes_from_season(raw_title, None) # type: ignore
+        assert episodes == [], "Should raise TypeError"
+
+    test_examples = [
+        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1]),
+        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
+        ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
+        ("The Simpsons S1 E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, list(range(1, 201))),
+        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", 6, list(range(1, 9))), # Eps 1-8
+        ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", 8, [1]),
+    ]
+    for test_string, season, expected in test_examples:
+        episodes = episodes_from_season(test_string, season)
+        assert episodes == expected, f"Failed for '{test_string}' with expected {expected}"
