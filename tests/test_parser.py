@@ -150,11 +150,17 @@ def test_batch_parse_processing(test_titles):
     # Test batch parsing retuns a list of ParsedData objects
     # Verify that each item in the result is an instance of ParsedData
     # and its raw_title matches the corresponding input title
-    parsed_results = batch_parse(test_titles, chunk_size=5)
+    parsed_results = batch_parse(test_titles, remove_trash=False, chunk_size=5)
     assert len(parsed_results) == len(test_titles)
     for parsed_data, title in zip(parsed_results, test_titles):
         assert isinstance(parsed_data, ParsedData), "Result item is not an instance of ParsedData"
         assert parsed_data.raw_title == title, f"Expected raw_title to be '{title}', but got '{parsed_data.raw_title}'"
+
+
+def test_batch_parse_trash_processing(test_titles):
+    # Some of these titles are trash, so we should remove them.
+    with pytest.raises(ValueError):
+        assert batch_parse(test_titles, remove_trash=True, chunk_size=5)
 
 
 def test_episode_parsing():
@@ -234,7 +240,7 @@ def test_complete_series_patterns():
 
 
 def test_sort_function(test_titles, settings_model, rank_model):
-    processed = batch_parse(test_titles)
+    processed = batch_parse(test_titles, remove_trash=False, chunk_size=5)
     rtn = RTN(settings_model, rank_model)
     torrents = [rtn.rank(data.raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") for data in processed]
     sort(torrents)

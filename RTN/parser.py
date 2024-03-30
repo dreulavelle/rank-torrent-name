@@ -6,7 +6,7 @@ import PTN
 import regex
 from pydantic import BaseModel, validator
 
-from .fetch import check_fetch
+from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
 from .patterns import parse_extras
 from .ranker import get_rank
@@ -34,13 +34,6 @@ class Torrent(BaseModel):
     fetch: bool = False
     rank: int = 0
     lev_ratio: float = 0.0
-
-    @validator("raw_title", "infohash")
-    def validate_strings(cls, v):
-        """Ensures raw_title and infohash are strings."""
-        if not v or not isinstance(v, str):
-            raise TypeError("The title and infohash must be non-empty strings.")
-        return v
 
     @validator("infohash")
     def validate_infohash(cls, v):
@@ -80,7 +73,7 @@ class RTN:
         self.settings = settings
         self.ranking_model = ranking_model
 
-    def rank(self, raw_title: str, infohash: str) -> Torrent:
+    def rank(self, raw_title: str, infohash: str, remove_trash=False) -> Torrent:
         """Parses a torrent title, computes its rank, and returns a Torrent object."""
         if not raw_title or not infohash:
             raise ValueError("Both the title and infohash must be provided.")
@@ -89,7 +82,7 @@ class RTN:
         if len(infohash) != 40:
             raise ValueError("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
-        parsed_data = parse(raw_title)
+        parsed_data = parse(raw_title, remove_trash)
         return Torrent(
             raw_title=raw_title,
             infohash=infohash,
@@ -99,7 +92,7 @@ class RTN:
             lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower()),
         )
 
-    def batch_rank(self, torrents: List[Tuple[str, str]], max_workers: int = 4) -> List[Torrent]:
+    def batch_rank(self, torrents: List[Tuple[str, str]], remove_trash=False, max_workers: int = 4) -> List[Torrent]:
         """
         Ranks a batch of torrents in parallel using multiple threads.
 
@@ -138,21 +131,26 @@ class RTN:
             True
         """
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            return list(executor.map(lambda t: self.rank(t[0], t[1]), torrents))
+            return list(executor.map(lambda t: self.rank(t[0], t[1], remove_trash), torrents))
 
 
-def parse(raw_title: str) -> ParsedData:
+def parse(raw_title: str, remove_trash: bool = True) -> ParsedData:
     """
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
 
     Args:
-        raw_title (str): The original torrent title to parse.
+        `raw_title` (str): The original torrent title to parse.
+        `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
 
     Returns:
         ParsedData: A data model containing the parsed metadata from the torrent title.
     """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
+
+    if remove_trash:  # noqa: SIM102
+        if check_trash(raw_title):
+            raise ValueError("This title is trash and should be ignored by the scraper.")
 
     parsed_dict: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
     parsed_dict["year"] = parsed_dict["year"][0] if parsed_dict.get("year") else 0
@@ -163,27 +161,29 @@ def parse(raw_title: str) -> ParsedData:
     return ParsedData(**full_data)
 
 
-def parse_chunk(chunk: List[str]) -> List[ParsedData]:
+def parse_chunk(chunk: List[str], remove_trash: bool) -> List[ParsedData]:
     """
     Parses a chunk of torrent titles.
 
     Args:
-        chunk (List[str]): A list of torrent titles to parse.
+        `chunk` (List[str]): A list of torrent titles to parse.
+        `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
 
     Returns:
         List[ParsedData]: A list of ParsedData objects containing the parsed metadata from the torrent titles.
     """
-    return [parse(title) for title in chunk]
+    return [parse(title, remove_trash) for title in chunk]
 
 
-def batch_parse(titles: List[str], chunk_size: int = 50, max_workers: int = 4) -> List[ParsedData]:
+def batch_parse(titles: List[str], remove_trash: bool = True, chunk_size: int = 50, max_workers: int = 4) -> List[ParsedData]:
     """
     Parses a list of torrent titles in batches for improved performance.
 
     Args:
-        titles (List[str]): A list of torrent titles to parse.
-        chunk_size (int): The number of titles to process in each batch.
-        max_workers (int): The maximum number of worker threads to use for parsing.
+        `titles` (List[str]): A list of torrent titles to parse.
+        `chunk_size` (int): The number of titles to process in each batch.
+        `max_workers` (int): The maximum number of worker threads to use for parsing.
+        `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
 
     Returns:
         List[ParsedData]: A list of ParsedData objects for each title.
@@ -191,7 +191,7 @@ def batch_parse(titles: List[str], chunk_size: int = 50, max_workers: int = 4) -
     chunks = [titles[i : i + chunk_size] for i in range(0, len(titles), chunk_size)]
     parsed_data = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_to_chunk = {executor.submit(parse_chunk, chunk): chunk for chunk in chunks}
+        future_to_chunk = {executor.submit(parse_chunk, chunk, remove_trash): chunk for chunk in chunks}
         for future in as_completed(future_to_chunk):
             chunk_result = future.result()
             parsed_data.extend(chunk_result)
@@ -203,9 +203,9 @@ def title_match(correct_title: str, raw_title: str, threshold: float = 0.9) -> b
     Compares two titles using the Levenshtein ratio to determine similarity.
 
     Args:
-        correct_title (str): The reference title to compare against.
-        raw_title (str): The title to compare with the reference title.
-        threshold (float): The similarity threshold to consider the titles as matching.
+        `correct_title` (str): The reference title to compare against.
+        `raw_title` (str): The title to compare with the reference title.
+        `threshold` (float): The similarity threshold to consider the titles as matching.
 
     Returns:
         bool: True if the titles are similar above the specified threshold; False otherwise.
@@ -224,7 +224,7 @@ def sort(torrents: List[Torrent]) -> List[Torrent]:
     Sorts a list of Torrent objects based on their rank in descending order.
 
     Args:
-        torrents (List[Torrent]): The list of Torrent objects to sort.
+        `torrents` (List[Torrent]): The list of Torrent objects to sort.
 
     Returns:
         List[Torrent]: The sorted list of Torrent objects by rank.
