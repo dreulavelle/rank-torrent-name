@@ -130,9 +130,6 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
 
 def fetch_other(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the other data is fetchable based on user settings."""
-    if not data.proper and not data.repack:
-        return True
-
     if data.proper:
         return settings.custom_ranks["proper"].fetch
     if data.repack:

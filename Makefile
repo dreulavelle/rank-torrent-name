@@ -30,10 +30,12 @@ check:
 # Run tests
 test:
 	@poetry run pytest
+	@poetry run pyright $(SRC_DIR)
 
 # Run tests with coverage
 coverage: clean
 	@poetry run pytest --cov=$(SRC_DIR) --cov-report=xml --cov-report=html --cov-report=term
+	@poetry run pyright $(SRC_DIR)
 
 benchmark:
 	@poetry run python benchmarks/rank.py --quiet

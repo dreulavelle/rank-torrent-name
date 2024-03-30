@@ -153,3 +153,20 @@ def test_pattern_matching(title: str, expected_match: bool):
 def test_invalid_pattern_type_error():
     with pytest.raises(ValidationError):
         SettingsModel(require=["4K", 1080])  # 1080 is not a string or Pattern object # type: ignore
+
+
+def test_if_regex_pattern_check():
+    settings = SettingsModel(
+        require=[regex.compile(r"\b4K|1080p\b"), regex.compile(r"720p")],
+    )
+    
+    # We loop through the list, and if all patterns are regex.Pattern objects - these are valid.
+    assert all(isinstance(pattern, regex.Pattern) for pattern in settings.require), "We should support a list of regex Patterns as well."
+
+def test_half_and_half_regex_strings():
+    settings = SettingsModel(
+        require=[regex.compile(r"\b4K|1080p\b"), "/720p/"],
+    )
+    
+    # We loop through the list, and any patterns that are regex.Pattern objects with strings present as well - are also valid.
+    assert all(isinstance(pattern, regex.Pattern) for pattern in settings.require), "We should support a list of regex Patterns as well as strings"
