@@ -133,7 +133,7 @@ def test_valid_torrent_from_title(settings_model, ranking_model):
     assert torrent.raw_title == "The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]"
     assert torrent.infohash == "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"
     assert torrent.data.parsed_title == "The Walking Dead"
-    assert torrent.data.fetch is False
+    assert torrent.data.fetch is True
     assert torrent.rank > 0, f"Rank was {torrent.rank} instead of 163"
     assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
 

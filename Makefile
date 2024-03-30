@@ -21,7 +21,6 @@ lint:
 # Format code
 format:
 	@poetry run isort $(SRC_DIR)
-	@poetry run black $(SRC_DIR)
 
 # Type checking
 check:

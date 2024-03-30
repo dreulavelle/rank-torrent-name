@@ -72,80 +72,45 @@ COMPLETE_SERIES_COMPILED = compile_patterns(
         r"\bcollection\b.*\b(?:set|pack|movies)\b",
         r"\bcollection\b",
         r"duology|trilogy|quadr[oi]logy|tetralogy|pentalogy|hexalogy|heptalogy|anthology|saga",
-    ]
+    ],
 )
 
 # Patterns for parsing episodes.
 EPISODE_PATTERNS = [
-    (
-        regex.compile(r"(?:[\W\d]|^)e[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|e){1,2}[ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE),
-        "range",
-    ),
-    (
-        regex.compile(r"(?:[\W\d]|^)ep[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|ep){1,2}[ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE),
-        "range",
-    ),
-    (
-        regex.compile(r"(?:[\W\d]|^)\d+[xх][ .]?[([]?(\d{1,3}(?:[ .]?[xх][ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE),
-        "range",
-    ),
-    (
-        regex.compile(
-            r"(?:[\W\d]|^)(?:episodes?|[Сс]ерии:?)[ .]?[([]?(\d{1,3}(?:[ .+]*[&+][ .]?\d{1,3})+)(?:\W|$)",
-            regex.IGNORECASE,
-        ),
-        "range",
-    ),
+    (regex.compile(r"(?:[\W\d]|^)e[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|e){1,2}[ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
+    (regex.compile(r"(?:[\W\d]|^)ep[ .]?[([]?(\d{1,3}(?:[ .-]*(?:[&+]|ep){1,2}[ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
+    (regex.compile(r"(?:[\W\d]|^)\d+[xх][ .]?[([]?(\d{1,3}(?:[ .]?[xх][ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
+    (regex.compile(r"(?:[\W\d]|^)(?:episodes?|[Сс]ерии:?)[ .]?[([]?(\d{1,3}(?:[ .+]*[&+][ .]?\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
     (regex.compile(r"[([]?(?:\D|^)(\d{1,3}[ .]?ao[ .]?\d{1,3})[)\]]?(?:\W|$)", regex.IGNORECASE), "range"),
-    (
-        regex.compile(
-            r"(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)",
-            regex.IGNORECASE,
-        ),
-        "range",
-    ),
-    (
-        regex.compile(
-            r"(?:\W|^)[st]\d{1,2}[. ]?[xх-]?[. ]?(?:e|x|х|ep|-|\.)[. ]?(\d{1,3})(?:[abc]|v0?[1-4]|\D|$)", regex.IGNORECASE
-        ),
-        "array(integer)",
-    ),
+    (regex.compile(r"(?:[\W\d]|^)(?:e|eps?|episodes?|[Сс]ерии:?|\d+[xх])[ .]*[([]?(\d{1,3}(?:-\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
+    (regex.compile(r"(?:\W|^)[st]\d{1,2}[. ]?[xх-]?[. ]?(?:e|x|х|ep|-|\.)[. ]?(\d{1,3})(?:[abc]|v0?[1-4]|\D|$)", regex.IGNORECASE), "array(integer)"),
     (regex.compile(r"\b[st]\d{2}(\d{2})\b", regex.IGNORECASE), "array(integer)"),
     (regex.compile(r"(?:\W|^)(\d{1,3}(?:[ .]*~[ .]*\d{1,3})+)(?:\W|$)", regex.IGNORECASE), "range"),
     (regex.compile(r"-\s(\d{1,3}[ .]*-[ .]*\d{1,3})(?!-\d)(?:\W|$)", regex.IGNORECASE), "range"),
     (regex.compile(r"s\d{1,2}\s?\((\d{1,3}[ .]*-[ .]*\d{1,3})\)", regex.IGNORECASE), "range"),
     (regex.compile(r"(?:^|\/)\d{1,2}-(\d{2})\b(?!-\d)"), "array(integer)"),
     (regex.compile(r"(?<!\d-)\b\d{1,2}-(\d{2})(?=\.\w{2,4}$)"), "array(integer)"),
-    (
-        regex.compile(
-            r"(?<!seasons?|[Сс]езони?)\W(?:[ .([-]|^)(\d{1,3}(?:[ .]?[,&+~][ .]?\d{1,3})+)(?:[ .)\]-]|$)",
-            regex.IGNORECASE,
-        ),
-        "range",
-    ),
-    (
-        regex.compile(r"(?<!seasons?|[Сс]езони?)\W(?:[ .([-]|^)(\d{1,3}(?:-\d{1,3})+)(?:[ .)(\]]|-\D|$)", regex.IGNORECASE),
-        "range",
-    ),
+    (regex.compile(r"(?<!seasons?|[Сс]езони?)\W(?:[ .([-]|^)(\d{1,3}(?:[ .]?[,&+~][ .]?\d{1,3})+)(?:[ .)\]-]|$)", regex.IGNORECASE), "range"),
+    (regex.compile(r"(?<!seasons?|[Сс]езони?)\W(?:[ .([-]|^)(\d{1,3}(?:-\d{1,3})+)(?:[ .)(\]]|-\D|$)", regex.IGNORECASE), "range"),
     (regex.compile(r"\bEp(?:isode)?\W+\d{1,2}\.(\d{1,3})\b", regex.IGNORECASE), "array(integer)"),
-    (
-        regex.compile(
-            r"(?:\b[ée]p?(?:isode)?|[Ээ]пизод|[Сс]ер(?:ии|ия|\.)?|cap(?:itulo)?|epis[oó]dio)[. ]?[-:#№]?[. ]?(\d{1,4})(?:[abc]|v0?[1-4]|\W|$)",
-            regex.IGNORECASE,
-        ),
-        "array(integer)",
-    ),
-    (
-        regex.compile(r"\b(\d{1,3})(?:-?я)?[ ._-]*(?:ser(?:i?[iyj]a|\b)|[Сс]ер(?:ии|ия|\.)?)", regex.IGNORECASE),
-        "array(integer)",
-    ),
-    (regex.compile(r"(?:\D|^)\d{1,2}[. ]?[xх][. ]?(\d{1,3})(?:[abc]|v0?[1-4]|\D|$)"), "array(integer)"),
+    (regex.compile(r"(?:\b[ée]p?(?:isode)?|[Ээ]пизод|[Сс]ер(?:ии|ия|\.)?|cap(?:itulo)?|epis[oó]dio)[. ]?[-:#№]?[. ]?(\d{1,4})(?:[abc]|v0?[1-4]|\W|$)", regex.IGNORECASE), "array(integer)"),
+    (regex.compile(r"\b(\d{1,3})(?:-?я)?[ ._-]*(?:ser(?:i?[iyj]a|\b)|[Сс]ер(?:ии|ия|\.)?)", regex.IGNORECASE), "array(integer)"),
+    (regex.compile(r"(?:\D|^)\d{1,2}[. ]?[xх][. ]?(\d{1,2})(?:[abc]|v0?[1-4]|\D|$)"), "array(integer)"), # Fixed: Was catching `1.x265` as episode.
     (regex.compile(r"[[(]\d{1,2}\.(\d{1,3})[)\]]"), "array(integer)"),
     (regex.compile(r"\b[Ss]\d{1,2}[ .](\d{1,2})\b"), "array(integer)"),
     (regex.compile(r"-\s?\d{1,2}\.(\d{2,3})\s?-"), "array(integer)"),
     (regex.compile(r"(?<=\D|^)(\d{1,3})[. ]?(?:of|из|iz)[. ]?\d{1,3}(?=\D|$)", regex.IGNORECASE), "array(integer)"),
     (regex.compile(r"\b\d{2}[ ._-](\d{2})(?:.F)?\.\w{2,4}$"), "array(integer)"),
     (regex.compile(r"(?<!^)\[(\d{2,3})\](?!(?:\.\w{2,4})?$)"), "array(integer)"),
+]
+
+
+IS_MOVIE_COMPILED = [
+    regex.compile(r"[se]\d\d", regex.IGNORECASE),
+    regex.compile(r"\b(tv|complete)\b", regex.IGNORECASE),
+    regex.compile(r"\b(saisons?|stages?|seasons?).?\d", regex.IGNORECASE),
+    regex.compile(r"[a-z]\s?\-\s?\d{2,4}\b", regex.IGNORECASE),
+    regex.compile(r"\d{2,4}\s?\-\s?\d{2,4}\b", regex.IGNORECASE),
 ]
 
 
