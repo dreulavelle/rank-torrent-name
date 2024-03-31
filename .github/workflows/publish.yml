@@ -1,6 +1,12 @@
 name: Publish RTN to PyPI
 
 on:
+  workflow_run:
+    workflows: ["Run Battery of Checks"]
+    types:
+      - completed
+    branches:
+      - main
   push:
     branches:
       - main
@@ -29,7 +35,7 @@ jobs:
         poetry install --no-dev
 
     - name: Publish to PyPI
+      if: ${{ github.event.workflow_run.conclusion == 'success' }}
       run: poetry publish --build
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-      # continue-on-error: true  # Still want coverage tests to be ran even if publishing fails

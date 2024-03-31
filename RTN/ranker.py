@@ -8,9 +8,9 @@ def get_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingM
     Calculate the ranking of the given parsed data.
 
     Parameters:
-        data (ParsedData): The parsed data object containing information about the torrent title.
-        settings (SettingsModel): The user settings object containing custom ranking models.
-        rank_model (BaseRankingModel): The base ranking model used for calculating the ranking.
+        `data` (ParsedData): The parsed data object containing information about the torrent title.
+        `settings` (SettingsModel): The user settings object containing custom ranking models.
+        `rank_model` (BaseRankingModel): The base ranking model used for calculating the ranking.
 
     Returns:
         int: The calculated ranking value for the parsed data.

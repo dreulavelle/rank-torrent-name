@@ -5,7 +5,24 @@ from .patterns import IS_TRASH_COMPILED
 
 
 def check_trash(raw_title: str) -> bool:
-    """Check if the title contains any trash patterns."""
+    """
+    Check if the title contains any unwanted patterns.
+
+    Parameters:
+        `raw_title` (str): The raw title string to check.
+
+    Returns:
+        bool: True if the title contains unwanted patterns, otherwise False.
+
+    Raises:
+        TypeError: If the input title is empty or not a string.
+
+    Exmaples:
+        >>> check_trash("Some.Title.CAM.720p.WEB-DL.x264-Group")
+        True
+        >>> check_trash("Some.Title.720p.WEB-DL.x264-Group")
+        False
+    """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
     # True if we find any of the trash patterns in the title.
@@ -14,7 +31,25 @@ def check_trash(raw_title: str) -> bool:
 
 
 def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
-    """Check user settings and unwanted quality to determine if torrent should be fetched."""
+    """
+    Check user settings and unwanted quality to determine if torrent should be fetched.
+    
+    Parameters:
+        `data` (ParsedData): The parsed data object containing information about the torrent title.
+        `settings` (SettingsModel): The user settings object containing custom ranking models.
+    
+    Returns:
+        bool: True if the torrent should be fetched, otherwise False.
+    
+    Raises:
+        TypeError: If the parsed data is not a ParsedData object.
+        TypeError: If the settings is not a SettingsModel object.
+    """
+    if not isinstance(data, ParsedData):
+        raise TypeError("Parsed data must be an instance of ParsedData.")
+    if not isinstance(settings, SettingsModel):
+        raise TypeError("Settings must be an instance of SettingsModel.")
+
     if check_trash(data.raw_title):
         return False
     if check_required(data, settings):

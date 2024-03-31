@@ -27,6 +27,34 @@ class Torrent(BaseModel):
 
     Methods:
         __eq__: Determines equality based on the infohash of the torrent, allowing for easy comparison.
+        __hash__: Generates a hash based on the infohash of the torrent for set operations.
+    
+    Raises:
+        GarbageTorrent: If the title is identified as trash and should be ignored by the scraper.
+
+    Example:
+        >>> torrent = Torrent(
+        ...     raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
+        ...     infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7",
+        ...     data=ParsedData(...),
+        ...     fetch=True,
+        ...     rank=500,
+        ...     lev_ratio=0.95,
+        ... )
+        >>> isinstance(torrent, Torrent)
+        True
+        >>> torrent.raw_title
+        'The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]'
+        >>> torrent.infohash
+        'c08a9ee8ce3a5c2c08865e2b05406273cabc97e7'
+        >>> torrent.data.title
+        'The Walking Dead'
+        >>> torrent.fetch
+        True
+        >>> torrent.rank
+        500
+        >>> torrent.lev_ratio
+        0.95
     """
 
     raw_title: str
@@ -43,13 +71,13 @@ class Torrent(BaseModel):
     def validate_infohash(cls, v):
         """Validates infohash length and SHA-1 format."""
         if len(v) != 40 or not regex.match(r"^[a-fA-F0-9]{40}$", v):
-            raise ValueError("Infohash must be a 40-character SHA-1 hash.")
+            raise GarbageTorrent("Infohash must be a 40-character SHA-1 hash.")
         return v
 
     def __eq__(self, other: object) -> bool:
         """Compares Torrent objects based on their infohash."""
         return isinstance(other, Torrent) and self.infohash == other.infohash
-    
+
     def __hash__(self) -> int:
         return hash(self.infohash)
 
@@ -61,13 +89,33 @@ class RTN:
     Attributes:
         `settings` (SettingsModel): The settings model with user preferences for parsing and ranking torrents.
         `ranking_model` (BaseRankingModel): The model defining the ranking logic and score computation.
+        `lev_threshold` (float): The Levenshtein ratio threshold for title matching. Defaults to 0.9.
 
     Methods:
         `rank`: Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
     """
 
-    def __init__(self, settings: SettingsModel, ranking_model: BaseRankingModel):
-        """Initializes the RTN class with user settings and a ranking model."""
+    def __init__(self, settings: SettingsModel, ranking_model: BaseRankingModel, lev_threshold: float = 0.9):
+        """
+        Initializes the RTN class with settings and a ranking model.
+
+        Parameters:
+            `settings` (SettingsModel): The settings model with user preferences for parsing and ranking torrents.
+            `ranking_model` (BaseRankingModel): The model defining the ranking logic and score computation.
+            `lev_threshold` (float): The Levenshtein ratio threshold for title matching. Defaults to 0.9.
+
+        Raises:
+            ValueError: If settings or a ranking model is not provided.
+            TypeError: If settings is not an instance of SettingsModel or the ranking model is not an instance of BaseRankingModel.
+
+        Example:
+            >>> from RTN import RTN
+            >>> from RTN.models import SettingsModel, DefaultRanking
+            >>>
+            >>> settings_model = SettingsModel()
+            >>> ranking_model = DefaultRanking()
+            >>> rtn = RTN(settings_model, ranking_model, lev_threshold=0.94)
+        """
         if not settings or not ranking_model:
             raise ValueError("Both settings and a ranking model must be provided.")
         if not isinstance(settings, SettingsModel):
@@ -77,35 +125,87 @@ class RTN:
 
         self.settings = settings
         self.ranking_model = ranking_model
+        self.lev_threshold = lev_threshold
 
-    def rank(self, raw_title: str, infohash: str, remove_trash=False) -> Torrent:
-        """Parses a torrent title, computes its rank, and returns a Torrent object."""
+    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False) -> Torrent:
+        """
+        Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
+
+        Parameters:
+            `raw_title` (str): The original title of the torrent to parse.
+            `infohash` (str): The SHA-1 hash identifier of the torrent.
+            `correct_title` (str): The correct title to compare against for similarity. Defaults to an empty string.
+            `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
+
+        Returns:
+            Torrent: A Torrent object with metadata and ranking information.
+
+        Raises:
+            ValueError: If the title or infohash is not provided for any torrent.
+            TypeError: If the title or infohash is not a string.
+            GarbageTorrent: If the title is identified as trash and should be ignored by the scraper, or invalid SHA-1 infohash is given.
+
+        Notes:
+            - If `correct_title` is provided, the Levenshtein ratio will be calculated between the parsed title and the correct title.
+            - If the ratio is below the threshold, a `GarbageTorrent` error will be raised.
+            - If no correct title is provided, the Levenshtein ratio will be set to 0.0.
+
+        Example:
+            >>> rtn = RTN(settings_model, ranking_model)
+            >>> torrent = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
+            >>> isinstance(torrent, Torrent)
+            True
+            >>> isinstance(torrent.data, ParsedData)
+            True
+            >>> torrent.fetch
+            True
+            >>> torrent.rank > 0
+            True
+            >>> torrent.lev_ratio > 0.0
+            True
+        """
         if not raw_title or not infohash:
             raise ValueError("Both the title and infohash must be provided.")
         if not isinstance(raw_title, str) or not isinstance(infohash, str):
             raise TypeError("The title and infohash must be strings.")
+        if not isinstance(correct_title, str):
+            raise TypeError("The correct title must be a string.")
         if len(infohash) != 40:
-            raise ValueError("The infohash must be a valid SHA-1 hash and 40 characters in length.")
+            raise GarbageTorrent("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
         parsed_data = parse(raw_title, remove_trash)
         fetch = check_fetch(parsed_data, self.settings)
         parsed_data.fetch = fetch
+        rank = get_rank(parsed_data, self.settings, self.ranking_model)
+
+        lev_ratio = 0.0
+        if correct_title:
+            lev_ratio = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
+            if lev_ratio < self.lev_threshold:
+                raise GarbageTorrent(f"This title does not match the correct title, got ratio of {lev_ratio:.3f}")
+
+        if remove_trash and check_trash(raw_title):
+                raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
+            
+
         return Torrent(
             raw_title=raw_title,
             infohash=infohash,
             data=parsed_data,
             fetch=fetch,
-            rank=get_rank(parsed_data, self.settings, self.ranking_model),
-            lev_ratio=Levenshtein.ratio(parsed_data.parsed_title.lower(), raw_title.lower()),
+            rank=rank,
+            lev_ratio=lev_ratio
         )
 
-    def batch_rank(self, torrents: List[Tuple[str, str]], remove_trash=False, max_workers: int = 4) -> List[Torrent]:
+    def batch_rank(self, torrents: List[Tuple[str, str]], correct_title: str = "", remove_trash: bool = False, max_workers: int = 4) -> List[Torrent]:
         """
         Ranks a batch of torrents in parallel using multiple threads.
 
         Parameters:
             `torrents` (List[Tuple[str, str]]): A list of tuples containing the raw title and infohash of each torrent.
             `max_workers` (int, optional): The maximum number of worker threads to use for parallel processing. Defaults to 4.
+            `correct_title` (str): The correct title to compare against for similarity. Defaults to an empty string.
+            `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
 
         Returns:
             List[Torrent]: A list of Torrent objects representing the ranked torrents.
@@ -124,21 +224,15 @@ class RTN:
 
             >>> rtn = RTN(settings_model, ranking_model)
             >>> ranked_torrents = rtn.batch_rank(torrents)
-            >>> len(ranked_torrents)
-            3
-            >>> isinstance(ranked_torrents[0], Torrent)
+            >>> isinstance(ranked_torrents, list)
             True
-            >>> isinstance(ranked_torrents[0].data, ParsedData)
+            >>> all(isinstance(t, Torrent) for t in ranked_torrents)
             True
-            >>> ranked_torrents[0].fetch
-            True
-            >>> ranked_torrents[0].rank > 0
-            True
-            >>> ranked_torrents[0].lev_ratio > 0.0
+            >>> all(t.rank > 0 for t in ranked_torrents)
             True
         """
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            return list(executor.map(lambda t: self.rank(t[0], t[1], remove_trash), torrents))
+            return list(executor.map(lambda t: self.rank(t[0], t[1], correct_title=correct_title, remove_trash=remove_trash), torrents))
 
 
 def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
@@ -159,17 +253,22 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         if check_trash(raw_title):
             raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
-    parsed_dict: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
-    if not parsed_dict:
+    ptn_data: Dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
+    if not ptn_data:
         raise ValueError("The title could not be parsed by PTN")
-    parsed_dict["year"] = parsed_dict["year"][0] if parsed_dict.get("year") else 0
+    ptn_data["year"] = ptn_data["year"][0] if ptn_data.get("year") else 0
     extras: dict[str, Any] = parse_extras(raw_title)
-    full_data = {**parsed_dict, **extras}  # Merge PTN parsed data with RTN extras.
+    full_data = {**ptn_data, **extras}  # Merge PTN parsed data with RTN extras.
     full_data["raw_title"] = raw_title
-    full_data["parsed_title"] = parsed_dict.get("title")
+    full_data["parsed_title"] = ptn_data.get("title")
     full_data["type"] = get_type(ParsedData(**full_data))
     if not full_data:
         raise ValueError("The title could not be parsed by RTN.")
+    
+    # Check both PTT and PTN for episode data.
+    if not full_data.get("episode"):
+        full_data["episode"] = ptn_data.get("episode", [])
+
     return ParsedData(**full_data)
 
 
@@ -306,7 +405,7 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
         raise TypeError("The title must be a string.")
     if not isinstance(season_num, int) or season_num <= 0:
         raise TypeError("The season number must be a positive integer.")
-    
+
     data: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
     season_from_title: List[str] = data.get("season", [])
     if isinstance(season_from_title, list) and season_num in season_from_title or season_from_title == season_num:

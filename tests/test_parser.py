@@ -4,6 +4,7 @@ from pydantic import ValidationError
 
 from RTN import get_rank, parse
 from RTN.exceptions import GarbageTorrent
+from RTN.fetch import check_trash
 from RTN.models import (
     BaseRankingModel,
     CustomRank,
@@ -312,7 +313,7 @@ def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
     with pytest.raises(ValueError):
         # Missing title and infohash
         rtn.rank(None, None)  # type: ignore
-    with pytest.raises(ValueError):
+    with pytest.raises(GarbageTorrent):
         # Invalid infohash length
         data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
         Torrent(raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", infohash="c08a9ee8ce3a5c2c08", data=data)  # type: ignore
@@ -420,3 +421,77 @@ def test_extract_episode_from_season():
     for test_string, season, expected in test_examples:
         episodes = episodes_from_season(test_string, season)
         assert episodes == expected, f"Failed for '{test_string}' with expected {expected}"
+
+
+def test_get_correct_episodes():
+    test_cases = [
+        ("Yu-Gi-Oh! Zexal - 087 - Dual Duel, Part 1.mkv", [87]),
+        ("Yu-Gi-Oh! Zexal - 088 - Dual Duel, Part 2.mkv", [88]),
+        ("Yu-Gi-Oh! Zexal - 089 - Darkness Dawns.mkv", [89]),
+        ("Yu-Gi-Oh! Zexal - 090 - You Give Love a Bot Name.mkv", [90]),
+        ("Yu-Gi-Oh! Zexal - 091 - Take a Chance.mkv", [91]),
+        ("Yu-Gi-Oh! Zexal - 092 - An Imperfect Couple, Part 1.mkv", [92]),
+        ("Yu-Gi-Oh! Zexal - 093 - An Imperfect Couple, Part 2.mkv", [93]),
+        ("Yu-Gi-Oh! Zexal - 094 - Enter Vector.mkv", [94]),
+    ]
+
+    # Test PTT
+    for test_string, expected in test_cases:
+        data = parse(test_string, remove_trash=False)
+        assert data.episode == expected, f"Failed for '{test_string}' with expected {expected}"
+
+    # Test PTN
+    from PTN import parse as ptn_parse
+    for test_string, expected in test_cases:
+        data = ptn_parse(test_string, coherent_types=True)
+        assert data.get("episode") == expected, f"Failed for '{test_string}' with expected {expected}"
+
+
+# IS_TRASH_COMPILED = compile_patterns(
+#     [
+#         r"\b(?:H[DQ][ .-]*)?CAM(?:H[DQ])?(?:[ .-]*Rip)?\b",
+#         r"\b(?:H[DQ][ .-]*)?S[ .-]*print\b",
+#         r"\b(?:HD[ .-]*)?T(?:ELE)?S(?:YNC)?(?:Rip)?\b",
+#         r"\b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b",
+#         r"\bP(?:re)?DVD(?:Rip)?\b",
+#         r"\b(?:DVD?|BD|BR)?[ .-]*Scr(?:eener)?\b",
+#         r"\bVHS\b",
+#         r"\bHD[ .-]*TV(?:Rip)\b",
+#         r"\bDVB[ .-]*(?:Rip)?\b",
+#         r"\bSAT[ .-]*Rips?\b",
+#         r"\bTVRips?\b",
+#         r"\bR5|R6\b",
+#         r"\b(DivX|XviD)\b",
+#         r"\b(?:Deleted[ .-]*)?Scene(?:s)?\b",
+#         r"\bTrailers?\b",
+#         r"\b((Half.)?SBS|3D)\b",
+#         r"\bWEB[ .-]?DL[ .-]?Rip\b",
+#     ]
+# )
+
+def test_trash_coverage():
+    # Test the coverage of the trash patterns
+    test_cases = [
+        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+        ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+        ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+        ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+        ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+        ("House MD All Seasons (1-8) 720p Ultra-Compressed", False),
+        ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", False),
+        ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", False),
+        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", True), # XviD
+        ("4-13 Cursed (HD)", False),
+        ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", False),
+        ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", False),
+        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", True),  # WEB-DLRip
+        ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", False),
+        ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", False),
+        ("Naruto Shippuden - 107 - Strange Bedfellows", False),
+        ("[224] Shingeki no Kyogin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]", False),
+        ("[Erai-raws] Shingeki no Kyogin Season 3 - 11 [1080p][Multiple Subtitle]", False),
+    ]
+
+    for test_string, expected in test_cases:
+        assert check_trash(test_string) == expected, f"Failed for '{test_string}' with expected {expected}"

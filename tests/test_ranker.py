@@ -1,6 +1,7 @@
 import pytest
 
 from RTN import RTN
+from RTN.exceptions import GarbageTorrent
 from RTN.models import (
     BaseRankingModel,
     CustomRank,
@@ -125,20 +126,32 @@ def enabled_settings_model():
 def test_valid_torrent_from_title(settings_model, ranking_model):
     rtn = RTN(settings_model, ranking_model)
 
-    torrent = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
-                       "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
+    torrent: Torrent = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
+                       "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", 
+                       correct_title="The Walking Dead",
+                       remove_trash=True
+    )
 
     assert isinstance(torrent, Torrent)
     assert isinstance(torrent.data, ParsedData)
     assert torrent.raw_title == "The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]"
     assert torrent.infohash == "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"
     assert torrent.data.parsed_title == "The Walking Dead"
-    assert torrent.data.fetch is True
-    assert torrent.rank > 0, f"Rank was {torrent.rank} instead of 163"
+    assert torrent.data.fetch is True, f"Fetch was {torrent.data.fetch} instead of True"
+    assert torrent.fetch is True, f"Fetch was {torrent.fetch} instead of True"
+    assert torrent.rank == 163, f"Rank was {torrent.rank} instead of 163"
     assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
+
 
 def test_invalid_torrent_from_title(settings_model, ranking_model):
     rtn = RTN(settings_model, ranking_model)
+
+    with pytest.raises(GarbageTorrent):
+        assert rtn.rank("The Walking Dead S05E03 CAM 720p HDTV x264-ASAP[ettv]",
+                        "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", 
+                        correct_title="The Walking Dead",
+                        remove_trash=True
+        )
 
     with pytest.raises(TypeError):
         # Missing 2 string arguments
@@ -158,18 +171,20 @@ def test_invalid_torrent_from_title(settings_model, ranking_model):
     with pytest.raises(TypeError):
         # Invalid infohash type
         rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", 123) # type: ignore
-    with pytest.raises(ValueError):
+    with pytest.raises(GarbageTorrent):
         # Invalid infohash length
         rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c0886")
     with pytest.raises(ValueError):
         # test if not parsed_data
         rtn.rank("", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") # type: ignore
 
+
 def test_valid_rtn_object(settings_model, ranking_model):
     rtn = RTN(settings_model, ranking_model)
     assert isinstance(rtn, RTN)
     assert isinstance(rtn.settings, SettingsModel)
     assert isinstance(rtn.ranking_model, BaseRankingModel)
+
 
 def test_invalid_rtn_object(settings_model, ranking_model):
     with pytest.raises(ValueError):
@@ -184,6 +199,7 @@ def test_invalid_rtn_object(settings_model, ranking_model):
     with pytest.raises(TypeError):
         # Invalid ranking_model type
         RTN(settings_model, 123) # type: ignore
+
 
 def test_rank_calculation_accuracy(settings_model, ranking_model):
     parsed_data = ParsedData(
@@ -201,6 +217,7 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
 
     rank = get_rank(parsed_data, settings_model, ranking_model)
     assert rank == 273, f"Expected rank did not match, got {rank}"
+
 
 def test_get_rank_validity(settings_model, ranking_model):
     parsed_data = ParsedData(
@@ -235,6 +252,7 @@ def test_get_rank_validity(settings_model, ranking_model):
     with pytest.raises(TypeError):
         get_rank(None, settings_model, ranking_model) # type: ignore
 
+
 def test_valid_preferred_calculation(custom_settings_model):
     # use calculate_preferred function
     parsed_data = ParsedData(
@@ -253,7 +271,26 @@ def test_valid_preferred_calculation(custom_settings_model):
     rank = calculate_preferred(parsed_data, custom_settings_model)
     assert rank == 0, f"Expected rank did not match, got {rank}"
 
-def test_batch_ranking(settings_model, custom_ranking_model):
+
+def test_batch_ranking_with_correct_title(settings_model, custom_ranking_model):
+    rtn = RTN(settings_model, custom_ranking_model)
+    torrents = [
+        ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"),
+        ("The Walking Dead.S2E18.1080p.BluRay.x264-Example", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e8"),
+        ("The Walking Dead.S2.2020.1080p", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e9"),
+    ]
+
+    ranked_torrents = rtn.batch_rank(torrents, correct_title="The Walking Dead")
+    assert len(ranked_torrents) == 3
+    for torrent in ranked_torrents:
+        assert isinstance(torrent, Torrent)
+        assert isinstance(torrent.data, ParsedData)
+        assert torrent.fetch is True
+        assert torrent.rank > 0, f"Rank was {torrent.rank} instead of > 0"
+        assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
+
+
+def test_batch_ranking_without_correct_title(settings_model, custom_ranking_model):
     rtn = RTN(settings_model, custom_ranking_model)
     torrents = [
         ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7"),
@@ -268,7 +305,8 @@ def test_batch_ranking(settings_model, custom_ranking_model):
         assert isinstance(torrent.data, ParsedData)
         assert torrent.fetch is True
         assert torrent.rank > 0, f"Rank was {torrent.rank} instead of > 0"
-        assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
+        assert torrent.lev_ratio == 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
+
 
 def test_preference_handling(custom_settings_model, ranking_model):
     # Test with preferred title with a preference for Season number in title
