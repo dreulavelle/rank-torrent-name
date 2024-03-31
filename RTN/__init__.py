@@ -6,7 +6,7 @@ from .parser import (
     batch_parse,
     episodes_from_season,
     parse,
-    sort,
+    sort_torrents,
     title_match,
 )
 from .patterns import parse_extras
@@ -21,7 +21,7 @@ __all__ = [
     "check_fetch",
     "check_trash",
     "title_match",
-    "sort",
+    "sort_torrents",
     "parse_extras",
     "ParsedData",
     "BaseRankingModel",

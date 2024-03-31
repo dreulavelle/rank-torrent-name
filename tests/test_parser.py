@@ -18,7 +18,7 @@ from RTN.parser import (
     episodes_from_season,
     get_type,
     is_movie,
-    sort,
+    sort_torrents,
     title_match,
 )
 from RTN.patterns import (
@@ -276,13 +276,20 @@ def test_complete_series_patterns():
 
 
 def test_sort_function(test_titles, settings_model, rank_model):
+    torrent_set = set()
     processed = batch_parse(test_titles, remove_trash=False, chunk_size=5)
-    rtn = RTN(settings_model, rank_model)
-    torrents = [rtn.rank(data.raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7") for data in processed]
-    sort(torrents)
-
-    # Test if the list is sorted in reverse
-    assert all(torrents[i].rank <= torrents[i + 1].rank for i in range(len(torrents) - 1))
+    for item in processed:
+        ranking = get_rank(item, settings_model, rank_model)
+        torrent = Torrent(raw_title=item.raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", data=item, rank=ranking)
+        torrent_set.add(torrent)
+    sorted_torrents = sort_torrents(torrent_set)
+    
+    # Test that the sorted_torrents is a dict
+    # and that the torrents are sorted by rank in the correct order (descending)
+    assert isinstance(sorted_torrents, dict)
+    sorted_torrents_list = list(sorted_torrents.values())
+    for i in range(len(sorted_torrents_list) - 1):
+        assert sorted_torrents_list[i].rank >= sorted_torrents_list[i + 1].rank
 
 
 def test_compare_two_torrent_objs(settings_model, rank_model):

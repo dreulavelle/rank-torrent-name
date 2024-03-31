@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 import Levenshtein
 import regex
@@ -36,6 +36,9 @@ class Torrent(BaseModel):
     rank: int = 0
     lev_ratio: float = 0.0
 
+    class Config:
+        frozen = True
+
     @validator("infohash")
     def validate_infohash(cls, v):
         """Validates infohash length and SHA-1 format."""
@@ -45,9 +48,10 @@ class Torrent(BaseModel):
 
     def __eq__(self, other: object) -> bool:
         """Compares Torrent objects based on their infohash."""
-        if not isinstance(other, Torrent):
-            return False
-        return self.infohash == other.infohash
+        return isinstance(other, Torrent) and self.infohash == other.infohash
+    
+    def __hash__(self) -> int:
+        return hash(self.infohash)
 
 
 class RTN:
@@ -227,19 +231,22 @@ def title_match(correct_title: str, raw_title: str, threshold: float = 0.9) -> b
     return Levenshtein.ratio(correct_title.lower(), raw_title.lower()) >= threshold
 
 
-def sort(torrents: List[Torrent]) -> List[Torrent]:
+def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
     """
-    Sorts a list of Torrent objects based on their rank in descending order.
+    Sorts a set of Torrent objects by their rank in descending order and returns a dictionary
+    with infohash as keys and Torrent objects as values.
 
-    Args:
-        `torrents` (List[Torrent]): The list of Torrent objects to sort.
+    Parameters:
+    - `torrents`: A set of Torrent objects.
 
     Returns:
-        List[Torrent]: The sorted list of Torrent objects by rank.
+    - A dictionary of Torrent objects sorted by rank in descending order, with the torrent's
+      infohash as the key.
     """
-    if not isinstance(torrents, list) or not all(isinstance(t, Torrent) for t in torrents):
-        raise TypeError("The input must be a list of Torrent objects.")
-    return sorted(torrents, key=lambda t: t.rank, reverse=True)
+    if not isinstance(torrents, set) or not all(isinstance(t, Torrent) for t in torrents):
+        raise TypeError("The input must be a set of Torrent objects.")
+    sorted_torrents: List[Torrent] = sorted(torrents, key=lambda torrent: torrent.rank, reverse=True)
+    return {torrent.infohash: torrent for torrent in sorted_torrents}
 
 
 def is_movie(data: ParsedData) -> bool:
