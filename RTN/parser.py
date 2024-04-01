@@ -456,7 +456,7 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
 
     data: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
 
-    season_from_title = data.get("season")
+    season_from_title = data.get("season", [])
     if isinstance(season_from_title, int):
         season_from_title = [season_from_title]
     elif not isinstance(season_from_title, list):
@@ -464,6 +464,6 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
 
     if season_num in season_from_title:
         eps = extract_episodes(raw_title)
-        if eps:
+        if isinstance(eps, list) and len(eps) > 0:
             return eps
     return []

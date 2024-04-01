@@ -167,7 +167,18 @@ def range_transform(raw_title: str) -> set[int]:
 
 
 def extract_episodes(raw_title: str) -> List[int]:
-    """Extract episode numbers from the title."""
+    """
+    Extract episode numbers from the title or filename.
+    
+    Parameters:
+    - `raw_title` (str): The original title of the torrent to analyze.
+
+    Returns:
+    - List[int]: A list of extracted episode numbers from the title.
+    """
+    if not raw_title or not isinstance(raw_title, str):
+        raise TypeError("The input title must be a non-empty string.")
+
     episodes = set()
     for compiled_pattern, transform in EPISODE_PATTERNS_COMPILED:
         matches = compiled_pattern.findall(raw_title)
