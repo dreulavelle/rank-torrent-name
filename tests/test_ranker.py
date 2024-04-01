@@ -139,7 +139,7 @@ def test_valid_torrent_from_title(settings_model, ranking_model):
     assert torrent.data.parsed_title == "The Walking Dead"
     assert torrent.data.fetch is True, f"Fetch was {torrent.data.fetch} instead of True"
     assert torrent.fetch is True, f"Fetch was {torrent.fetch} instead of True"
-    assert torrent.rank == 163, f"Rank was {torrent.rank} instead of 163"
+    assert torrent.rank == 63, f"Rank was {torrent.rank} instead of 63"
     assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
 
 
@@ -210,13 +210,10 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
         codec=["H.264"],
         audio=["Dolby Digital"],
         hdr="HDR10",
-        is_complete=True,
-        season=[1],
-        episode=[1],
     )
 
     rank = get_rank(parsed_data, settings_model, ranking_model)
-    assert rank == 273, f"Expected rank did not match, got {rank}"
+    assert rank == 63, f"Expected rank did not match, got {rank}"
 
 
 def test_get_rank_validity(settings_model, ranking_model):

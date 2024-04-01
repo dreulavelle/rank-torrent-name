@@ -447,28 +447,6 @@ def test_get_correct_episodes():
         assert data.get("episode") == expected, f"Failed for '{test_string}' with expected {expected}"
 
 
-# IS_TRASH_COMPILED = compile_patterns(
-#     [
-#         r"\b(?:H[DQ][ .-]*)?CAM(?:H[DQ])?(?:[ .-]*Rip)?\b",
-#         r"\b(?:H[DQ][ .-]*)?S[ .-]*print\b",
-#         r"\b(?:HD[ .-]*)?T(?:ELE)?S(?:YNC)?(?:Rip)?\b",
-#         r"\b(?:HD[ .-]*)?T(?:ELE)?C(?:INE)?(?:Rip)?\b",
-#         r"\bP(?:re)?DVD(?:Rip)?\b",
-#         r"\b(?:DVD?|BD|BR)?[ .-]*Scr(?:eener)?\b",
-#         r"\bVHS\b",
-#         r"\bHD[ .-]*TV(?:Rip)\b",
-#         r"\bDVB[ .-]*(?:Rip)?\b",
-#         r"\bSAT[ .-]*Rips?\b",
-#         r"\bTVRips?\b",
-#         r"\bR5|R6\b",
-#         r"\b(DivX|XviD)\b",
-#         r"\b(?:Deleted[ .-]*)?Scene(?:s)?\b",
-#         r"\bTrailers?\b",
-#         r"\b((Half.)?SBS|3D)\b",
-#         r"\bWEB[ .-]?DL[ .-]?Rip\b",
-#     ]
-# )
-
 def test_trash_coverage():
     # Test the coverage of the trash patterns
     test_cases = [

@@ -207,8 +207,8 @@ def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model:
             )
     if data.is_complete:
         total_rank += 100
-    if len(data.season) > 0:
-        total_rank += 100 * len(data.season)
+    if len(data.season) > 0 and len(data.episode) == 0:
+        total_rank += 125 * len(data.season)
     if len(data.episode) > 0:
         total_rank += 10 * len(data.episode)
     return total_rank
