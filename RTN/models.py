@@ -1,3 +1,36 @@
+"""
+This module contains models used in the RTN package for parsing torrent titles, ranking media quality, and defining user settings.
+
+Models:
+- `ParsedData`: Parsed data model for a torrent title.
+- `BaseRankingModel`: Base class for ranking models used in the context of media quality and attributes.
+- `CustomRank`: Custom ranking model used in the `SettingsModel` for defining custom ranks for specific attributes.
+- `SettingsModel`: User-defined settings model for ranking torrents, including preferences for filtering torrents based on regex patterns and customizing ranks for specific torrent attributes.
+
+For more information on each model, refer to the respective docstrings.
+
+Note:
+- The `ParsedData` model contains attributes for storing parsed information from a torrent title.
+- The `BaseRankingModel` model is a base class for ranking
+- The `CustomRank` model is used in the `SettingsModel` for defining custom ranks for specific attributes.
+- The `SettingsModel` model allows users to define custom settings for ranking torrents based on quality attributes and regex patterns.
+
+Example:
+    >>> rank_model = DefaultRanking()
+    >>> settings = SettingsModel(
+            profile="default",
+            require=["\\b4K|1080p\\b", "720p"],
+            exclude=["CAM", "TS"],
+            preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/i"],
+            custom_ranks={
+                "uhd": CustomRank(enable=True, fetch=False, rank=150),
+                "fhd": CustomRank(enable=True, fetch=True, rank=90),
+                ...
+            },
+        )
+    >>> rtn = RTN(rank_model, settings)
+"""
+
 from typing import Any, Dict, List, Union
 
 import regex

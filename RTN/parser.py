@@ -1,3 +1,51 @@
+"""
+Parser module for parsing torrent titles and extracting metadata using PTN and RTN patterns.
+
+The module provides functions for parsing torrent titles, extracting metadata, and ranking torrents based on user preferences.
+
+Functions:
+- `parse`: Parse a torrent title using PTN and enrich it with additional metadata extracted from patterns.
+- `parse_chunk`: Parse a chunk of torrent titles.
+- `batch_parse`: Parse a list of torrent titles in batches for improved performance.
+- `title_match`: Compare two titles using the Levenshtein ratio to determine similarity.
+- `sort_torrents`: Sort a set of Torrent objects by their rank in descending order.
+- `is_movie`: Determine if the item is a movie based on the absence of typical show indicators.
+- `get_type`: Determine the type of media based on the parsed data.
+- `episodes_from_season`: Extract episode numbers for a specific season from the title.
+
+Classes:
+- `Torrent`: Represents a torrent with metadata parsed from its title and additional computed properties.
+- `RTN`: Rank Torrent Name class for parsing and ranking torrent titles based on user preferences.
+
+For more information on each function or class, refer to the respective docstrings.
+
+Example:
+    >>> from RTN import parse, Torrent
+    >>> data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
+    >>> isinstance(data, ParsedData)
+    True
+    >>> torrent = Torrent(
+    ...     raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
+    ...     infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7",
+    ...     data=data,
+    ...     fetch=True,
+    ...     rank=500,
+    ...     lev_ratio=0.95,
+    ... )
+    >>> torrent.raw_title
+    'The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]'
+    >>> torrent.infohash
+    'c08a9ee8ce3a5c2c08865e2b05406273cabc97e7'
+    >>> torrent.data.parsed_title
+    'The Walking Dead'
+    >>> torrent.fetch
+    True
+    >>> torrent.rank
+    500
+    >>> torrent.lev_ratio
+    0.95
+"""
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Set, Tuple
 
@@ -30,7 +78,7 @@ class Torrent(BaseModel):
         __hash__: Generates a hash based on the infohash of the torrent for set operations.
     
     Raises:
-        GarbageTorrent: If the title is identified as trash and should be ignored by the scraper.
+        `GarbageTorrent`: If the title is identified as trash and should be ignored by the scraper.
 
     Example:
         >>> torrent = Torrent(
@@ -47,7 +95,7 @@ class Torrent(BaseModel):
         'The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]'
         >>> torrent.infohash
         'c08a9ee8ce3a5c2c08865e2b05406273cabc97e7'
-        >>> torrent.data.title
+        >>> torrent.data.parsed_title
         'The Walking Dead'
         >>> torrent.fetch
         True
@@ -103,7 +151,7 @@ class RTN:
             `settings` (SettingsModel): The settings model with user preferences for parsing and ranking torrents.
             `ranking_model` (BaseRankingModel): The model defining the ranking logic and score computation.
             `lev_threshold` (float): The Levenshtein ratio threshold for title matching. Defaults to 0.9.
-
+        
         Raises:
             ValueError: If settings or a ranking model is not provided.
             TypeError: If settings is not an instance of SettingsModel or the ranking model is not an instance of BaseRankingModel.

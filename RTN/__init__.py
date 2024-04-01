@@ -1,13 +1,13 @@
 """
-RTN (Rank Torrent Name) Package
+Welcome to RTN (Rank Torrent Name)! 🎉
 
 This package provides tools for parsing, analyzing, and ranking torrent names based on user-defined criteria. It includes functionality for:
 
 - Main parsing and ranking operations.
 - Models for configuring the ranking behavior.
 - Submodules for advanced manipulation and extension.
-- Integration with PTN for additional parsing capabilities.
-- Utility functions for fetching and sorting data.
+- PTN Integration for additional parsing capabilities.
+- Additional utility functions for fetching and sorting data.
 
 Importable modules and classes are categorized below for ease of use.
 
