@@ -1,3 +1,20 @@
+"""
+This module contains additional parsing patterns and utilities that are used in RTN.
+
+Functions:
+- `compile_patterns`: Compile a list of patterns and return them as a list of regex.Pattern objects.
+- `check_pattern`: Check if a pattern is found in the input string.
+- `check_hdr_dolby_video`: Check if the title contains HDR/Dolby video patterns.
+- `extract_episodes`: Extract episode numbers from the title.
+- `parse_extras`: Parse the input string to extract additional information relevant to RTN processing.
+
+Arguments:
+- `patterns` (list[regex.Pattern]): A list of compiled regex patterns to check.
+- `raw_title` (str): The raw title string to check.
+
+For more information on each function, refer to the respective docstrings.
+"""
+
 from typing import Any, Dict, List
 
 import regex
