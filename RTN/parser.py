@@ -447,16 +447,22 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
     Returns:
     - List[int]: A list of extracted episode numbers for the specified season.
     """
-    if not raw_title:
-        raise ValueError("The input title must be a non-empty string.")
-    if not isinstance(raw_title, str):
-        raise TypeError("The title must be a string.")
+    if not season_num:
+        raise ValueError("The season number must be provided.")
     if not isinstance(season_num, int) or season_num <= 0:
         raise TypeError("The season number must be a positive integer.")
+    if not raw_title or not isinstance(raw_title, str):
+        raise ValueError("The input title must be a non-empty string.")
 
     data: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
-    season_from_title: List[str] = data.get("season", [])
-    if isinstance(season_from_title, list) and season_num in season_from_title or season_from_title == season_num:
+
+    season_from_title = data.get("season")
+    if isinstance(season_from_title, int):
+        season_from_title = [season_from_title]
+    elif not isinstance(season_from_title, list):
+        season_from_title = []
+
+    if season_num in season_from_title:
         eps = extract_episodes(raw_title)
         if eps:
             return eps
