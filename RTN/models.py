@@ -44,7 +44,7 @@ class ParsedData(BaseModel):
     """Parsed data model for a torrent title."""
 
     raw_title: str
-    parsed_title: str
+    parsed_title: str = ""
     fetch: bool = False
     is_4k: bool = False
     is_multi_audio: bool = False

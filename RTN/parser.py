@@ -284,6 +284,36 @@ class RTN:
             return list(executor.map(lambda t: self.rank(t[0], t[1], correct_title=correct_title, remove_trash=remove_trash), torrents))
 
 
+# class ParsedData(BaseModel):
+#     """Parsed data model for a torrent title."""
+
+#     raw_title: str
+#     parsed_title: str = ""
+#     fetch: bool = False
+#     is_4k: bool = False
+#     is_multi_audio: bool = False
+#     is_multi_subtitle: bool = False
+#     is_complete: bool = False
+#     year: int = 0
+#     resolution: List[str] = []
+#     quality: List[str] = []
+#     season: List[int] = []
+#     episode: List[int] = []
+#     codec: List[str] = []
+#     audio: List[str] = []
+#     subtitles: List[str] = []
+#     language: List[str] = []
+#     bitDepth: List[int] = []
+#     hdr: str = ""
+#     proper: bool = False
+#     repack: bool = False
+#     remux: bool = False
+#     upscaled: bool = False
+#     remastered: bool = False
+#     directorsCut: bool = False
+#     extended: bool = False
+
+
 def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
     """
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
@@ -302,25 +332,43 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         if check_trash(raw_title):
             raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
-    ptn_data: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
-    if not ptn_data:
-        raise ValueError("The title could not be parsed by PTN")
-    
-    ptn_data["year"] = ptn_data["year"][0] if ptn_data.get("year") else 0
+    ptn_data = PTN.parse(raw_title, coherent_types=True)
+    extras = parse_extras(raw_title)
+    combined_data = {
+        "raw_title": raw_title,
+        "parsed_title": ptn_data.get("title", ""),
+        "fetch": False,
+        "is_4k": ptn_data.get("4k", False),
+        "is_multi_audio": extras.get("is_multi_audio", False),
+        "is_multi_subtitle": extras.get("is_multi_audio", False),
+        "is_complete": extras.get("is_complete", False),
+        "year": ptn_data.get("year", 0),
+        "resolution": ptn_data.get("resolution", []),
+        "quality": ptn_data.get("quality", []),
+        "season": ptn_data.get("season", []),
+        "episode": ptn_data.get("episode", []),
+        "codec": ptn_data.get("codec", []),
+        "audio": ptn_data.get("audio", []),
+        "subtitles": ptn_data.get("subtitles", []),
+        "language": ptn_data.get("language", []),
+        "bitDepth": ptn_data.get("bitDepth", []),
+        "hdr": extras.get("hdr", ""),
+        "proper": ptn_data.get("proper", False),
+        "repack": ptn_data.get("repack", False),
+        "remux": ptn_data.get("remux", False),
+        "upscaled": ptn_data.get("upscaled", False),
+        "remastered": ptn_data.get("remastered", False),
+        "directorsCut": ptn_data.get("directorsCut", False),
+        "extended": ptn_data.get("extended", False),
+    }
 
-    extras: dict[str, Any] = parse_extras(raw_title)
-    full_data = {**ptn_data, **extras}  # Merge PTN parsed data with RTN extras.
-    full_data["raw_title"] = raw_title
-    full_data["parsed_title"] = ptn_data.get("title")
-    full_data["type"] = get_type(ParsedData(**full_data))
-    if not full_data:
-        raise ValueError("The title could not be parsed by RTN.")
-    
+    parsed_data = ParsedData(**combined_data)
+
     # Check both PTT and PTN for episode data.
-    if not full_data.get("episode") and full_data.get("type") == "show":
-        full_data["episode"] = ptn_data.get("episode", [])
+    if not ptn_data.get("episode") and parsed_data.type == "show":
+        combined_data["episode"] = ptn_data.get("episode", [])
 
-    return ParsedData(**full_data)
+    return parsed_data
 
 
 def parse_chunk(chunk: List[str], remove_trash: bool) -> List[ParsedData]:
