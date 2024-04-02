@@ -50,6 +50,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Set, Tuple
 
 import Levenshtein
+import PTN
 import regex
 from pydantic import BaseModel, validator
 
@@ -57,7 +58,7 @@ from RTN.exceptions import GarbageTorrent
 
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
-from .patterns import IS_MOVIE_COMPILED, PTN_PARSER, extract_episodes, parse_extras
+from .patterns import IS_MOVIE_COMPILED, extract_episodes, parse_extras
 from .ranker import get_rank
 
 
@@ -221,20 +222,20 @@ class RTN:
         if len(infohash) != 40:
             raise GarbageTorrent("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
+        if remove_trash: # noqa: SIM102
+            if check_trash(raw_title):
+                raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
+    
         parsed_data = parse(raw_title, remove_trash)
+        lev_ratio = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
+
+        if correct_title: # noqa: SIM102
+            if remove_trash and lev_ratio < self.lev_threshold:
+                raise GarbageTorrent(f"This title does not match the correct title, got ratio of {lev_ratio:.3f}")
+
         fetch = check_fetch(parsed_data, self.settings)
         parsed_data.fetch = fetch
         rank = get_rank(parsed_data, self.settings, self.ranking_model)
-
-        lev_ratio = 0.0
-        if correct_title:
-            lev_ratio = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
-            if lev_ratio < self.lev_threshold:
-                raise GarbageTorrent(f"This title does not match the correct title, got ratio of {lev_ratio:.3f}")
-
-        if remove_trash and check_trash(raw_title):
-                raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
-            
 
         return Torrent(
             raw_title=raw_title,
@@ -301,10 +302,12 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         if check_trash(raw_title):
             raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
-    ptn_data: Dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
+    ptn_data: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
     if not ptn_data:
         raise ValueError("The title could not be parsed by PTN")
+    
     ptn_data["year"] = ptn_data["year"][0] if ptn_data.get("year") else 0
+
     extras: dict[str, Any] = parse_extras(raw_title)
     full_data = {**ptn_data, **extras}  # Merge PTN parsed data with RTN extras.
     full_data["raw_title"] = raw_title
@@ -314,7 +317,7 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         raise ValueError("The title could not be parsed by RTN.")
     
     # Check both PTT and PTN for episode data.
-    if not full_data.get("episode"):
+    if not full_data.get("episode") and full_data.get("type") == "show":
         full_data["episode"] = ptn_data.get("episode", [])
 
     return ParsedData(**full_data)
@@ -454,7 +457,7 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
     if not raw_title or not isinstance(raw_title, str):
         raise ValueError("The input title must be a non-empty string.")
 
-    data: dict[str, Any] = PTN_PARSER.parse(raw_title, coherent_types=True, standardise=True)
+    data: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
 
     season_from_title = data.get("season", [])
     if isinstance(season_from_title, int):

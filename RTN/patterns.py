@@ -18,15 +18,11 @@ For more information on each function, refer to the respective docstrings.
 from typing import Any, Dict, List
 
 import regex
-from PTN import PTN
 
 
 def compile_patterns(patterns):
     """Compile a list of patterns and return them as a list of regex.Pattern objects."""
     return [regex.compile(pattern, regex.IGNORECASE) for pattern in patterns]
-
-# Instantiate it early so it can compile it's own patterns.
-PTN_PARSER = PTN()
 
 # Pattern for identifying unwanted quality. This will set `data.fetch`.
 IS_TRASH_COMPILED = compile_patterns(

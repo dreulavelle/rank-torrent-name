@@ -1,4 +1,3 @@
-
 import pytest
 from pydantic import ValidationError
 
@@ -406,7 +405,7 @@ def test_extract_episode_from_season():
         assert episodes == [], "Should raise TypeError"
 
     raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         episodes = episodes_from_season(raw_title, None) # type: ignore
         assert episodes == [], "Should raise TypeError"
 
@@ -435,7 +434,7 @@ def test_get_correct_episodes():
         ("Yu-Gi-Oh! Zexal - 094 - Enter Vector.mkv", [94]),
     ]
 
-    # Test PTT
+    # Test RTN
     for test_string, expected in test_cases:
         data = parse(test_string, remove_trash=False)
         assert data.episode == expected, f"Failed for '{test_string}' with expected {expected}"
@@ -445,6 +444,9 @@ def test_get_correct_episodes():
     for test_string, expected in test_cases:
         data = ptn_parse(test_string, coherent_types=True)
         assert data.get("episode") == expected, f"Failed for '{test_string}' with expected {expected}"
+
+    # Test PTT
+
 
 
 def test_trash_coverage():
@@ -473,3 +475,77 @@ def test_trash_coverage():
 
     for test_string, expected in test_cases:
         assert check_trash(test_string) == expected, f"Failed for '{test_string}' with expected {expected}"
+
+
+def test_rtn_default_parse(settings_model, rank_model):
+    raw_title = "Ходячие мертвецы: Выжившие / The Walking Dead: The Ones Who Live [01x01-03 из 06] (2024) WEB-DL 1080p от NewComers | P"
+    rtn = RTN(settings_model, rank_model)
+
+    # with pytest.raises(GarbageTorrent):
+    #     assert rtn.rank(raw_title=raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=True)
+
+    torrent = rtn.rank(raw_title=raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=False)
+    assert torrent.raw_title == raw_title
+    assert torrent.data.type == "show"
+    assert torrent.lev_ratio > 0.0
+    assert torrent.rank > 0
+    assert torrent.data.season == [1]
+    assert torrent.data.episode == [1, 2, 3]
+    assert torrent.data.resolution == ["1080p"]
+    assert torrent.data.quality == ["WEB-DL"]
+    assert torrent.data.language == []
+    assert torrent.data.subtitles == []
+    assert torrent.data.audio == []
+    assert torrent.data.codec == []
+    assert torrent.data.bitDepth == []
+    assert torrent.data.hdr == ""
+
+
+def test_metadata_mapping_issue_in_kc():
+    test_cases = [
+        ("3.10.to.Yuma.2007.1080p.BluRay.x264.DTS-SWTYBLZ.mkv", [], []),
+        ("30.Minutes.or.Less.2011.1080p.BluRay.X264-SECTOR7.mkv", [], []),
+        ("Alien.Covenant.2017.1080p.BluRay.x264-SPARKS[EtHD].mkv", [], []),
+        ("Alien.1979.REMASTERED.THEATRICAL.1080p.BluRay.x264.DTS-SWTYBLZ.mkv", [], []),
+        ("The Steve Harvey Show - S02E07 - When the Funk Hits the Rib Tips.mkv", [2], [7]),
+        ("Fantastic.Beasts.The.Crimes.Of.Grindelwald.2018.4K.HDR.2160p.BDRip Ita Eng x265-NAHOM.mkv", [], [])
+    ]
+
+    for test_string, expected_season, expected_episode in test_cases:
+        items = parse(test_string, False)
+        assert isinstance(items, ParsedData), f"Failed for '{test_string}', expected ParsedData object"
+        assert items.season == expected_season, f"Failed for '{test_string}' with expected {expected_season}"
+        assert items.episode == expected_episode, f"Failed for '{test_string}' with expected {expected_episode}"
+
+
+def test_fix_using_constant_instantiation_of_rtn():
+    test_cases = [
+        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1], [1]),
+        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1], [1, 2]),
+        ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8], []),
+        ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [1], [15]),
+        ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [], [2]),
+        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6], [5]),
+        ("4-13 Cursed (HD)", [], [13]),
+    ]
+
+    for test_string, expected_season, expected_episode in test_cases:
+        item = parse(test_string, False)
+        assert item.season == expected_season, f"Failed for '{test_string}' with expected {expected_season} season"
+        assert item.episode == expected_episode, f"Failed for '{test_string}' with expected {expected_episode} episode"
+        assert item.year == 0, f"Failed for '{test_string}' with expected 0"
+
+
+# def test_best_season_parser():
+#     test_cases = [
+#         ("Archer.S02.1080p.BluRay.DTSMA.AVC.Remux", [2]),
+#         ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
+#         ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", [1, 2, 3, 4, 5, 6]),
+#         ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8]),
+#         ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [10]),
+#         ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6]),
+#         ("4-13 Cursed (HD)", [4]),
+#         ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", []),
+#         ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", [6]),
+#         ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [4]),
+#     ]
