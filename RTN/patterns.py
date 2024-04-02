@@ -20,8 +20,6 @@ from typing import Any, Dict, List
 import regex
 from javascript import require
 
-from RTN.models import ParsedData
-
 
 def compile_patterns(patterns):
     """Compile a list of patterns and return them as a list of regex.Pattern objects."""
@@ -271,36 +269,36 @@ def ptt_parse(raw_title) -> Dict[str, Any]:
 
     return PTT.parse(raw_title)
 
-def ptt_map_to_obj(title: str) -> ParsedData:
+# def ptt_map_to_obj(title: str) -> ParsedData:
     
-    data = PTT.parse(title)
-    return ParsedData(
-        raw_title=title,
-        parsed_title=data["title"],
-        fetch=False,
-        is_4k=False,
-        is_multi_audio=data["audio"] and len(data["audio"]) > 1,
-        is_multi_subtitle=False,
-        is_complete=data["complete"],
-        year=data["year"],
-        resolution=[data["resolution"]],
-        quality=[data["source"]],
-        season=data["season"],
-        episode=data["episode"],
-        codec=[data["codec"]],
-        audio=data["audio"],
-        subtitles=[],
-        language=[data["languages"]],
-        bitDepth=[int(data["bitDepth"])],
-        hdr=data["hdr"],
-        proper=data["proper"],
-        repack=data["repack"],
-        remux=data["remastered"],
-        upscaled=False,
-        remastered=data["remastered"],
-        directorsCut=False,
-        extended=data["extended"],
-    )
+#     data = PTT.parse(title)
+#     return ParsedData(
+#         raw_title=title,
+#         parsed_title=data["title"],
+#         fetch=False,
+#         is_4k=False,
+#         is_multi_audio=data["audio"] and len(data["audio"]) > 1,
+#         is_multi_subtitle=False,
+#         is_complete=data["complete"],
+#         year=data["year"],
+#         resolution=[data["resolution"]],
+#         quality=[data["source"]],
+#         season=data["season"],
+#         episode=data["episode"],
+#         codec=[data["codec"]],
+#         audio=data["audio"],
+#         subtitles=[],
+#         language=[data["languages"]],
+#         bitDepth=[int(data["bitDepth"])],
+#         hdr=data["hdr"],
+#         proper=data["proper"],
+#         repack=data["repack"],
+#         remux=data["remastered"],
+#         upscaled=False,
+#         remastered=data["remastered"],
+#         directorsCut=False,
+#         extended=data["extended"],
+#     )
 
 
 def parse_extras(raw_title: str) -> Dict[str, Any]:
