@@ -49,7 +49,6 @@ from PTN import parse as ptn_parse
 
 from RTN import exceptions, fetch, models, parser, patterns, ranker
 
-from .extras import PTT
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, DefaultRanking, ParsedData, SettingsModel
 from .parser import (
@@ -61,7 +60,7 @@ from .parser import (
     sort_torrents,
     title_match,
 )
-from .patterns import parse_extras
+from .patterns import parse_extras, ptt_parse
 from .ranker import get_rank
 
 __all__ = [
@@ -84,7 +83,7 @@ __all__ = [
     "exceptions",
     # Extras
     "PTN",
-    "PTT",
+    "ptt_parse",
     "ptn_parse",
     "get_rank",
     "check_fetch",
