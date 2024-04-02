@@ -536,6 +536,7 @@ def test_fix_using_constant_instantiation_of_rtn():
         assert item.year == 0, f"Failed for '{test_string}' with expected 0"
 
 
+# This will be used in the next release.
 # def test_best_season_parser():
 #     test_cases = [
 #         ("Archer.S02.1080p.BluRay.DTSMA.AVC.Remux", [2]),

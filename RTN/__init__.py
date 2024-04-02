@@ -60,7 +60,7 @@ from .parser import (
     sort_torrents,
     title_match,
 )
-from .patterns import parse_extras, ptt_parse
+from .patterns import parse_extras
 from .ranker import get_rank
 
 __all__ = [
@@ -83,7 +83,6 @@ __all__ = [
     "exceptions",
     # Extras
     "PTN",
-    "ptt_parse",
     "ptn_parse",
     "get_rank",
     "check_fetch",
