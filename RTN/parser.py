@@ -45,7 +45,6 @@ Example:
     >>> torrent.lev_ratio
     0.95
 """
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List, Set, Tuple
 
@@ -282,36 +281,6 @@ class RTN:
         """
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             return list(executor.map(lambda t: self.rank(t[0], t[1], correct_title=correct_title, remove_trash=remove_trash), torrents))
-
-
-# class ParsedData(BaseModel):
-#     """Parsed data model for a torrent title."""
-
-#     raw_title: str
-#     parsed_title: str = ""
-#     fetch: bool = False
-#     is_4k: bool = False
-#     is_multi_audio: bool = False
-#     is_multi_subtitle: bool = False
-#     is_complete: bool = False
-#     year: int = 0
-#     resolution: List[str] = []
-#     quality: List[str] = []
-#     season: List[int] = []
-#     episode: List[int] = []
-#     codec: List[str] = []
-#     audio: List[str] = []
-#     subtitles: List[str] = []
-#     language: List[str] = []
-#     bitDepth: List[int] = []
-#     hdr: str = ""
-#     proper: bool = False
-#     repack: bool = False
-#     remux: bool = False
-#     upscaled: bool = False
-#     remastered: bool = False
-#     directorsCut: bool = False
-#     extended: bool = False
 
 
 def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:

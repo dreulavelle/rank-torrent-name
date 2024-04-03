@@ -446,8 +446,7 @@ def test_get_correct_episodes():
         assert data.get("episode") == expected, f"Failed for '{test_string}' with expected {expected}"
 
     # Test PTT
-
-
+    # TODO: Add PTT
 
 def test_trash_coverage():
     # Test the coverage of the trash patterns
@@ -550,3 +549,45 @@ def test_fix_using_constant_instantiation_of_rtn():
 #         ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", [6]),
 #         ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [4]),
 #     ]
+
+def test_output_on_parse(settings_model, rank_model):
+    raw_title = "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+
+    ptn_data = parse(raw_title, remove_trash=False)
+
+    assert ptn_data.raw_title == raw_title
+    assert ptn_data.parsed_title == "The Simpsons"
+    assert ptn_data.year == 0
+    assert ptn_data.resolution == ["1080p"]
+    assert ptn_data.quality == ["Blu-ray"]
+    assert ptn_data.season == [1]
+    assert ptn_data.episode == [1]
+    assert ptn_data.codec == ["H.265"]
+    assert ptn_data.audio == ["AAC 5.1"]
+    assert ptn_data.subtitles == []
+    assert ptn_data.language == []
+    assert ptn_data.bitDepth == [10]
+    assert ptn_data.hdr == ""
+
+    rtn = RTN(settings_model, rank_model)
+    rank_data = rtn.rank(raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", "The Simpsons", remove_trash=False)
+    
+    assert rank_data.raw_title == raw_title
+    assert rank_data.data.raw_title == raw_title
+    assert rank_data.data.parsed_title == "The Simpsons"
+    assert rank_data.data.year == 0
+    assert rank_data.data.resolution == ["1080p"]
+    assert rank_data.data.quality == ["Blu-ray"]
+    assert rank_data.data.season == [1]
+    assert rank_data.data.episode == [1]
+    assert rank_data.data.codec == ["H.265"]
+    assert rank_data.data.audio == ["AAC 5.1"]
+    assert rank_data.data.subtitles == []
+    assert rank_data.data.language == []
+    assert rank_data.data.bitDepth == [10]
+
+# def test_ptt_parse_output():
+#     raw_title = "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
+
+#     data = ptt_parse(raw_title)
+#     assert isinstance(data, dict)
