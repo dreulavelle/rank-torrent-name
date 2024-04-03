@@ -143,6 +143,10 @@ def check_hdr_dolby_video(raw_title: str) -> str:
     return ""
 
 
+def check_4k_video(raw_title: str) -> bool:
+    return bool(regex.search(r"\b4K|2160p\b", raw_title, regex.IGNORECASE))
+
+
 def range_transform(raw_title: str) -> set[int]:
     """
     Expands a range string into a list of individual episode numbers.
@@ -206,6 +210,7 @@ def parse_extras(raw_title: str) -> Dict[str, Any]:
         "is_multi_audio": check_pattern(MULTI_AUDIO_COMPILED, raw_title),
         "is_multi_subtitle": check_pattern(MULTI_SUBTITLE_COMPILED, raw_title),
         "is_complete": check_pattern(COMPLETE_SERIES_COMPILED, raw_title),
+        "is_4k": check_4k_video(raw_title),
         "hdr": check_hdr_dolby_video(raw_title) or "",
         "episode": extract_episodes(raw_title),
     }

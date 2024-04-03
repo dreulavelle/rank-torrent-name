@@ -332,43 +332,43 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         if check_trash(raw_title):
             raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
-    ptn_data = PTN.parse(raw_title, coherent_types=True)
+    data = PTN.parse(raw_title, coherent_types=True)
     extras = parse_extras(raw_title)
-    combined_data = {
-        "raw_title": raw_title,
-        "parsed_title": ptn_data.get("title", ""),
-        "fetch": False,
-        "is_4k": ptn_data.get("4k", False),
-        "is_multi_audio": extras["is_multi_audio"],
-        "is_multi_subtitle": extras["is_multi_subtitle"],
-        "is_complete": extras["is_complete"],
-        "year": ptn_data["year"],
-        "resolution": ptn_data["resolution"],
-        "quality": ptn_data["quality"],
-        "season": ptn_data["season"],
-        "episode": ptn_data["episode"],
-        "codec": ptn_data["codec"],
-        "audio": ptn_data["audio"],
-        "subtitles": ptn_data["subtitles"],
-        "language": ptn_data["language"],
-        "bitDepth": ptn_data.get("bitDepth", []),
-        "hdr": extras.get("hdr", ""),
-        "proper": ptn_data.get("proper", False),
-        "repack": ptn_data.get("repack", False),
-        "remux": ptn_data.get("remux", False),
-        "upscaled": ptn_data.get("upscaled", False),
-        "remastered": ptn_data.get("remastered", False),
-        "directorsCut": ptn_data.get("directorsCut", False),
-        "extended": ptn_data.get("extended", False),
-    }
 
-    parsed_data = ParsedData(**combined_data)
+    ptn_data = ParsedData(
+        # PTN
+        raw_title=raw_title,
+        parsed_title=data.get("title", ""),
+        year=data.get("year", 0)[0] if data.get("year") else 0,
+        resolution=data.get("resolution", []),
+        quality=data.get("quality", []),
+        season=data.get("season", []),
+        episode=data.get("episode", []),
+        codec=data.get("codec", []),
+        audio=data.get("audio", []),
+        subtitles=data.get("subtitles", []),
+        language=data.get("language", []),
+        bitDepth=data.get("bitDepth", []),
+        proper=data.get("proper", False),
+        repack=data.get("repack", False),
+        remux=data.get("remux", False),
+        upscaled=data.get("upscaled", False),
+        remastered=data.get("remastered", False),
+        directorsCut=data.get("directorsCut", False),
+        extended=data.get("extended", False),
+        # Extras
+        is_multi_audio=extras.get("is_multi_audio", False),
+        is_multi_subtitle=extras.get("is_multi_subtitle", False),
+        is_complete=extras.get("is_complete", False),
+        is_4k=extras.get("is_4k", False),
+        hdr=extras.get("hdr", ""),
+    )
 
     # Check both PTT and PTN for episode data.
-    if not ptn_data.get("episode") and parsed_data.type == "show":
-        combined_data["episode"] = ptn_data.get("episode", [])
+    if not ptn_data.episode and ptn_data.type == "show":
+        ptn_data.episode = extras.get("episode", [])
 
-    return parsed_data
+    return ptn_data
 
 
 def parse_chunk(chunk: List[str], remove_trash: bool) -> List[ParsedData]:

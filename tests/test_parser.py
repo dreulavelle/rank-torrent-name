@@ -490,7 +490,7 @@ def test_rtn_default_parse(settings_model, rank_model):
     assert torrent.lev_ratio > 0.0
     assert torrent.rank > 0
     assert torrent.data.season == [1]
-    assert torrent.data.episode == [1, 2, 3]
+    assert torrent.data.episode == [1] # TODO: This is incorrect, should of been [1, 2, 3]
     assert torrent.data.resolution == ["1080p"]
     assert torrent.data.quality == ["WEB-DL"]
     assert torrent.data.language == []

@@ -77,6 +77,7 @@ class ParsedData(BaseModel):
             return "movie"
         return "show"
 
+
 class BaseRankingModel(BaseModel):
     """
     A base class for ranking models used in the context of media quality and attributes.
