@@ -60,7 +60,7 @@ from .parser import (
     sort_torrents,
     title_match,
 )
-from .patterns import parse_extras
+from .patterns import check_video_extension, parse_extras
 from .ranker import get_rank
 
 __all__ = [
@@ -91,4 +91,5 @@ __all__ = [
     "sort_torrents",
     "parse_extras",
     "episodes_from_season",
+    "check_video_extension",
 ]

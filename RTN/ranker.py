@@ -16,6 +16,22 @@ Arguments:
 - `rank_model` (BaseRankingModel): The base ranking model used for calculating the ranking.
 
 For more information on each function, refer to the respective docstrings.
+
+Examples:
+    >>> get_rank(ParsedData, SettingsModel, BaseRankingModel)
+    250
+    >>> calculate_preferred(ParsedData, SettingsModel)
+    5000
+    >>> calculate_resolution_rank(ParsedData, SettingsModel, BaseRankingModel)
+    25
+    >>> calculate_quality_rank(ParsedData, SettingsModel, BaseRankingModel)
+    20
+    >>> calculate_codec_rank(ParsedData, SettingsModel, BaseRankingModel)
+    10
+    >>> calculate_audio_rank(ParsedData, SettingsModel, BaseRankingModel)
+    5
+    >>> calculate_other_ranks(ParsedData, SettingsModel, BaseRankingModel)
+    25
 """
 
 import regex

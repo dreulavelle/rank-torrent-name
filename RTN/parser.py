@@ -224,7 +224,7 @@ class RTN:
         if remove_trash: # noqa: SIM102
             if check_trash(raw_title):
                 raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
-    
+
         parsed_data = parse(raw_title, remove_trash)
         lev_ratio = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
 
