@@ -558,13 +558,13 @@ dev = ["importlib-metadata", "tox"]
 
 [[package]]
 name = "pyright"
-version = "1.1.359"
+version = "1.1.361"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.359-py3-none-any.whl", hash = "sha256:5582777be7eab73512277ac7da7b41e15bc0737f488629cb9babd96e0769be61"},
-    {file = "pyright-1.1.359.tar.gz", hash = "sha256:f0eab50f3dafce8a7302caeafd6a733f39901a2bf5170bb23d77fd607c8a8dbc"},
+    {file = "pyright-1.1.361-py3-none-any.whl", hash = "sha256:c50fc94ce92b5c958cfccbbe34142e7411d474da43d6c14a958667e35b9df7ea"},
+    {file = "pyright-1.1.361.tar.gz", hash = "sha256:1d67933315666b05d230c85ea8fb97aaa2056e4092a13df87b7765bb9e8f1a8d"},
 ]
 
 [package.dependencies]
