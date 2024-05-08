@@ -46,6 +46,7 @@ For more information on each module or class, refer to the respective docstrings
 """
 from PTN import PTN
 from PTN import parse as ptn_parse
+from PTT import Parser, add_defaults
 
 from RTN import exceptions, fetch, models, parser, patterns, ranker
 
@@ -75,6 +76,9 @@ __all__ = [
     # Required Models
     "SettingsModel",
     "BaseRankingModel",
+    # PTT
+    "Parser",
+    "add_defaults",
     # Submodules
     "models",
     "parser",

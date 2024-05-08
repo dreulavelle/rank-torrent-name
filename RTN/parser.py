@@ -51,6 +51,7 @@ from typing import Any, Dict, List, Set, Tuple
 import Levenshtein
 import PTN
 import regex
+from PTT import Parser, add_defaults
 from pydantic import BaseModel, field_validator
 
 from RTN.exceptions import GarbageTorrent
@@ -487,3 +488,17 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
         if isinstance(eps, list) and len(eps) > 0:
             return eps
     return []
+
+def parsett(query: str) -> dict:
+    """
+    Parse a torrent title using the default PTT parser with additional patterns and settings.
+
+    Parameters:
+    - `query` (str): The torrent title to parse.
+
+    Returns:
+    - dict: A dictionary containing the parsed metadata from the torrent title.
+    """
+    p = Parser()
+    add_defaults(p)
+    return p.parse(query)
