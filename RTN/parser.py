@@ -51,7 +51,7 @@ from typing import Any, Dict, List, Set, Tuple
 import Levenshtein
 import PTN
 import regex
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from RTN.exceptions import GarbageTorrent
 
@@ -115,7 +115,7 @@ class Torrent(BaseModel):
     class Config:
         frozen = True
 
-    @validator("infohash")
+    @field_validator("infohash")
     def validate_infohash(cls, v):
         """Validates infohash length and SHA-1 format."""
         if len(v) != 40 or not regex.match(r"^[a-fA-F0-9]{40}$", v):
