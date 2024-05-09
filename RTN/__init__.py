@@ -62,7 +62,13 @@ from .parser import (
     sort_torrents,
     title_match,
 )
-from .patterns import check_video_extension, parse_extras
+from .patterns import (
+    check_video_extension,
+    extract_episodes,
+    extract_seasons,
+    parse_extras,
+    parsett,
+)
 from .ranker import get_rank
 
 __all__ = [
@@ -77,6 +83,9 @@ __all__ = [
     "SettingsModel",
     "BaseRankingModel",
     # PTT
+    "parsett",
+    "extract_seasons",
+    "extract_episodes",
     "Parser",
     "add_defaults",
     # Submodules

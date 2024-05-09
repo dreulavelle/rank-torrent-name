@@ -31,10 +31,11 @@ Example:
     >>> rtn = RTN(rank_model, settings)
 """
 
-from typing import Any, Dict, List, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
 
 import regex
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 from regex import Pattern
 
 from RTN.patterns import IS_MOVIE_COMPILED
@@ -68,6 +69,7 @@ class ParsedData(BaseModel):
     remastered: bool = False
     directorsCut: bool = False
     extended: bool = False
+    date: Optional[datetime] = None
 
     @property
     def type(self) -> str:
@@ -247,7 +249,7 @@ class SettingsModel(BaseModel):
         "av1": CustomRank(enable=False, fetch=True, rank=0),
     }
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def compile_and_validate_patterns(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Compile string patterns to regex.Pattern, keeping compiled patterns unchanged."""
         for field in ("require", "exclude", "preferred"):

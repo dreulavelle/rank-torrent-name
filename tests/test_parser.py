@@ -29,6 +29,7 @@ from RTN.patterns import (
     check_pattern,
     extract_episodes,
     parse_extras,
+    parsett,
 )
 
 ## Define Fixtures
@@ -67,29 +68,321 @@ def rank_model():
 @pytest.fixture
 def test_titles():
     return [
+        "The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
         "The.Matrix.1999.1080p.BluRay.x264",
         "Inception.2010.720p.BRRip.x264",
-        "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "House MD All Seasons (1-8) 720p Ultra-Compressed"
-        "The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)"
-        "Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World"
-        "Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]"
-        "4-13 Cursed (HD)"
-        "Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR"
-        "[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]"
-        "BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p"
-        "[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ"
-        "Bleach 10º Temporada - 215 ao 220 - [DB-BR]"
-        "Naruto Shippuden - 107 - Strange Bedfellows"
-        "[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]"
-        "[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]"
+        "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+        "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+        "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+        "The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+        "The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+        "House MD All Seasons (1-8) 720p Ultra-Compressed",
+        "The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)",
+        "[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]",
+        "BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p",
+        "Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World",
+        "Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]",
+        "4-13 Cursed (HD)",
+        "Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR",
+        "[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ",
+        "Bleach 10º Temporada - 215 ao 220 - [DB-BR]",
+        "Naruto Shippuden - 107 - Strange Bedfellows",
+        "[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]",
+        "[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle].mkv"
     ]
 
+
+@pytest.mark.parametrize("test_string, expected", [
+    ("The Simpsons S28E21 720p HDTV x264-AVS", [28]),
+    ("breaking.bad.s01e01.720p.bluray.x264-reward", [1]),
+    ("S011E16.mkv", [11]),
+    ("Dragon Ball Super S01 E23 French 1080p HDTV H264-Kesni", [1]),
+    ("The Twilight Zone 1985 S01E23a Shadow Play.mp4", [1]),
+    ("Mash S10E01b Thats Show Biz Part 2 1080p H.264 (moviesbyrizzo upload).mp4", [10]),
+    ("The Twilight Zone 1985 S01E22c The Library.mp4", [1]),
+    ("Desperate.Housewives.S0615.400p.WEB-DL.Rus.Eng.avi", [6]),
+    ("Doctor.Who.2005.8x11.Dark.Water.720p.HDTV.x264-FoV", [8]),
+    ("Orange Is The New Black Season 5 Episodes 1-10 INCOMPLETE (LEAKED)", [5]),
+    ("Smallville (1x02 Metamorphosis).avi", [1]),
+    ("The.Man.In.The.High.Castle1x01.HDTV.XviD[www.DivxTotaL.com].avi", [1]),
+    ("clny.3x11m720p.es[www.planetatorrent.com].mkv", [3]),
+    ("Game Of Thrones Complete Season 1,2,3,4,5,6,7 406p mkv + Subs", [1, 2, 3, 4, 5, 6, 7]),
+    ("Futurama Season 1 2 3 4 5 6 7 + 4 Movies - threesixtyp", [1, 2, 3, 4, 5, 6, 7]),
+    ("Breaking Bad Complete Season 1 , 2 , 3, 4 ,5 ,1080p HEVC", [1, 2, 3, 4, 5]),
+    ("True Blood Season 1, 2, 3, 4, 5 & 6 + Extras BDRip TSV", [1, 2, 3, 4, 5, 6]),
+    ("How I Met Your Mother Season 1, 2, 3, 4, 5, & 6 + Extras DVDRip", [1, 2, 3, 4, 5, 6]),
+    ("The Simpsons Season 20 21 22 23 24 25 26 27 - threesixtyp", [20, 21, 22, 23, 24, 25, 26, 27]),
+    ("Perdidos: Lost: Castellano: Temporadas 1 2 3 4 5 6 (Serie Com", [1, 2, 3, 4, 5, 6]),
+    ("The Boondocks Season 1, 2 & 3", [1, 2, 3]),
+    ("Boondocks, The - Seasons 1 + 2", [1, 2]),
+    ("The Boondocks Seasons 1-4 MKV", [1, 2, 3, 4]),
+    ("The Expanse Complete Seasons 01 & 02 1080p", [1, 2]),
+    ("Friends.Complete.Series.S01-S10.720p.BluRay.2CH.x265.HEVC-PSA", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    ("Stargate Atlantis ALL Seasons - S01 / S02 / S03 / S04 / S05", [1, 2, 3, 4, 5]),
+    ("Stargate Atlantis Complete (Season 1 2 3 4 5) 720p HEVC x265", [1, 2, 3, 4, 5]),
+    ("Skam.S01-S02-S03.SweSub.720p.WEB-DL.H264", [1, 2, 3]),
+    ("Seinfeld S02 Season 2 720p WebRip ReEnc-DeeJayAhmed", [2]),
+    ("Seinfeld Season 2 S02 720p AMZN WEBRip x265 HEVC Complete", [2]),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8]),
+    ("Teen Titans Season 1-5", [1, 2, 3, 4, 5]),
+    ("Game Of Thrones - Season 1 to 6 (Eng Subs)", [1, 2, 3, 4, 5, 6]),
+    ("Travelers - Seasons 1 and 2 - Mp4 x264 AC3 1080p", [1, 2]),
+    ("Naruto Shippuden Season 1:11", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+    ("South Park Complete Seasons 1: 11", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
+    ("24 Season 1-8 Complete with Subtitles", [1, 2, 3, 4, 5, 6, 7, 8]),
+    ("One Punch Man 01 - 12 Season 1 Complete [720p] [Eng Subs] [Xerxe:16", [1]),
+    ("[5.01] Weight Loss.avi", [5]),
+    ("Dragon Ball [5.134] Preliminary Peril.mp4", [5]),
+    ("Bron - S4 - 720P - SweSub.mp4", [4]),
+    ("Mad Men S02 Season 2 720p 5.1Ch BluRay ReEnc-DeeJayAhmed", [2]),
+    ("Friends S04 Season 4 1080p 5.1Ch BluRay ReEnc-DeeJayAhmed", [4]),
+    ("Doctor Who S01--S07--Complete with holiday episodes", [1, 2, 3, 4, 5, 6, 7]),
+    ("My Little Pony FiM - 6.01 - No Second Prances.mkv", [6]),
+    ("Desperate Housewives - Episode 1.22 - Goodbye for now.avi", [1]),
+    ("All of Us Are Dead . 2022 . S01 EP #1.2.mkv", [1]),
+    ("Empty Nest Season 1 (1988 - 89) fiveofseven", [1]),
+    ("Game of Thrones / Сезон: 1-8 / Серии: 1-73 из 73 [2011-2019, США, BDRip 1080p] MVO (LostFilm)", [1, 2, 3, 4, 5, 6, 7, 8]),
+    ("Друзья / Friends / Сезон: 1, 2 / Серии: 1-24 из 24 [1994-1999, США, BDRip 720p] MVO", [1, 2]),
+    ("Друзья / Friends / Сезон: 1 / Серии: 1-24 из 24 [1994-1995, США, BDRip 720p] MVO + Original + Sub (Rus, Eng)", [1]),
+    ("Сезон 5/Серия 11.mkv", [5]),
+    ("Разрушители легенд. MythBusters. Сезон 15. Эпизод 09. Скрытая угроза (2015).avi", [15]),
+    ("Леди Баг и Супер-Кот – Сезон 3, Эпизод 21 – Кукловод 2 [1080p].mkv", [3]),
+    ("Проклятие острова ОУК_ 5-й сезон 09-я серия_ Прорыв Дэна.avi", [5]),
+    ("2 сезон 24 серия.avi", [2]),
+    ("3 сезон", [3]),
+    ("2. Discovery-Kak_ustroena_Vselennaya.(2.sezon_8.serii.iz.8).2012.XviD.HDTVRip.Krasnodarka", [2]),
+    ("Otchayannie.domochozyaiki.(8.sez.21.ser.iz.23).2012.XviD.HDTVRip.avi", [8]),
+    ("Интерны. Сезон №9. Серия №180.avi", [9]),
+    ("Discovery. Парни с Юкона / Yokon Men [06х01-08] (2017) HDTVRip от GeneralFilm | P1", [6]),
+    ("Zvezdnie.Voiny.Voina.Klonov.3.sezon.22.seria.iz.22.XviD.HDRip.avi", [3]),
+    ("2-06. Девичья сила.mkv", [2]),
+    ("4-13 Cursed (HD).m4v", [4]),
+    ("Доктор Хаус 03-20.mkv", [3]),
+    ("Комиссар Рекс 11-13.avi", [11]),
+    ("13-13-13 2013 DVDrip x264 AAC-MiLLENiUM", []),
+    ("MARATHON EPISODES/Orphan Black S3 Eps.05-08.mp4", [3]),
+    ("Once Upon a Time [S01-07] (2011-2017) WEB-DLRip by Generalfilm", [1, 2, 3, 4, 5, 6, 7]),
+    ("[F-D] Fairy Tail Season 1 -6 + Extras [480P][Dual-Audio]", [1, 2, 3, 4, 5, 6]),
+    ("Coupling Season 1 - 4 Complete DVDRip - x264 - MKV by RiddlerA", [1, 2, 3, 4]),
+    ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [4]),
+    ("Tokyo Ghoul Root A - 07 [S2-07] [Eng Sub] 480p [email protected]", [2]),
+    ("Ace of the Diamond: 1st Season", [1]),
+    ("Ace of the Diamond: 2nd Season", [2]),
+    ("Adventure Time 10 th season", [10]),
+    ("Kyoukai no Rinne (TV) 3rd Season - 23 [1080p]", [3]),
+    ("[Erai-raws] Granblue Fantasy The Animation Season 2 - 08 [1080p][Multiple Subtitle].mkv", [2]),
+    ("The Nile Egypts Great River with Bettany Hughes Series 1 4of4 10", [1]),
+    ("Teen Wolf - 04ª Temporada 720p", [4]),
+    ("Vikings 3 Temporada 720p", [3]),
+    ("Eu, a Patroa e as Crianças  4° Temporada Completa - HDTV - Dublado", [4]),
+    ("Merl - Temporada 1", [1]),
+    ("Elementar 3º Temporada Dublado", [3]),
+    ("Beavis and Butt-Head - 1a. Temporada", [1]),
+    ("3Âº Temporada Bob esponja Pt-Br", [3]),
+    ("Juego de Tronos - Temp.2 [ALTA DEFINICION 720p][Cap.209][Spanish].mkv", [2]),
+    ("Los Simpsons Temp 7 DVDrip Espanol De Espana", [7]),
+    ("The Walking Dead [Temporadas 1 & 2 Completas Em HDTV E Legena", [1, 2]),
+    ("My Little Pony - A Amizade é Mágica - T02E22.mp4", [2]),
+    ("30 M0N3D4S ESP T01XE08.mkv", [1]),
+    ("Sons of Anarchy Sn4 Ep14 HD-TV - To Be, Act 2, By Cool Release", [4]),
+    ("[FFA] Kiratto Pri☆chan Season 3 - 11 [1080p][HEVC].mkv", [3]),
+    ("[Erai-raws] Granblue Fantasy The Animation Season 2 - 10 [1080p][Multiple Subtitle].mkv", [2]),
+    ("[SCY] Attack on Titan Season 3 - 11 (BD 1080p Hi10 FLAC) [1FA13150].mkv", [3]),
+    ("DARKER THAN BLACK - S00E04 - Darker Than Black Gaiden OVA 3.mkv", [0]),
+    ("Seizoen 22 - Zon & Maan Ultra Legendes/afl.18 Je ogen op de bal houden!.mp4", [22]),
+    ("Ranma-12-86.mp4", []),
+    ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle].mkv", [3]),
+
+    # From episode parsing, these are not supposed to have seasons either.
+    ("523 23.mp4", []),
+    ("Chernobyl E02 1 23 45.mp4", []),
+    ("Watch Gary And His Demons Episode 10 - 0.00.07-0.11.02.mp4", []),
+    ("wwf.raw.is.war.18.09.00.avi", []),
+])
+def test_extract_seasons(test_string, expected):
+    results = parsett(test_string)
+    assert results["seasons"] == expected, f"Failed for {test_string}"
+
+@pytest.mark.parametrize("test_string, expected_episode", [
+    # Mine
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2]),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2]),
+    ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2, 3, 4, 5]),
+    ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2, 3, 4, 5]),
+    ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", list(range(1, 201))),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", []),
+    ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [15]),
+    ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [5]),
+    ("4-13 Cursed (HD)", [13]),
+    ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [2]),
+    ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [215, 216, 217, 218, 219, 220]),
+    ("Naruto Shippuden - 107 - Strange Bedfellows", [107]),
+    ("[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]", [13]),
+    ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle].mkv", [11]),
+    ("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd.mkv", []),
+    # PTT
+    ("The Simpsons S28E21 720p HDTV x264-AVS", [21]),
+    ("breaking.bad.s01e01.720p.bluray.x264-reward", [1]),
+    ("Dragon Ball Super S01 E23 French 1080p HDTV H264-Kesni", [23]),
+    ("The.Witcher.S01.07.2019.Dub.AVC.ExKinoRay.mkv", [7]),
+    ("Vikings.s02.09.AVC.tahiy.mkv", [9]),
+    ("The Twilight Zone 1985 S01E23a Shadow Play.mp4", [23]),
+    ("Desperate_housewives_S03E02Le malheur aime la compagnie.mkv", [2]),
+    ("Mash S10E01b Thats Show Biz Part 2 1080p H.264 (moviesbyrizzo upload).mp4", [1]),
+    ("The Twilight Zone 1985 S01E22c The Library.mp4", [22]),
+    ("Desperate.Housewives.S0615.400p.WEB-DL.Rus.Eng.avi", [15]),
+    ("Doctor.Who.2005.8x11.Dark.Water.720p.HDTV.x264-FoV", [11]),
+    ("Anubis saison 01 episode 38 tvrip FR", [38]),
+    ("Le Monde Incroyable de Gumball - Saison 5 Ep 14 - L'extérieur", [14]),
+    ("Smallville (1x02 Metamorphosis).avi", [2]),
+    ("The.Man.In.The.High.Castle1x01.HDTV.XviD[www.DivxTotaL.com].avi", [1]),
+    ("clny.3x11m720p.es[www.planetatorrent.com].mkv", [11]),
+    ("Friends.S07E20.The.One.With.Rachel's.Big.Kiss.720p.BluRay.2CH.x265.HEVC-PSA.mkv", [20]),
+    ("Friends - [8x18] - The One In Massapequa.mkv", [18]),
+    ("Friends - [7x23-24] - The One with Monica and Chandler's Wedding + Audio Commentary.mkv", [23, 24]),
+    ("Yu-Gi-Oh 3x089 - Awakening of Evil (Part 4).avi", [89]),
+    ("611-612 - Desperate Measures, Means & Ends.mp4", [611, 612]),
+    ("[Final8]Suisei no Gargantia - 05 (BD 10-bit 1920x1080 x264 FLAC)[E0B15ACF].mkv", [5]),
+    ("Orange Is The New Black Season 5 Episodes 1-10 INCOMPLETE (LEAKED)", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    ("Vikings.Season.05.Ep(01-10).720p.WebRip.2Ch.x265.PSA", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+    ("[TBox] Dragon Ball Z Full 1-291(Subbed Jap Vers)", list(range(1, 292))),
+    ("Marvel's.Agents.of.S.H.I.E.L.D.S02E01-03.Shadows.1080p.WEB-DL.DD5.1", [1, 2, 3]),
+    ("Naruto Shippuden Ep 107 - Strange Bedfellows.mkv", [107]),
+    ("Naruto Shippuden - 107 - Strange Bedfellows.mkv", [107]),
+    ("[AnimeRG] Naruto Shippuden - 107 [720p] [x265] [pseudo].mkv", [107]),
+    ("Naruto Shippuuden - 006-007.mkv", [6, 7]),
+    ("321 - Family Guy Viewer Mail #1.avi", [321]),
+    ("512 - Airport '07.avi", [512]),
+    ("102 - The Invitation.avi", [102]),
+    ("02 The Invitation.mp4", [2]),
+    ("004 - Male Unbonding - [DVD].avi", [4]),
+    ("The Amazing World of Gumball - 103, 104 - The Third - The Debt.mkv", [103, 104]),
+    ("The Amazing World of Gumball - 103 - The End - The Dress (720p.x264.ac3-5.1) [449].mkv", [103]),
+    ("The Amazing World of Gumball - 107a - The Mystery (720p.x264.ac3-5.1) [449].mkv", [107]),
+    ("The Amazing World of Gumball - 107b - The Mystery (720p.x264.ac3-5.1) [449].mkv", [107]),
+    ("[5.01] Weight Loss.avi", [1]),
+    ("Dragon Ball [5.134] Preliminary Peril.mp4", [134]),
+    ("S01 - E03 - Fifty-Fifty.mkv", [3]),
+    ("The Office S07E25+E26 Search Committee.mp4", [25, 26]),
+    ("[animeawake] Naruto Shippuden - 124 - Art_2.mkv", [124]),
+    ("[animeawake] Naruto Shippuden - 072 - The Quietly Approaching Threat_2.mkv", [72]),
+    ("[animeawake] Naruto Shippuden - 120 - Kakashi Chronicles. Boys' Life on the Battlefield. Part 2.mkv", [120]),
+    ("Supernatural - S03E01 - 720p BluRay x264-Belex - Dual Audio + Legenda.mkv", [1]),
+    ("[F-D] Fairy Tail Season 1 -6 + Extras [480P][Dual-Audio]", []),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", []),
+    ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p", []),
+    ("09 Movie - Dragon Ball Z - Bojack Unbound", []),
+    ("24 - S01xE03.mp4", [3]),
+    ("24 - S01E04 - x264 - dilpill.mkv", [4]),
+    ("24.Legacy.S01E05.720p.HEVC.x265-MeGusta", [5]),
+    ("[F-D] Fairy.Tail.-.004v2.-. [480P][Dual-Audio].mkv", [4]),
+    ("[Exiled-Destiny]_Tokyo_Underground_Ep02v2_(41858470).mkv", [2]),
+    ("[a-s]_fairy_tail_-_003_-_infiltrate_the_everlue_mansion__rs2_[1080p_bd-rip][4CB16872].mkv", [3]),
+    ("Food Wars! Shokugeki No Souma S4 - 11 (1080p)(HEVC x265 10bit)", [11]),
+    ("Dragon Ball Super S05E53 - Ep.129.mkv", [53]),
+    ("DShaun.Micallefs.MAD.AS.HELL.S10E03.576p.x642-YADNUM.mkv", [3]),
+    ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay).mp4", [15]),
+    ("My Little Pony FiM - 6.01 - No Second Prances.mkv", [1]),
+    ("Desperate Housewives - Episode 1.22 - Goodbye for now.avi", [22]),
+    ("All of Us Are Dead . 2022 . S01 EP #1.2.mkv", [2]),
+    ("Mob Psycho 100 - 09 [1080p].mkv", [9]),
+    ("3-Nen D-Gumi Glass no Kamen - 13 [480p]", [13]),
+    ("BBC Indian Ocean with Simon Reeve 5of6 Sri Lanka to Bangladesh.avi", [5]),
+    ("Witches Of Salem - 2Of4 - Road To Hell - Gr.mkv", [2]),
+    ("Das Boot Miniseries Original Uncut-Reevel Cd2 Of 3.avi", [2]),
+    ("Stargate Universe S01E01E02E03.mp4", [1, 2, 3]),
+    ("Stargate Universe S01E01-E02-E03.mp4", [1, 2, 3]),
+    ("MARATHON EPISODES/Orphan Black S3 Eps.05-08.mp4", [5, 6, 7, 8]),
+    ("Pokemon Black & White E10 - E17 [CW] AVI", [10, 11, 12, 13, 14, 15, 16, 17]),
+    ("Pokémon.S01E01-E04.SWEDISH.VHSRip.XviD-aka", [1, 2, 3, 4]),
+    ("[HorribleSubs] White Album 2 - 06 [1080p].mkv", [6]),
+    ("Mob.Psycho.100.II.E10.720p.WEB.x264-URANiME.mkv", [10]),
+    ("E5.mkv", [5]),
+    ("[OMDA] Bleach - 002 (480p x264 AAC) [rich_jc].mkv", [2]),
+    ("[ACX]El_Cazador_de_la_Bruja_-_19_-_A_Man_Who_Protects_[SSJ_Saiyan_Elite]_[9E199846].mkv", [19]),
+    ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", [1, 2, 3, 4, 5, 6, 7, 8]),
+    ("Мистер Робот / Mr. Robot / Сезон: 2 / Серии: 1-5 (12) [2016, США, WEBRip 1080p] MVO", [1, 2, 3, 4, 5]),
+    ("Викинги / Vikings / Сезон: 5 / Серии: 1 [2017, WEB-DL 1080p] MVO", [1]),
+    ("Викинги / Vikings / Сезон: 5 / Серии: 1 из 20 [2017, WEB-DL 1080p] MVO", [1]),
+    ("Prehistoric park.3iz6.Supercroc.DVDRip.Xvid.avi", [3]),
+    ("Меч (05 сер.) - webrip1080p.mkv", [5]),
+    ("Серия 11.mkv", [11]),
+    ("Разрушители легенд. MythBusters. Сезон 15. Эпизод 09. Скрытая угроза (2015).avi", [9]),
+    ("Леди Баг и Супер-Кот – Сезон 3, Эпизод 21 – Кукловод 2 [1080p].mkv", [21]),
+    ("Проклятие острова ОУК_ 5-й сезон 09-я серия_ Прорыв Дэна.avi", [9]),
+    ("Интерны. Сезон №9. Серия №180.avi", [180]),
+    ("Tajny.sledstviya-20.01.serya.WEB-DL.(1080p).by.lunkin.mkv", [1]),
+    ("Zvezdnie.Voiny.Voina.Klonov.3.sezon.22.seria.iz.22.XviD.HDRip.avi", [22]),
+    ("Otchayannie.domochozyaiki.(8.sez.21.ser.iz.23).2012.XviD.HDTVRip.avi", [21]),
+    ("MosGaz.(08.seriya).2012.WEB-DLRip(AVC).ExKinoRay.mkv", [8]),
+    ("Tajny.sledstvija.(2.sezon.12.serija.iz.12).2002.XviD.DVDRip.avi", [12]),
+    ("Discovery. Парни с Юкона / Yokon Men [06х01-08] (2017) HDTVRip от GeneralFilm | P1", [1, 2, 3, 4, 5, 6, 7, 8]),
+    ("2-06. Девичья сила.mkv", [6]),
+    ("4-13 Cursed (HD).m4v", [13]),
+    ("The Ed Show 10-19-12.mp4", []),
+    ("Hogan's Heroes - 516 - Get Fit or Go Flight - 1-09-70.divx", [516]),
+    ("Доктор Хаус 03-20.mkv", [20]),
+    ("Комиссар Рекс 11-13.avi", [13]),
+    ("Kyoukai no Rinne (TV) 3rd Season - 23 [1080p]", [23]),
+    ("[224] Shingeki no Kyojin - S03 - Part 1 -  13 [BDRip.1080p.x265.FLAC].mkv", [13]),
+    ("El Chema Temporada 1 Capitulo 25", [25]),
+    ("Juego de Tronos - Temp.2 [ALTA DEFINICION 720p][Cap.209][Spanish].mkv", [209]),
+    ("Blue Bloods - Temporada 11 [HDTV 720p][Cap.1103][AC3 5.1 Castellano][www.PCTmix.com].mkv", [1103]),
+    ("Mazinger-Z-Cap-52.avi", [52]),
+    ("Yu-Gi-Oh! ZEXAL Temporada 1 Episodio 009 Dual Latino e Inglés [B3B4970E].mkv", [9]),
+    ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [215, 216, 217, 218, 219, 220]),
+    ("My Little Pony - A Amizade é Mágica - T02E22.mp4", [22]),
+    ("30 M0N3D4S ESP T01XE08.mkv", [8]),
+    ("[CBM]_Medaka_Box_-_11_-_This_Is_the_End!!_[720p]_[436E0E90].mkv", [11]),
+    ("[CBM]_Medaka_Box_-_11_-_This_Is_the_End!!_[720p]_[436E0E90]", [11]),
+    ("(Hi10)_Re_Zero_Shin_Henshuu-ban_-_02v2_(720p)_(DDY)_(72006E34).mkv", [2]),
+    ("22-7 (Season 1) (1080p)(HEVC x265 10bit)(Eng-Subs)-Judas[TGx] ⭐", []),
+    ("[Erai-raws] Carole and Tuesday - 01 ~ 12 [1080p][Multiple Subtitle]", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+    ("[Erai-raws] 3D Kanojo - Real Girl 2nd Season - 01 ~ 12 [720p]", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+    ("[FFA] Koi to Producer: EVOL×LOVE - 01 - 12 [1080p][HEVC][AAC]", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+    ("[BenjiD] Quan Zhi Gao Shou (The King’s Avatar) / Full-Time Master S01 (01 - 12) [1080p x265] [Soft sub] V2", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+    ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [24]),
+    ("Tokyo Ghoul Root A - 07 [S2-07] [Eng Sub] 480p [email protected]", [7]),
+    ("black-ish.S05E02.1080p..x265.10bit.EAC3.6.0-Qman[UTR].mkv", [2]),
+    ("[Eng Sub] Rebirth Ep #36 [8CF3ADFA].mkv", [36]),
+    ("[92 Impatient Eilas & Miyafuji] Strike Witches - Road to Berlin - 01 [1080p][BCDFF6A2].mkv", [1]),
+    ("[224] Darling in the FranXX - 14 [BDRip.1080p.x265.FLAC].mkv", [14]),
+    ("[Erai-raws] Granblue Fantasy The Animation Season 2 - 10 [1080p][Multiple Subtitle].mkv", [10]),
+    ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle].mkv", [11]),
+    ("DARKER THAN BLACK - S00E00.mkv", [0]),
+    ("[Erai-raws] 22-7 - 11 .mkv", [11]),
+    ("[Golumpa] Star Blazers 2202 - 22 (Uchuu Senkan Yamato 2022) [FuniDub 1080p x264 AAC] [A24B89C8].mkv", [22]),
+    ("[SubsPlease] Digimon Adventure (2020) - 35 (720p) [4E7BA28A].mkv", [35]),
+    ("[KH] Sword Art Online II - 14.5 - Debriefing.mkv", [14]),
+    ("[SSA] Detective Conan - 1001 [720p].mkv", [1001]),
+    ("Pwer-04_05.avi", [5]),
+    ("SupNat-11_06.avi", [6]),
+    ("office_03_19.avi", [19]),
+    ("Spergrl-2016-02_04.avi", [4]),
+    ("Iron-Fist-2017-01_13-F.avi", [13]),
+    ("Lgds.of.Tmrow-02_17.F.avi", [17]),
+    ("Ozk.02.09.avi", [9]),
+    ("Ozk.02.10.F.avi", [10]),
+    ("Cestovatelé_S02E04_11_27.mkv", [4]),
+    ("S03E13_91.avi", [13]),
+    ("wwe.nxt.uk.11.26.mkv", [26]),
+    ("Chernobyl.S01E01.1.23.45.mkv", [1]),
+    ("The.Witcher.S01.07.mp4", [7]),
+    ("Breaking Bad S02 03.mkv", [3]),
+    ("NCIS Season 11 01.mp4", [1]),
+    ("Top Gear - 3x05 - 2003.11.23.avi", [5]),
+    ("[KTKJ]_[BLEACH]_[DVDRIP]_[116]_[x264_640x480_aac].mkv", [116]),
+    ("[GM-Team][国漫][绝代双骄][Legendary Twins][2022][08][HEVC][GB][4K].mp4", [8]),
+    # ("8-6 2006.07.16.avi", [6]),   # This is wrong. It should be [6] but instead gets [8]
+    ("523 23.mp4", [523]),
+    ("Chernobyl E02 1 23 45.mp4", [2]),
+    ("Watch Gary And His Demons Episode 10 - 0.00.07-0.11.02.mp4", [10]),
+    ("wwf.raw.is.war.18.09.00.avi", []),
+])
+def test_extract_episodes(test_string, expected_episode):
+    results = parsett(test_string)
+    assert results["episodes"] == expected_episode, f"Failed for {test_string}"
 
 def test_default_ranking_model(rank_model):
     assert isinstance(rank_model, BaseRankingModel)
@@ -189,12 +482,11 @@ def test_batch_parse_processing(test_titles):
     # Test batch parsing retuns a list of ParsedData objects
     # Verify that each item in the result is an instance of ParsedData
     # and its raw_title matches the corresponding input title
-    parsed_results = batch_parse(test_titles, remove_trash=False, chunk_size=5)
+    parsed_results = batch_parse(test_titles, remove_trash=False, chunk_size=50)
     assert len(parsed_results) == len(test_titles)
-    for parsed_data, title in zip(parsed_results, test_titles):
-        assert isinstance(parsed_data, ParsedData), "Result item is not an instance of ParsedData"
-        assert parsed_data.raw_title == title, f"Expected raw_title to be '{title}', but got '{parsed_data.raw_title}'"
-
+    for parsed, title in zip(parsed_results, test_titles):
+        assert isinstance(parsed, ParsedData)
+        assert parsed.raw_title == title
 
 def test_batch_parse_trash_processing(test_titles):
     # Some of these titles are trash, so we should remove them.
@@ -225,13 +517,13 @@ def test_episode_parsing():
         ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", list(range(1, 9))), # Eps 1-8
         ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [24]),
         ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [215, 216, 217, 218, 219, 220]),
+        ("Naruto Shippuden - 107 - Strange Bedfellows", [107]),
+        ("[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip1080p.x265.FLAC]", [13]),
 
-        # Looks like it doesn't handle hyphens in the episode part. It's not a big deal,
+        # Looks like it doesn't handle hyphens very well in the episode part. It's not a big deal,
         # as it's not a common practice to use hypens in the episode part. Mostly seen in Anime.
         # I did run tests and I was still able to scrape for Naruto, which is a huge win as its always been a tough one!
-        ("Naruto Shippuden - 107 - Strange Bedfellows", []),                              # Incorrect, should of been: [107]
-        ("[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip1080p.x265.FLAC]", []),      # Incorrect, should of been:  [13]
-        ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]", []),  # Incorrect, should of been:  [11]
+        ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle].mkv", [11]),  # Incorrect, should of been:  [11]
 
         # User submitted edge cases
         ("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd.mkv", []),
@@ -489,7 +781,7 @@ def test_rtn_default_parse(settings_model, rank_model):
     assert torrent.lev_ratio > 0.0
     assert torrent.rank > 0
     assert torrent.data.season == [1]
-    assert torrent.data.episode == [1] # TODO: This is incorrect, should of been [1, 2, 3]
+    assert torrent.data.episode == [1, 2, 3]
     assert torrent.data.resolution == ["1080p"]
     assert torrent.data.quality == ["WEB-DL"]
     assert torrent.data.language == []
@@ -525,7 +817,7 @@ def test_fix_using_constant_instantiation_of_rtn():
         ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [1], [15]),
         ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [], [2]),
         ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6], [5]),
-        ("4-13 Cursed (HD)", [], [13]),
+        ("4-13 Cursed (HD)", [4], [13]),
     ]
 
     for test_string, expected_season, expected_episode in test_cases:
@@ -535,20 +827,24 @@ def test_fix_using_constant_instantiation_of_rtn():
         assert item.year == 0, f"Failed for '{test_string}' with expected 0"
 
 
-# This will be used in the next release.
-# def test_best_season_parser():
-#     test_cases = [
-#         ("Archer.S02.1080p.BluRay.DTSMA.AVC.Remux", [2]),
-#         ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
-#         ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", [1, 2, 3, 4, 5, 6]),
-#         ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8]),
-#         ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [10]),
-#         ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6]),
-#         ("4-13 Cursed (HD)", [4]),
-#         ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", []),
-#         ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", [6]),
-#         ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [4]),
-#     ]
+def test_best_season_parser():
+    test_cases = [
+        ("Archer.S02.1080p.BluRay.DTSMA.AVC.Remux", [2]),
+        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
+        ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", [1, 2, 3, 4, 5, 6]),
+        ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8]),
+        ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [10]),
+        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6]),
+        ("4-13 Cursed (HD)", [4]),
+        ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", []), # Movie
+        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", [6]),
+        ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [4]),
+    ]
+
+    for test_string, expected_season in test_cases:
+        item = parse(test_string, False)
+        assert item.season == expected_season, f"Failed for '{test_string}' with expected {expected_season} season"
+
 
 def test_output_on_parse(settings_model, rank_model):
     raw_title = "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
@@ -586,8 +882,53 @@ def test_output_on_parse(settings_model, rank_model):
     assert rank_data.data.language == []
     assert rank_data.data.bitDepth == [10]
 
-# def test_ptt_parse_output():
-#     raw_title = "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
 
-#     data = ptt_parse(raw_title)
-#     assert isinstance(data, dict)
+@pytest.mark.parametrize("test_string, expected_title", [
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "The Simpsons"),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "The Simpsons"),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "The Simpsons"),
+    ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "The Simpsons"),
+    ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "The Simpsons"),
+    ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "The Simpsons"),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", "House MD"),
+    ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", "The Avengers"),
+    ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", "Witches Of Salem"),
+    ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", "Lost"),
+    ("4-13 Cursed (HD)", "Cursed"),
+    ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", "Dragon Ball Z Movie - 09 - Bojack Unbound"),
+    ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", "Fairy Tail"),
+    ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", "BoJack Horseman"),
+    ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", "Boku no Hero Academia"),
+    ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", "Bleach"),
+    ("Naruto Shippuden - 107 - Strange Bedfellows", "Naruto Shippuden"),
+    ("[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]", "Shingeki no Kyojin"),
+    ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]", "Shingeki no Kyojin"),
+    ("La famille bélier", "La famille bélier"),
+    ("Mr. Nobody", "Mr. Nobody"),
+    ("doctor_who_2005.8x12.death_in_heaven.720p_hdtv_x264-fov", "doctor who"),
+    ("[GM-Team][国漫][太乙仙魔录 灵飞纪 第3季][Magical Legend of Rise to immortality Ⅲ][01-26][AVC][GB][1080P]", "Magical Legend of Rise to immortality Ⅲ"),
+    ("【喵萌奶茶屋】★01月新番★[Rebirth][01][720p][简体][招募翻译]", "Rebirth"),
+    ("【喵萌奶茶屋】★01月新番★[別對映像研出手！/映像研には手を出すな！/Eizouken ni wa Te wo Dasu na!][01][1080p][繁體]", "Eizouken ni wa Te wo Dasu na!"),
+    ("【喵萌奶茶屋】★01月新番★[別對映像研出手！/Eizouken ni wa Te wo Dasu na!/映像研には手を出すな！][01][1080p][繁體]", "Eizouken ni wa Te wo Dasu na!"),
+    ("[Seed-Raws] 劇場版 ペンギン・ハイウェイ Penguin Highway The Movie (BD 1280x720 AVC AACx4 [5.1+2.0+2.0+2.0]).mp4", "Penguin Highway The Movie"),
+    ("[SweetSub][Mutafukaz / MFKZ][Movie][BDRip][1080P][AVC 8bit][简体内嵌]", "Mutafukaz / MFKZ"),
+    ("[Erai-raws] Kingdom 3rd Season - 02 [1080p].mkv", "Kingdom"),
+    ("Голубая волна / Blue Crush (2002) DVDRip", "Blue Crush"),
+    ("Жихарка (2007) DVDRip", "Жихарка"),
+    ("3 Миссия невыполнима 3 2006г. BDRip 1080p.mkv", "3 Миссия невыполнима 3"),
+    ("1. Детские игры. 1988. 1080p. HEVC. 10bit..mkv", "1. Детские игры."),
+    ("01. 100 девчонок и одна в лифте 2000 WEBRip 1080p.mkv", "01. 100 девчонок и одна в лифте"),
+    ("08.Планета.обезьян.Революция.2014.BDRip-HEVC.1080p.mkv", "08 Планета обезьян Революция"),
+    ("Американские животные / American Animals (Барт Лэйтон / Bart Layton) [2018, Великобритания, США, драма, криминал, BDRip] MVO (СВ Студия)", "American Animals"),
+    ("Греческая смоковница / Griechische Feigen / The Fruit Is Ripe (Зиги Ротемунд / Sigi Rothemund (as Siggi Götz)) [1976, Германия (ФРГ), эротика, комедия, приключения, DVDRip] 2 VO", "Griechische Feigen / The Fruit Is Ripe"),
+    ("Греческая смоковница / The fruit is ripe / Griechische Feigen (Siggi Götz) [1976, Германия, Эротическая комедия, DVDRip]", "The fruit is ripe / Griechische Feigen"),
+    ("Бастер / Buster (Дэвид Грин / David Green) [1988, Великобритания, Комедия, мелодрама, драма, приключения, криминал, биография, DVDRip]", "Buster"),
+    ("(2000) Le follie dell'imperatore - The Emperor's New Groove (DvdRip Ita Eng AC3 5.1).avi", "Le follie dell'imperatore - The Emperor's New Groove"),
+    ("[NC-Raws] 间谍过家家 / SPY×FAMILY - 04 (B-Global 1920x1080 HEVC AAC MKV)", "SPY×FAMILY"),
+    ("GTO (Great Teacher Onizuka) (Ep. 1-43) Sub 480p lakshay", "GTO (Great Teacher Onizuka)"),
+    ("Книгоноши / Кнiганошы (1987) TVRip от AND03AND | BLR", "Кнiганошы"),
+    ("Yurusarezaru_mono2.srt", "Yurusarezaru mono2"),
+])
+def test_title_extraction(test_string, expected_title):
+    data = parse(test_string, remove_trash=False)
+    assert data.parsed_title == expected_title, f"Failed for '{test_string}' with expected '{expected_title}'"

@@ -51,14 +51,13 @@ from typing import Any, Dict, List, Set, Tuple
 import Levenshtein
 import PTN
 import regex
-from PTT import Parser, add_defaults
 from pydantic import BaseModel, field_validator
 
 from RTN.exceptions import GarbageTorrent
 
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
-from .patterns import IS_MOVIE_COMPILED, extract_episodes, parse_extras
+from .patterns import IS_MOVIE_COMPILED, parse_extras
 from .ranker import get_rank
 
 
@@ -280,6 +279,13 @@ class RTN:
             >>> all(t.rank > 0 for t in ranked_torrents)
             True
         """
+        if not torrents:
+            raise ValueError("At least one torrent must be provided.")
+        if not all(isinstance(t, tuple) and len(t) == 2 for t in torrents):
+            raise TypeError("Each torrent must be a tuple containing the title and infohash.")
+        if not isinstance(correct_title, str):
+            raise TypeError("The correct title must be a string.")
+        
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             return list(executor.map(lambda t: self.rank(t[0], t[1], correct_title=correct_title, remove_trash=remove_trash), torrents))
 
@@ -300,7 +306,7 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
 
     if remove_trash:  # noqa: SIM102
         if check_trash(raw_title):
-            raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
+            raise GarbageTorrent("This torrent is considered garbage and should be ignored.")
 
     data = PTN.parse(raw_title, coherent_types=True)
     extras = parse_extras(raw_title)
@@ -308,16 +314,17 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
     ptn_data = ParsedData(
         # PTN
         raw_title=raw_title,
-        parsed_title=data.get("title", ""),
+        # parsed_title=data.get("title", ""),
+        parsed_title=extras.get("title", ""),
         year=data.get("year", 0)[0] if data.get("year") else 0,
         resolution=data.get("resolution", []),
         quality=data.get("quality", []),
-        season=data.get("season", []),
-        episode=data.get("episode", []),
+        season=extras.get("season", []),
+        episode=extras.get("episode", []),
         codec=data.get("codec", []),
         audio=data.get("audio", []),
         subtitles=data.get("subtitles", []),
-        language=data.get("language", []),
+        language=extras.get("languages", []),
         bitDepth=data.get("bitDepth", []),
         proper=data.get("proper", False),
         repack=data.get("repack", False),
@@ -332,6 +339,7 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         is_complete=extras.get("is_complete", False),
         is_4k=extras.get("is_4k", False),
         hdr=extras.get("hdr", ""),
+        date=extras.get("date", None),
     )
 
     # Check both PTT and PTN for episode data.
@@ -475,7 +483,7 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
     if not raw_title or not isinstance(raw_title, str):
         raise ValueError("The input title must be a non-empty string.")
 
-    data: dict[str, Any] = PTN.parse(raw_title, coherent_types=True)
+    data: dict[str, Any] = parse_extras(raw_title)
 
     season_from_title = data.get("season", [])
     if isinstance(season_from_title, int):
@@ -484,21 +492,7 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
         season_from_title = []
 
     if season_num in season_from_title:
-        eps = extract_episodes(raw_title)
+        eps = data.get("episode", [])
         if isinstance(eps, list) and len(eps) > 0:
             return eps
     return []
-
-def parsett(query: str) -> dict:
-    """
-    Parse a torrent title using the default PTT parser with additional patterns and settings.
-
-    Parameters:
-    - `query` (str): The torrent title to parse.
-
-    Returns:
-    - dict: A dictionary containing the parsed metadata from the torrent title.
-    """
-    p = Parser()
-    add_defaults(p)
-    return p.parse(query)
