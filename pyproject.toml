@@ -65,7 +65,8 @@ ignore = [
   "S311", # flake8-bandit: Standard pseudo-random generators are not suitable for security/cryptographic purposes
   "S101", # ruff: Ignore assert warnings on tests
   "RET505", # ruff: Checks for else statements with a return statement in the preceding if block.
-  "RET503"  # ruff: Ignore required explicit returns
+  "RET503",  # ruff: Ignore required explicit returns
+  "T201"
 ]
 extend-select = [
   "I",   # isort
