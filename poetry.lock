@@ -407,13 +407,13 @@ files = [
 
 [[package]]
 name = "parsett"
-version = "0.2.2"
+version = "0.2.3"
 description = "PTT"
 optional = false
 python-versions = "<4.0,>=3.11"
 files = [
-    {file = "parsett-0.2.2-py3-none-any.whl", hash = "sha256:1a2b81346f7bae035e418073863a3fbaa73e4de2413b5d715b5fce5470ebeeec"},
-    {file = "parsett-0.2.2.tar.gz", hash = "sha256:858346d9ec6756f9c8b245e42776ce9d93e2ee049119ed4a1e791ad4b77711de"},
+    {file = "parsett-0.2.3-py3-none-any.whl", hash = "sha256:17e491f7b5f34c382aef607eef68b3a04f379611e76b3fdad2faec0537823a42"},
+    {file = "parsett-0.2.3.tar.gz", hash = "sha256:2d4d37922d4f83152a21aa91064559b3f31731064dac19b0479c932547a4189a"},
 ]
 
 [package.dependencies]
