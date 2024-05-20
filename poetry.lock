@@ -575,13 +575,13 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pyperf"
-version = "2.6.3"
+version = "2.7.0"
 description = "Python module to run and analyze benchmarks"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyperf-2.6.3-py3-none-any.whl", hash = "sha256:ee69bedb36cb0b2bf858d7013038bb088920a95a7bab69a36749de6f051127e6"},
-    {file = "pyperf-2.6.3.tar.gz", hash = "sha256:9752fe749c21e460a564bb3f52fc319b892c62ee61c5138b4a9bbf94ad2755e6"},
+    {file = "pyperf-2.7.0-py3-none-any.whl", hash = "sha256:dce63053b916b73d8736a77404309328f938851b5c2c5e8493cde910ce37e362"},
+    {file = "pyperf-2.7.0.tar.gz", hash = "sha256:4201c6601032f374e9c900c6d2544a2f5891abedc1a96eec0e7b2338a6247589"},
 ]
 
 [package.dependencies]
