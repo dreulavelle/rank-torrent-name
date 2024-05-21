@@ -59,7 +59,7 @@ class ParsedData(BaseModel):
     audio: List[str] = []
     subtitles: List[str] = []
     language: List[str] = []
-    lang_codes: List[str] = []
+    lang_codes: Dict[str, str] = {}
     bitDepth: List[int] = []
     hdr: str = ""
     proper: bool = False

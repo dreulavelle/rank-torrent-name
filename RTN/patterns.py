@@ -132,6 +132,55 @@ IS_MOVIE_COMPILED = [
     regex.compile(r"\d{2,4}\s?\-\s?\d{2,4}\b", regex.IGNORECASE),
 ]
 
+# Mapping of language names to their codes
+language_code_mapping = {
+    "multi subs": "multisubs",
+    "multi audio": "multiaudio",
+    "dual audio": "dualaudio",
+    "english": "en",
+    "japanese": "jp",
+    "korean": "ko",
+    "taiwanese": "tw",
+    "chinese": "zh",
+    "french": "fr",
+    "latino": "es-latam",
+    "spanish": "es",
+    "portuguese": "pt",
+    "italian": "it",
+    "greek": "el",
+    "german": "de",
+    "russian": "ru",
+    "ukrainian": "uk",
+    "hindi": "hi",
+    "telugu": "te",
+    "tamil": "ta",
+    "lithuanian": "lt",
+    "latvian": "lv",
+    "estonian": "et",
+    "polish": "pl",
+    "czech": "cs",
+    "slovakian": "sk",
+    "hungarian": "hu",
+    "romanian": "ro",
+    "bulgarian": "bg",
+    "serbian": "sr",
+    "croatian": "hr",
+    "slovenian": "sl",
+    "dutch": "nl",
+    "danish": "da",
+    "finnish": "fi",
+    "swedish": "sv",
+    "norwegian": "no",
+    "arabic": "ar",
+    "turkish": "tr",
+    "vietnamese": "vi",
+    "indonesian": "id",
+    "thai": "th",
+    "malay": "ms",
+    "hebrew": "he",
+    "persian": "fa"
+}
+
 
 def check_video_extension(raw_title: str) -> bool:
     """Check if the title contains a video extension."""
@@ -223,3 +272,8 @@ def parse_extras(raw_title: str) -> Dict[str, Any]:
         "hdr": check_hdr_dolby_video(raw_title) or "",
         "episode": extract_episodes(raw_title),
     }
+
+
+def get_language_codes(languages: List[str]) -> Dict[str, str]:
+    return {language: language_code_mapping.get(language.lower()) for language in languages if
+            language_code_mapping.get(language.lower()) is not None}
