@@ -283,6 +283,54 @@ class RTN:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             return list(executor.map(lambda t: self.rank(t[0], t[1], correct_title=correct_title, remove_trash=remove_trash), torrents))
 
+# Mapping of language names to their codes
+language_code_mapping = {
+    "multi subs": "multisubs",
+    "multi audio": "multiaudio",
+    "dual audio": "dualaudio",
+    "english": "en",
+    "japanese": "jp",
+    "korean": "ko",
+    "taiwanese": "tw",
+    "chinese": "zh",
+    "french": "fr",
+    "latino": "es-latam",
+    "spanish": "es",
+    "portuguese": "pt",
+    "italian": "it",
+    "greek": "el",
+    "german": "de",
+    "russian": "ru",
+    "ukrainian": "uk",
+    "hindi": "hi",
+    "telugu": "te",
+    "tamil": "ta",
+    "lithuanian": "lt",
+    "latvian": "lv",
+    "estonian": "et",
+    "polish": "pl",
+    "czech": "cs",
+    "slovakian": "sk",
+    "hungarian": "hu",
+    "romanian": "ro",
+    "bulgarian": "bg",
+    "serbian": "sr",
+    "croatian": "hr",
+    "slovenian": "sl",
+    "dutch": "nl",
+    "danish": "da",
+    "finnish": "fi",
+    "swedish": "sv",
+    "norwegian": "no",
+    "arabic": "ar",
+    "turkish": "tr",
+    "vietnamese": "vi",
+    "indonesian": "id",
+    "thai": "th",
+    "malay": "ms",
+    "hebrew": "he",
+    "persian": "fa"
+}
 
 def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
     """
@@ -318,6 +366,7 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         audio=data.get("audio", []),
         subtitles=data.get("subtitles", []),
         language=data.get("language", []),
+        lang_codes=[language_code_mapping[lang.lower()] for lang in data.get("language", []) if lang.lower() in language_code_mapping],
         bitDepth=data.get("bitDepth", []),
         proper=data.get("proper", False),
         repack=data.get("repack", False),
