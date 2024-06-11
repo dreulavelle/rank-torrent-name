@@ -58,7 +58,7 @@ from RTN.exceptions import GarbageTorrent
 
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
-from .patterns import IS_MOVIE_COMPILED, extract_episodes, parse_extras
+from .patterns import IS_MOVIE_COMPILED, extract_episodes, parse_extras, get_language_codes
 from .ranker import get_rank
 
 
@@ -318,6 +318,7 @@ def parse(raw_title: str, remove_trash: bool = False) -> ParsedData:
         audio=data.get("audio", []),
         subtitles=data.get("subtitles", []),
         language=data.get("language", []),
+        lang_codes=get_language_codes(data.get("language", [])),
         bitDepth=data.get("bitDepth", []),
         proper=data.get("proper", False),
         repack=data.get("repack", False),
