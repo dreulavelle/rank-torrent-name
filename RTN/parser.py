@@ -58,7 +58,12 @@ from RTN.exceptions import GarbageTorrent
 
 from .fetch import check_fetch, check_trash
 from .models import BaseRankingModel, ParsedData, SettingsModel
-from .patterns import IS_MOVIE_COMPILED, extract_episodes, parse_extras, get_language_codes
+from .patterns import (
+    IS_MOVIE_COMPILED,
+    extract_episodes,
+    get_language_codes,
+    parse_extras,
+)
 from .ranker import get_rank
 
 

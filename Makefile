@@ -1,4 +1,4 @@
-.PHONY: install lint format check test clean coverage benchmark pr-ready publish
+.PHONY: install lint check test clean coverage benchmark pr-ready publish sort
 
 SRC_DIR := ./RTN
 
@@ -16,10 +16,10 @@ clean:
 # Run linters
 lint:
 	@poetry run ruff check $(SRC_DIR)
-	@poetry run isort --check-only $(SRC_DIR)
+	@poetry run isort $(SRC_DIR)
 
-# Format code
-format:
+# Sort imports
+sort:
 	@poetry run isort $(SRC_DIR)
 
 # Type checking
@@ -39,7 +39,7 @@ coverage: clean
 benchmark:
 	@poetry run python benchmarks/rank.py --quiet
 
-pr-ready: clean format lint test
+pr-ready: clean lint test
 
 publish:
 	@poetry publish --build

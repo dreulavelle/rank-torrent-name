@@ -275,5 +275,20 @@ def parse_extras(raw_title: str) -> Dict[str, Any]:
 
 
 def get_language_codes(languages: List[str]) -> Dict[str, str]:
-    return {language: language_code_mapping.get(language.lower()) for language in languages if
-            language_code_mapping.get(language.lower()) is not None}
+    """
+    Get the language code for the given language.
+    
+    Parameters:
+    - languages (List[str]): The list of languages to get the language code for.
+
+    - This function returns a dictionary containing the language code for the given language.
+    - If the language is not found, the code is not included in the dictionary.
+
+    Returns:
+    - Dict[str, str]: A dictionary containing the language code for the given language.
+    """
+    return {
+        language: language_code_mapping[language.lower()]
+        for language in languages
+        if language.lower() in language_code_mapping
+    }
