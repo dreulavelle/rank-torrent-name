@@ -46,6 +46,8 @@ IS_TRASH_COMPILED = compile_patterns(
         r"\bWEB[ .-]?DL[ .-]?Rip\b",
         r"\b(iso|rar|mp3|ogg|txt|nfo|ts|m2ts)$\b", # Common Non video extensions.
         r"\bLeaked\b", # Known cam leaks. Tested against 10k+ titles. Safe.
+        r"\b(threesixtyp|360p|244p)\b",
+        r"\b((www)?.?1?tamil)", # bye-bye Tamil!
     ]
 )
 

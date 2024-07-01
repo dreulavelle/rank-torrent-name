@@ -114,18 +114,22 @@ def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model
     if not data.quality:
         return 0
 
-    quality = data.quality[0]
+    quality = data.quality[0].lower()
     match quality:
-        case "WEB-DL":
+        case "web-dl":
             return rank_model.webdl if not settings.custom_ranks["webdl"].enable else settings.custom_ranks["webdl"].rank
-        case "Blu-ray":
+        case "blu-ray":
             return rank_model.bluray if not settings.custom_ranks["bluray"].enable else settings.custom_ranks["bluray"].rank
-        case "WEBCap" | "Cam" | "Telesync" | "Telecine" | "Screener" | "VODRip" | "TVRip" | "DVD-R":
+        case "dvdrip":
+            return rank_model.dvdrip if not settings.custom_ranks["dvdrip"].enable else settings.custom_ranks["dvdrip"].rank
+        case "bdrip":
+            return rank_model.bdrip if not settings.custom_ranks["bdrip"].enable else settings.custom_ranks["bdrip"].rank
+        case "brrip":
+            return rank_model.brrip if not settings.custom_ranks["brrip"].enable else settings.custom_ranks["brrip"].rank
+        case "hdtv":
+            return rank_model.hdtv if not settings.custom_ranks["hdtv"].enable else settings.custom_ranks["hdtv"].rank
+        case "webcap" | "cam" | "telesync" | "telecine" | "screener" | "vodrip" | "tvrip" | "dvd-r":
             return -1000
-        case "BDRip":
-            return 5  # This one's a little better than BRRip
-        case "BRRip":
-            return 0
         case _:
             return 0
 
@@ -135,16 +139,20 @@ def calculate_codec_rank(data: ParsedData, settings: SettingsModel, rank_model: 
     if not data.codec:
         return 0
 
-    codec = data.codec[0]
+    codec = data.codec[0].lower()
     match codec:
-        case "Xvid" | "H.263" | "VC-1" | "MPEG-2":
+        case "xvid" | "h.263" | "vc-1" | "mpeg-2":
             return -1000
-        case "AV1":
+        case "h.264":
+            return rank_model.h264 if not settings.custom_ranks["h264"].enable else settings.custom_ranks["h264"].rank
+        case "h.265" | "h.265 main 10":
+            return rank_model.h265 if not settings.custom_ranks["h265"].enable else settings.custom_ranks["h265"].rank
+        case "hevc":
+            return rank_model.hevc if not settings.custom_ranks["hevc"].enable else settings.custom_ranks["hevc"].rank
+        case "av1":
             return rank_model.av1 if not settings.custom_ranks["av1"].enable else settings.custom_ranks["av1"].rank
-        case "H.264":
-            return 3
-        case "H.265" | "H.265 Main 10" | "HEVC":
-            return 0
+        case "avc":
+            return rank_model.avc if not settings.custom_ranks["avc"].enable else settings.custom_ranks["avc"].rank
         case _:
             return 0
 

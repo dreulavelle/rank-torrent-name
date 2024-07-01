@@ -134,9 +134,20 @@ def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
     if data.remux:
         return settings.custom_ranks["remux"].fetch
 
-    match data.quality[0]:
-        case "WEB-DL":
+    quality = data.quality[0].lower()
+    match quality:
+        case "web-dl":
             return settings.custom_ranks["webdl"].fetch
+        case "avc":
+            return settings.custom_ranks["avc"].fetch
+        case "hdtv":
+            return settings.custom_ranks["hdtv"].fetch
+        case "dvdrip":
+            return settings.custom_ranks["dvdrip"].fetch
+        case "bdrip":
+            return settings.custom_ranks["bdrip"].fetch
+        case "brrip":
+            return settings.custom_ranks["brrip"].fetch
         case _:
             return True
 
@@ -172,6 +183,12 @@ def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
     match data.codec[0]:
         case "AV1":
             return settings.custom_ranks["av1"].fetch
+        case "H.264":
+            return settings.custom_ranks["h264"].fetch
+        case "H.265":
+            return settings.custom_ranks["h265"].fetch
+        case "HEVC":
+            return settings.custom_ranks["hevc"].fetch
         case _:
             return True
 

@@ -369,6 +369,7 @@ def test_codec_ranking(enabled_settings_model, ranking_model):
         "H.265": 0,
         "H.265 Main 10": 0,
         "HEVC": 0,
+        "AVC": 0,
     }
 
     for key, rank in test_dict.items():

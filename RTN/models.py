@@ -124,6 +124,12 @@ class BaseRankingModel(BaseModel):
     hdr: int = 0
     hdr10: int = 0
     dolby_video: int = 0
+    # codec
+    h264: int = 0
+    h265: int = 0
+    hevc: int = 0
+    avc: int = 0
+    av1: int = 0
     # audio
     dts_x: int = 0
     dts_hd: int = 0
@@ -136,12 +142,15 @@ class BaseRankingModel(BaseModel):
     # other
     remux: int = 0
     webdl: int = 0
+    dvdrip: int = 0
+    bdrip: int = 0
+    brrip: int = 0
+    hdtv: int = 0
     repack: int = 5
     proper: int = 4
-    # extras
+    # languages
     dubbed: int = 4
     subbed: int = 2
-    av1: int = 0
 
 
 class DefaultRanking(BaseRankingModel):
@@ -227,10 +236,14 @@ class SettingsModel(BaseModel):
         "fhd": CustomRank(enable=False, fetch=True, rank=90),
         "hd": CustomRank(enable=False, fetch=True, rank=80),
         "sd": CustomRank(enable=False, fetch=True, rank=-120),
-        "bluray": CustomRank(enable=False, fetch=True, rank=80),
         "hdr": CustomRank(enable=False, fetch=True, rank=40),
         "hdr10": CustomRank(enable=False, fetch=True, rank=50),
         "dolby_video": CustomRank(enable=False, fetch=True, rank=-100),
+        "h264": CustomRank(enable=False, fetch=True, rank=0),
+        "h265": CustomRank(enable=False, fetch=True, rank=0),
+        "hevc": CustomRank(enable=False, fetch=True, rank=0),
+        "avc": CustomRank(enable=False, fetch=True, rank=0),
+        "av1": CustomRank(enable=False, fetch=True, rank=0),
         "dts_x": CustomRank(enable=False, fetch=True, rank=0),
         "dts_hd": CustomRank(enable=False, fetch=True, rank=0),
         "dts_hd_ma": CustomRank(enable=False, fetch=True, rank=0),
@@ -239,13 +252,17 @@ class SettingsModel(BaseModel):
         "ddplus": CustomRank(enable=False, fetch=True, rank=0),
         "aac": CustomRank(enable=False, fetch=True, rank=70),
         "ac3": CustomRank(enable=False, fetch=True, rank=50),
-        "remux": CustomRank(enable=False, fetch=True, rank=-1000),
+        "bluray": CustomRank(enable=False, fetch=True, rank=80),
         "webdl": CustomRank(enable=False, fetch=True, rank=90),
+        "remux": CustomRank(enable=False, fetch=True, rank=-1000),
+        "dvdrip": CustomRank(enable=False, fetch=True, rank=5),
+        "bdrip": CustomRank(enable=False, fetch=True, rank=5),
+        "brrip": CustomRank(enable=False, fetch=True, rank=0),
+        "hdtv": CustomRank(enable=False, fetch=True, rank=0),
         "repack": CustomRank(enable=False, fetch=True, rank=5),
         "proper": CustomRank(enable=False, fetch=True, rank=4),
         "dubbed": CustomRank(enable=False, fetch=True, rank=4),
         "subbed": CustomRank(enable=False, fetch=True, rank=2),
-        "av1": CustomRank(enable=False, fetch=True, rank=0),
     }
 
     @root_validator(pre=True)

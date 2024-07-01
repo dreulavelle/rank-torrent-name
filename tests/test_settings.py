@@ -52,6 +52,10 @@ def test_initialize_with_default_values(settings):
         "hdr": CustomRank(enable=False, fetch=True, rank=40),
         "hdr10": CustomRank(enable=False, fetch=True, rank=50),
         "dolby_video": CustomRank(enable=False, fetch=True, rank=-100),
+        "h264": CustomRank(enable=False, fetch=True, rank=0),
+        "h265": CustomRank(enable=False, fetch=True, rank=0),
+        "hevc": CustomRank(enable=False, fetch=True, rank=0),
+        "av1": CustomRank(enable=False, fetch=True, rank=0),
         "dts_x": CustomRank(enable=False, fetch=True, rank=0),
         "dts_hd": CustomRank(enable=False, fetch=True, rank=0),
         "dts_hd_ma": CustomRank(enable=False, fetch=True, rank=0),
@@ -66,7 +70,6 @@ def test_initialize_with_default_values(settings):
         "proper": CustomRank(enable=False, fetch=True, rank=4),
         "dubbed": CustomRank(enable=False, fetch=True, rank=4),
         "subbed": CustomRank(enable=False, fetch=True, rank=2),
-        "av1": CustomRank(enable=False, fetch=True, rank=0),
     }
 
 # Initialize SettingsModel with empty values

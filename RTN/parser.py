@@ -227,20 +227,20 @@ class RTN:
         if len(infohash) != 40:
             raise GarbageTorrent("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
-        if remove_trash: # noqa: SIM102
+        if remove_trash:
             if check_trash(raw_title):
                 raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
-        parsed_data = parse(raw_title, remove_trash)
-        lev_ratio = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
+        parsed_data: ParsedData = parse(raw_title, remove_trash)
+        lev_ratio: float = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
 
-        if correct_title: # noqa: SIM102
+        if correct_title:
             if remove_trash and lev_ratio < self.lev_threshold:
                 raise GarbageTorrent(f"This title does not match the correct title, got ratio of {lev_ratio:.3f}")
 
-        fetch = check_fetch(parsed_data, self.settings)
+        fetch: bool = check_fetch(parsed_data, self.settings)
         parsed_data.fetch = fetch
-        rank = get_rank(parsed_data, self.settings, self.ranking_model)
+        rank: int = get_rank(parsed_data, self.settings, self.ranking_model)
 
         return Torrent(
             raw_title=raw_title,
