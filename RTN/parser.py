@@ -63,6 +63,7 @@ from .patterns import (
     extract_episodes,
     get_language_codes,
     parse_extras,
+    translation_table
 )
 from .ranker import get_rank
 
@@ -181,7 +182,7 @@ class RTN:
         self.ranking_model = ranking_model
         self.lev_threshold = lev_threshold
 
-    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False) -> Torrent:
+    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False, threshold: float = 0.9) -> Torrent:
         """
         Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
 
@@ -232,7 +233,12 @@ class RTN:
                 raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
         parsed_data: ParsedData = parse(raw_title, remove_trash)
-        lev_ratio: float = Levenshtein.ratio(parsed_data.parsed_title.lower(), correct_title.lower())
+
+        normalized_parsed_title = parsed_data.parsed_title.lower().translate(translation_table)
+        normalized_correct_title = correct_title.lower().translate(translation_table)
+        print(normalized_parsed_title)
+        print(normalized_correct_title)
+        lev_ratio: float = Levenshtein.ratio(normalized_parsed_title, normalized_correct_title, score_cutoff=threshold)
 
         if correct_title:
             if remove_trash and lev_ratio < self.lev_threshold:
@@ -245,6 +251,7 @@ class RTN:
         return Torrent(
             raw_title=raw_title,
             infohash=infohash,
+            clean_title=normalized_correct_title,
             data=parsed_data,
             fetch=fetch,
             rank=rank,

@@ -32,6 +32,11 @@ def custom_ranking_model():
         remux=-75,
         webdl=90,
         bluray=-90,
+        avc=0,
+        hevc=0,
+        av1=0,
+        h264=0,
+        h265=0,
     )
 
 @pytest.fixture
@@ -59,6 +64,13 @@ def enabled_ranking_model():
         dubbed=1,
         subbed=1,
         av1=1,
+        brrip=1,
+        h264=1,
+        h265=1,
+        bdrip=1,
+        dvdrip=1,
+        avc=1,
+        hevc=1,
     )
 
 @pytest.fixture
@@ -85,6 +97,14 @@ def custom_settings_model():
             "remux": CustomRank(enable=False, fetch=True, rank=-75),
             "webdl": CustomRank(enable=True, fetch=True, rank=90),
             "bluray": CustomRank(enable=True, fetch=True, rank=-90),
+            "dvdrip": CustomRank(enable=True, fetch=True, rank=-90),
+            "avc": CustomRank(enable=True, fetch=True, rank=-90),
+            "hevc": CustomRank(enable=True, fetch=True, rank=-90),
+            "av1": CustomRank(enable=True, fetch=True, rank=-90),
+            "h264": CustomRank(enable=True, fetch=True, rank=-90),
+            "h265": CustomRank(enable=True, fetch=True, rank=-90),
+            "brrip": CustomRank(enable=True, fetch=True, rank=-90),
+            "bdrip": CustomRank(enable=True, fetch=True, rank=-90),
         },
     )
 
@@ -139,7 +159,7 @@ def test_valid_torrent_from_title(settings_model, ranking_model):
     assert torrent.data.parsed_title == "The Walking Dead"
     assert torrent.data.fetch is True, f"Fetch was {torrent.data.fetch} instead of True"
     assert torrent.fetch is True, f"Fetch was {torrent.fetch} instead of True"
-    assert torrent.rank == 63, f"Rank was {torrent.rank} instead of 63"
+    assert torrent.rank == 60, f"Rank was {torrent.rank} instead of 60"
     assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
 
 
@@ -213,7 +233,7 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
     )
 
     rank = get_rank(parsed_data, settings_model, ranking_model)
-    assert rank == 63, f"Expected rank did not match, got {rank}"
+    assert rank == 60, f"Expected rank did not match, got {rank}"
 
 
 def test_get_rank_validity(settings_model, ranking_model):

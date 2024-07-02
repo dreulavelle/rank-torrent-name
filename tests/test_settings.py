@@ -70,6 +70,11 @@ def test_initialize_with_default_values(settings):
         "proper": CustomRank(enable=False, fetch=True, rank=4),
         "dubbed": CustomRank(enable=False, fetch=True, rank=4),
         "subbed": CustomRank(enable=False, fetch=True, rank=2),
+        "dvdrip": CustomRank(enable=False, fetch=True, rank=5),
+        "avc": CustomRank(enable=False, fetch=True, rank=0),
+        "hevc": CustomRank(enable=False, fetch=True, rank=0),
+        "brrip": CustomRank(enable=False, fetch=True, rank=0),
+        "bdrip": CustomRank(enable=False, fetch=True, rank=5),
     }
 
 # Initialize SettingsModel with empty values

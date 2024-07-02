@@ -483,7 +483,7 @@ def test_rtn_default_parse(settings_model, rank_model):
     # with pytest.raises(GarbageTorrent):
     #     assert rtn.rank(raw_title=raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=True)
 
-    torrent = rtn.rank(raw_title=raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=False)
+    torrent = rtn.rank(raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=False)
     assert torrent.raw_title == raw_title
     assert torrent.data.type == "show"
     assert torrent.lev_ratio > 0.0
