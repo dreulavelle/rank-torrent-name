@@ -145,7 +145,7 @@ language_code_mapping = {
     "taiwanese": "tw",
     "chinese": "zh",
     "french": "fr",
-    "latino": "es-latam",
+    "latino": "es",
     "spanish": "es",
     "portuguese": "pt",
     "italian": "it",
@@ -182,6 +182,28 @@ language_code_mapping = {
     "hebrew": "he",
     "persian": "fa"
 }
+
+
+# Translation table for normalizing unicode characters
+translationTable: dict[str, str] = {
+    "ā": "a", "ă": "a", "ą": "a", "ć": "c", "č": "c", "ç": "c",
+    "ĉ": "c", "ċ": "c", "ď": "d", "đ": "d", "è": "e", "é": "e",
+    "ê": "e", "ë": "e", "ē": "e", "ĕ": "e", "ę": "e", "ě": "e",
+    "ĝ": "g", "ğ": "g", "ġ": "g", "ģ": "g", "ĥ": "h", "î": "i",
+    "ï": "i", "ì": "i", "í": "i", "ī": "i", "ĩ": "i", "ĭ": "i",
+    "ı": "i", "ĵ": "j", "ķ": "k", "ĺ": "l", "ļ": "l", "ł": "l",
+    "ń": "n", "ň": "n", "ñ": "n", "ņ": "n", "ŉ": "n", "ó": "o",
+    "ô": "o", "õ": "o", "ö": "o", "ø": "o", "ō": "o", "ő": "o",
+    "œ": "oe", "ŕ": "r", "ř": "r", "ŗ": "r", "š": "s", "ş": "s",
+    "ś": "s", "ș": "s", "ß": "ss", "ť": "t", "ţ": "t", "ū": "u",
+    "ŭ": "u", "ũ": "u", "û": "u", "ü": "u", "ù": "u", "ú": "u",
+    "ų": "u", "ű": "u", "ŵ": "w", "ý": "y", "ÿ": "y", "ŷ": "y",
+    "ž": "z", "ż": "z", "ź": "z", "æ": "ae", "ǎ": "a", "ǧ": "g",
+    "ə": "e", "ƒ": "f", "ǐ": "i", "ǒ": "o", "ǔ": "u", "ǚ": "u",
+    "ǜ": "u", "ǹ": "n", "ǻ": "a", "ǽ": "ae", "ǿ": "o"
+}
+
+translation_table = str.maketrans(translationTable)
 
 
 def check_video_extension(raw_title: str) -> bool:
@@ -253,6 +275,26 @@ def extract_episodes(raw_title: str) -> List[int]:
     return sorted(episodes)
 
 
+def get_language_codes(languages: List[str]) -> Dict[str, str]:
+    """
+    Get the language code for the given language.
+    
+    Parameters:
+    - languages (List[str]): The list of languages to get the language code for.
+
+    - This function returns a dictionary containing the language code for the given language.
+    - If the language is not found, the code is not included in the dictionary.
+
+    Returns:
+    - Dict[str, str]: A dictionary containing the language code for the given language.
+    """
+    return {
+        language: language_code_mapping[language.lower()]
+        for language in languages
+        if language.lower() in language_code_mapping
+    }
+
+
 def parse_extras(raw_title: str) -> Dict[str, Any]:
     """
     Parses the input string to extract additional information relevant to RTN processing.
@@ -274,44 +316,3 @@ def parse_extras(raw_title: str) -> Dict[str, Any]:
         "hdr": check_hdr_dolby_video(raw_title) or "",
         "episode": extract_episodes(raw_title),
     }
-
-
-def get_language_codes(languages: List[str]) -> Dict[str, str]:
-    """
-    Get the language code for the given language.
-    
-    Parameters:
-    - languages (List[str]): The list of languages to get the language code for.
-
-    - This function returns a dictionary containing the language code for the given language.
-    - If the language is not found, the code is not included in the dictionary.
-
-    Returns:
-    - Dict[str, str]: A dictionary containing the language code for the given language.
-    """
-    return {
-        language: language_code_mapping[language.lower()]
-        for language in languages
-        if language.lower() in language_code_mapping
-    }
-
-# Translation table for normalizing unicode characters
-translationTable: dict[str, str] = {
-    "ā": "a", "ă": "a", "ą": "a", "ć": "c", "č": "c", "ç": "c",
-    "ĉ": "c", "ċ": "c", "ď": "d", "đ": "d", "è": "e", "é": "e",
-    "ê": "e", "ë": "e", "ē": "e", "ĕ": "e", "ę": "e", "ě": "e",
-    "ĝ": "g", "ğ": "g", "ġ": "g", "ģ": "g", "ĥ": "h", "î": "i",
-    "ï": "i", "ì": "i", "í": "i", "ī": "i", "ĩ": "i", "ĭ": "i",
-    "ı": "i", "ĵ": "j", "ķ": "k", "ĺ": "l", "ļ": "l", "ł": "l",
-    "ń": "n", "ň": "n", "ñ": "n", "ņ": "n", "ŉ": "n", "ó": "o",
-    "ô": "o", "õ": "o", "ö": "o", "ø": "o", "ō": "o", "ő": "o",
-    "œ": "oe", "ŕ": "r", "ř": "r", "ŗ": "r", "š": "s", "ş": "s",
-    "ś": "s", "ș": "s", "ß": "ss", "ť": "t", "ţ": "t", "ū": "u",
-    "ŭ": "u", "ũ": "u", "û": "u", "ü": "u", "ù": "u", "ú": "u",
-    "ų": "u", "ű": "u", "ŵ": "w", "ý": "y", "ÿ": "y", "ŷ": "y",
-    "ž": "z", "ż": "z", "ź": "z", "æ": "ae", "ǎ": "a", "ǧ": "g",
-    "ə": "e", "ƒ": "f", "ǐ": "i", "ǒ": "o", "ǔ": "u", "ǚ": "u",
-    "ǜ": "u", "ǹ": "n", "ǻ": "a", "ǽ": "ae", "ǿ": "o"
-}
-
-translation_table = str.maketrans(translationTable)
