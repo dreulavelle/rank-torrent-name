@@ -236,8 +236,6 @@ class RTN:
 
         normalized_parsed_title = parsed_data.parsed_title.lower().translate(translation_table)
         normalized_correct_title = correct_title.lower().translate(translation_table)
-        print(normalized_parsed_title)
-        print(normalized_correct_title)
         lev_ratio: float = Levenshtein.ratio(normalized_parsed_title, normalized_correct_title, score_cutoff=threshold)
 
         if correct_title:
