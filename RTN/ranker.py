@@ -66,15 +66,16 @@ def get_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingM
     rank += calculate_audio_rank(data, settings, rank_model)
     rank += calculate_other_ranks(data, settings, rank_model)
     rank += calculate_preferred(data, settings)
+
     if data.repack:
         rank += rank_model.repack if not settings.custom_ranks["repack"].enable else settings.custom_ranks["repack"].rank
     if data.proper:
         rank += rank_model.proper if not settings.custom_ranks["proper"].enable else settings.custom_ranks["proper"].rank
     if data.remux:
         rank += rank_model.remux if not settings.custom_ranks["remux"].enable else settings.custom_ranks["remux"].rank
-    if data.is_multi_audio:
+    if data.dubbed:
         rank += rank_model.dubbed if not settings.custom_ranks["dubbed"].enable else settings.custom_ranks["dubbed"].rank
-    if data.is_multi_subtitle:
+    if data.subbed:
         rank += rank_model.subbed if not settings.custom_ranks["subbed"].enable else settings.custom_ranks["subbed"].rank
     return rank
 
@@ -212,12 +213,10 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
 
 def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate all the other rankings of the given parsed data."""
-    if not data.bitDepth and not data.hdr and not data.is_complete and not data.season and not data.episode:
+    if not data.bit_depth and not data.hdr and not data.seasons and not data.episodes:
         return 0
 
     total_rank = 0
-    if data.bitDepth and data.bitDepth[0] >= 8:
-        total_rank += 2
     if data.hdr:
         if data.hdr == "HDR":
             total_rank += settings.custom_ranks["hdr"].rank if settings.custom_ranks["hdr"].enable else rank_model.hdr
@@ -229,10 +228,9 @@ def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model:
                 if settings.custom_ranks["dolby_video"].enable
                 else rank_model.dolby_video
             )
-    if data.is_complete:
-        total_rank += 100
-    if len(data.season) > 0 and len(data.episode) == 0:
-        total_rank += 125 * len(data.season)
-    if len(data.episode) > 0:
-        total_rank += 10 * len(data.episode)
+
+    # if len(data.season) > 0 and len(data.episode) == 0:
+    #     total_rank += 125 * len(data.season)
+    # if len(data.episode) > 0:
+    #     total_rank += 10 * len(data.episode)
     return total_rank

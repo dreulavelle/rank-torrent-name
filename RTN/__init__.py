@@ -44,25 +44,22 @@ Extras:
 
 For more information on each module or class, refer to the respective docstrings.
 """
-from PTN import PTN
-from PTN import parse as ptn_parse
-from PTT import Parser, add_defaults
+
+from PTT import Parser, add_defaults, parse_title
 
 from RTN import exceptions, fetch, models, parser, patterns, ranker
 
-from .fetch import check_fetch, check_trash
-from .models import BaseRankingModel, DefaultRanking, ParsedData, SettingsModel
-from .parser import (
-    RTN,
-    Torrent,
-    batch_parse,
+from .extras import (
     episodes_from_season,
-    get_type,
-    parse,
     sort_torrents,
     title_match,
+    get_lev_ratio,
+
 )
-from .patterns import check_video_extension, parse_extras
+from .fetch import check_fetch
+from .models import BaseRankingModel, DefaultRanking, ParsedData, SettingsModel
+from .parser import RTN, Torrent, parse
+from .patterns import check_pattern, check_video_extension, normalize_title
 from .ranker import get_rank
 
 __all__ = [
@@ -70,7 +67,6 @@ __all__ = [
     "RTN",
     "Torrent",
     "parse",
-    "batch_parse",
     "DefaultRanking",
     "ParsedData",
     # Required Models
@@ -79,6 +75,7 @@ __all__ = [
     # PTT
     "Parser",
     "add_defaults",
+    "parse_title",
     # Submodules
     "models",
     "parser",
@@ -86,16 +83,15 @@ __all__ = [
     "ranker",
     "fetch",
     "exceptions",
-    # Extras
-    "PTN",
-    "ptn_parse",
-    "get_rank",
-    "get_type",
-    "check_fetch",
-    "check_trash",
-    "title_match",
-    "sort_torrents",
-    "parse_extras",
-    "episodes_from_season",
+    # Patterns
+    "normalize_title",
     "check_video_extension",
+    "check_pattern",
+    # Extras
+    "title_match",
+    "get_lev_ratio",
+    "sort_torrents",
+    "get_rank",
+    "check_fetch",
+    "episodes_from_season",
 ]

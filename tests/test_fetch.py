@@ -1,12 +1,9 @@
 import pytest
 
-# from hypothesis import HealthCheck, given, settings
-# from hypothesis import strategies as st
 from RTN.fetch import (
     check_exclude,
     check_fetch,
     check_required,
-    check_trash,
     fetch_audio,
     fetch_codec,
     fetch_other,
@@ -14,42 +11,6 @@ from RTN.fetch import (
     fetch_resolution,
 )
 from RTN.models import CustomRank, ParsedData, SettingsModel
-
-# @st.composite
-# def custom_rank(draw, fetch_value=st.booleans()):  # noqa: B008
-#     rank = draw(st.integers(min_value=-100, max_value=100))
-#     fetch = draw(fetch_value)
-#     return CustomRank(enable=True, fetch=fetch, rank=rank)
-
-# # Strategy to generate SettingsModel objects with variable fetch settings for testing
-# @st.composite
-# def generate_settings(draw):
-#     custom_ranks = {
-#         "uhd": draw(custom_rank()),
-#         "fhd": draw(custom_rank()),
-#         "hd": draw(custom_rank()),
-#         "sd": draw(custom_rank()),
-#         "bluray": draw(custom_rank()),
-#         "hdr": draw(custom_rank()),
-#         "hdr10": draw(custom_rank()),
-#         "dolby_video": draw(custom_rank()),
-#         "dts_x": draw(custom_rank()),
-#         "dts_hd": draw(custom_rank()),
-#         "dts_hd_ma": draw(custom_rank()),
-#         "atmos": draw(custom_rank()),
-#         "truehd": draw(custom_rank()),
-#         "ddplus": draw(custom_rank()),
-#         "ac3": draw(custom_rank()),
-#         "aac": draw(custom_rank()),
-#         "remux": draw(custom_rank()),
-#         "webdl": draw(custom_rank()),
-#         "repack": draw(custom_rank()),
-#         "proper": draw(custom_rank()),
-#         "dubbed": draw(custom_rank()),
-#         "subbed": draw(custom_rank()),
-#         "av1": draw(custom_rank()),
-#     }
-#     return SettingsModel(custom_ranks=custom_ranks)
 
 
 @pytest.fixture
@@ -115,23 +76,6 @@ def false_fetch_settings():
             "av1": CustomRank(rank=10, fetch=False),
         },
     )
-
-
-def test_check_if_string_is_trash():
-    # True means the string is unwanted, and won't be fetched.
-    test_cases = [
-        ("Mission.Impossible.1996.Custom.Audio.1080p.PL-Spedboy", False),
-        ("Casino.1995.MULTi.REMUX.2160p.UHD.Blu-ray.HDR.HEVC.DTS-X7.1-DENDA", False),
-        ("Guardians of the Galaxy (CamRip / 2014)", True),  # CamRip
-        ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", True),    # R5, LiNE
-        ("The.Lion.King.2019.1080p.BluRay.x264.DTS-HD.MA.7.1-FGT", False),
-        ("The Great Gatsby 2013 1080p BluRay x264 AAC - Ozlem", False),
-    ]
-    for test_string, expected in test_cases:
-        assert check_trash(test_string) == expected
-
-    with pytest.raises(TypeError):
-        assert check_trash(123) # type: ignore
 
 
 def test_check_fetch(true_fetch_settings, false_fetch_settings):

@@ -42,36 +42,7 @@ Examples:
     True
 """
 
-import regex
-
 from .models import ParsedData, SettingsModel
-from .patterns import IS_TRASH_COMPILED
-
-
-def check_trash(raw_title: str) -> bool:
-    """
-    Check if the title contains any unwanted patterns.
-
-    Parameters:
-        `raw_title` (str): The raw title string to check.
-
-    Returns:
-        bool: True if the title contains unwanted patterns, otherwise False.
-
-    Raises:
-        TypeError: If the input title is empty or not a string.
-
-    Exmaples:
-        >>> check_trash("Some.Title.CAM.720p.WEB-DL.x264-Group")
-        True
-        >>> check_trash("Some.Title.720p.WEB-DL.x264-Group")
-        False
-    """
-    if not raw_title or not isinstance(raw_title, str):
-        raise TypeError("The input title must be a non-empty string.")
-    # True if we find any of the trash patterns in the title.
-    # You can safely remove any title from being scraped if this returns True!
-    return any(pattern.search(raw_title) for pattern in IS_TRASH_COMPILED)
 
 
 def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
@@ -94,7 +65,7 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     if not isinstance(settings, SettingsModel):
         raise TypeError("Settings must be an instance of SettingsModel.")
 
-    if check_trash(data.raw_title):
+    if hasattr(data, "trash") and data.trash:
         return False
     if check_required(data, settings):
         return True
@@ -134,7 +105,7 @@ def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
     if data.remux:
         return settings.custom_ranks["remux"].fetch
 
-    quality = data.quality[0].lower()
+    quality = data.quality.lower()
     match quality:
         case "web-dl":
             return settings.custom_ranks["webdl"].fetch
@@ -157,19 +128,15 @@ def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
     if not data.resolution:
         return True
 
-    resolution = data.resolution[0]
+    resolution = data.resolution.lower()
     match resolution:
-        case "4K":
-            return settings.custom_ranks["uhd"].fetch
-        case "2160p":
-            return settings.custom_ranks["uhd"].fetch
-        case "1440p":
+        case "4k" | "2160p" | "1440p":
             return settings.custom_ranks["uhd"].fetch
         case "1080p":
             return settings.custom_ranks["fhd"].fetch
         case "720p":
             return settings.custom_ranks["hd"].fetch
-        case "576p" | "480p":
+        case "576p" | "480p" | "360p":
             return settings.custom_ranks["sd"].fetch
         case _:
             return True
@@ -199,8 +166,8 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
         return True
 
     # Remove unwanted audio concatenations.
-    audio: str = data.audio[0]
-    audio = regex.sub(r"7.1|5.1|Dual|Mono|Original|LiNE", "", audio).strip()
+    audio: str = data.audio
+    # audio = regex.sub(r"7.1|5.1|Dual|Mono|Original|LiNE", "", audio).strip()
     match audio:
         case "Dolby TrueHD":
             return settings.custom_ranks["truehd"].fetch
@@ -219,8 +186,6 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
         case "AAC":
             return settings.custom_ranks["aac"].fetch
         case _:
-            # If the audio format isn't specifically mentioned, default to True,
-            # meaning it's considered fetchable unless explicitly excluded.
             return True
 
 

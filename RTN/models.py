@@ -31,52 +31,151 @@ Example:
     >>> rtn = RTN(rank_model, settings)
 """
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import regex
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, field_validator, model_validator, root_validator
 from regex import Pattern
 
-from RTN.patterns import IS_MOVIE_COMPILED
+from PTT import parse_title
+
+from RTN.exceptions import GarbageTorrent
 
 
 class ParsedData(BaseModel):
     """Parsed data model for a torrent title."""
 
-    raw_title: str = ""
-    parsed_title: str = ""
-    fetch: bool = False
-    is_4k: bool = False
-    is_multi_audio: bool = False
-    is_multi_subtitle: bool = False
-    is_complete: bool = False
-    year: int = 0
-    resolution: List[str] = []
-    quality: List[str] = []
-    season: List[int] = []
-    episode: List[int] = []
-    codec: List[str] = []
+    raw_title: str
+    parsed_title: str
+    normalized_title: str = None
+    trash: bool = False
+    year: int = None
+    resolution: str = "unknown"
+    seasons: List[int] = []
+    episodes: List[int] = []
+    complete: bool = False
+    volumes: List[int] = []
+    languages: List[str] = []
+    quality: str = None
+    hdr: List[str] = []
+    codec: str = None
     audio: List[str] = []
-    subtitles: List[str] = []
-    language: List[str] = []
-    lang_codes: Dict[str, str] = {}
-    bitDepth: List[int] = []
-    hdr: str = ""
+    channels: List[str] = []
+    dubbed: bool = False
+    subbed: bool = False
+    date: str = None
+    group: str = None
+    edition: str = None
+    bit_depth: str = None
+    bitrate: str = None
+    extended: bool = False
+    convert: bool = False
+    hardcoded: bool = False
+    region: str = None
+    ppv: bool = False
+    site: str = None
     proper: bool = False
     repack: bool = False
-    remux: bool = False
+    retail: bool = False
     upscaled: bool = False
     remastered: bool = False
-    directorsCut: bool = False
-    extended: bool = False
+    unrated: bool = False
+    documentary: bool = False
+    episode_code: str = None
+    country: str = None
+    container: str = None
+    extension: str = None
+    torrent: bool = False
+
+    class Config:
+        from_attributes = True
+        use_orm = True
 
     @property
     def type(self) -> str:
         """Returns the type of the torrent based on its attributes."""
-        movie = not any(pattern.search(self.raw_title) for pattern in IS_MOVIE_COMPILED) and not self.episode and self.year != 0
-        if movie:
+        if not self.seasons and not self.episodes:
             return "movie"
         return "show"
+
+    def to_dict(self):
+        return self.model_dump_json()
+
+class Torrent(BaseModel):
+    """
+    Represents a torrent with metadata parsed from its title and additional computed properties.
+
+    Attributes:
+        `raw_title` (str): The original title of the torrent.
+        `infohash` (str): The SHA-1 hash identifier of the torrent.
+        `data` (ParsedData): Metadata extracted from the torrent title.
+        `fetch` (bool): Indicates whether the torrent meets the criteria for fetching based on user settings.
+        `rank` (int): The computed ranking score of the torrent based on user-defined preferences.
+        `lev_ratio` (float): The Levenshtein ratio comparing the parsed title and the raw title for similarity.
+
+    Methods:
+        __eq__: Determines equality based on the infohash of the torrent, allowing for easy comparison.
+        __hash__: Generates a hash based on the infohash of the torrent for set operations.
+    
+    Raises:
+        `GarbageTorrent`: If the title is identified as trash and should be ignored by the scraper.
+
+    Example:
+        >>> torrent = Torrent(
+        ...     raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
+        ...     infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7",
+        ...     data=ParsedData(...),
+        ...     fetch=True,
+        ...     rank=500,
+        ...     lev_ratio=0.95,
+        ... )
+        >>> isinstance(torrent, Torrent)
+        True
+        >>> torrent.raw_title
+        'The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]'
+        >>> torrent.infohash
+        'c08a9ee8ce3a5c2c08865e2b05406273cabc97e7'
+        >>> torrent.data.parsed_title
+        'The Walking Dead'
+        >>> torrent.fetch
+        True
+        >>> torrent.rank
+        500
+        >>> torrent.lev_ratio
+        0.95
+    """
+
+    infohash: str
+    raw_title: str
+    seeders: Optional[int] = 0
+    leechers: Optional[int] = 0
+    trackers: Optional[List[Any]] = []
+    data: ParsedData
+    fetch: bool = False
+    rank: int = 0
+    lev_ratio: float = 0.0
+
+    class Config:
+        from_attributes = True
+        use_orm = True
+        frozen = True
+
+    @field_validator("infohash")
+    def validate_infohash(cls, v):
+        """Validates infohash length and format (MD5 or SHA-1)."""
+        if len(v) not in (32, 40) or not regex.match(r"^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$", v):
+            raise GarbageTorrent("Infohash must be a 32-character MD5 hash or a 40-character SHA-1 hash.")
+        return v
+
+    def __eq__(self, other: object) -> bool:
+        """Compares Torrent objects based on their infohash."""
+        return isinstance(other, Torrent) and self.infohash == other.infohash
+
+    def __hash__(self) -> int:
+        return hash(self.infohash)
+
+    def to_dict(self):
+        return self.model_dump_json()
 
 class BaseRankingModel(BaseModel):
     """
@@ -231,6 +330,18 @@ class SettingsModel(BaseModel):
     require: List[Union[str, Pattern]] = []
     exclude: List[Union[str, Pattern]] = []
     preferred: List[Union[str, Pattern]] = []
+    options: Dict[str, Any] = {
+        "lev_ratio": 0.821,
+        "remove_trash": True,
+        "strict_mode": False,
+        "allow_unknown_resolutions": True,
+    }
+    languages: Dict[str, Any] = {
+        "allow_unknown_languages": True,
+        "require": [],
+        "exclude": ["hi", "ta"],
+        "preferred": [],
+    }
     custom_ranks: Dict[str, CustomRank] = {
         "uhd": CustomRank(enable=False, fetch=True, rank=120),
         "fhd": CustomRank(enable=False, fetch=True, rank=90),
@@ -265,7 +376,7 @@ class SettingsModel(BaseModel):
         "subbed": CustomRank(enable=False, fetch=True, rank=2),
     }
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def compile_and_validate_patterns(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Compile string patterns to regex.Pattern, keeping compiled patterns unchanged."""
         for field in ("require", "exclude", "preferred"):

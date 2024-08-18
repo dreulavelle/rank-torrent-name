@@ -455,3 +455,17 @@ def test_other_ranks_calculation(enabled_settings_model, ranking_model):
         rank = get_rank(data, enabled_settings_model, ranking_model)
         assert rank > 0, f"{key} data should have positive rank"
     assert get_rank(rank_none, enabled_settings_model, ranking_model) == 0, "No data should have rank 0"
+
+
+def test_manual_fetch_check_from_user(settings_model, ranking_model):
+    rtn = RTN(settings_model, ranking_model, lev_threshold=0.85)
+    
+    item: Torrent = rtn.rank(
+        "marvels.agents.of.s.h.i.e.l.d.s03.1080p.bluray.x264-shortbrehd[rartv]",
+        "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7",
+        correct_title="Marvel's Agents of S.H.I.E.L.D.",
+        remove_trash=True
+    )
+
+    assert item.fetch is True, "Fetch should be True"
+    assert item.lev_ratio > 0.0, "Levenshtein ratio should be greater than 0.0"
