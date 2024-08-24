@@ -15,7 +15,6 @@ For more information on each function, refer to the respective docstrings.
 
 import regex
 
-
 # Translation table for normalizing unicode characters
 translationTable: dict[str, str] = {
     "ā": "a", "ă": "a", "ą": "a", "ć": "c", "č": "c", "ç": "c",

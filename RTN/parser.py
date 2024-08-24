@@ -39,6 +39,7 @@ Example:
     0.95
 """
 from typing import Any, Dict, List
+
 from PTT import parse_title
 
 from .exceptions import GarbageTorrent
@@ -142,7 +143,7 @@ class RTN:
 
         parsed_data: ParsedData = parse(raw_title)
 
-        if self.settings.options.remove_trash:
+        if remove_trash:
             if parsed_data.trash:
                 raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
@@ -158,7 +159,6 @@ class RTN:
         return Torrent(
             infohash=infohash,
             raw_title=raw_title,
-            cleaned_title=normalize_title(parsed_data.parsed_title),
             data=parsed_data,
             fetch=fetch,
             rank=rank,
@@ -166,7 +166,7 @@ class RTN:
         )
 
 
-def parse(raw_title: str, json: bool = False) -> ParsedData:
+def parse(raw_title: str, json: bool = False) -> ParsedData | Dict[str, Any]:
     """
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
 
@@ -184,10 +184,11 @@ def parse(raw_title: str, json: bool = False) -> ParsedData:
     item = ParsedData(
         **data,
         raw_title=raw_title,
-        parsed_title=data.get("title", "")
+        parsed_title=data.get("title", ""),
+        normalized_title=normalize_title(data.get("title", "")),
     )
 
-    return item if not json else item.to_dict()
+    return item if not json else data
 
 
 def parse_chunk(chunk: List[str]) -> List[ParsedData]:

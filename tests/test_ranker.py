@@ -245,17 +245,16 @@ def test_get_rank_validity(settings_model, ranking_model):
         codec=["H.264"],
         audio=["Dolby Digital"],
         hdr="HDR10",
-        is_complete=True,
+        complete=True,
         repack=True,
         proper=True,
-        remux=True,
-        season=[1],
-        episode=[1],
+        seasons=[1],
+        episodes=[1],
     )
 
     rank = get_rank(parsed_data, settings_model, ranking_model)
     assert isinstance(rank, int)
-    assert rank < 0  # Remux is -1000 by default
+    assert rank < 0
 
     # test invalid get_rank with missing parsed_data
     parsed_data = ParsedData(

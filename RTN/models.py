@@ -31,13 +31,12 @@ Example:
     >>> rtn = RTN(rank_model, settings)
 """
 
-from typing import Any, Dict, List, Optional, Union
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 import regex
-from pydantic import BaseModel, field_validator, model_validator, root_validator
+from pydantic import BaseModel, field_validator, model_validator
 from regex import Pattern
-
-from PTT import parse_title
 
 from RTN.exceptions import GarbageTorrent
 
@@ -147,6 +146,7 @@ class Torrent(BaseModel):
 
     infohash: str
     raw_title: str
+    torrent: Optional[str] = None
     seeders: Optional[int] = 0
     leechers: Optional[int] = 0
     trackers: Optional[List[Any]] = []
@@ -269,11 +269,23 @@ class DefaultRanking(BaseRankingModel):
     bluray: int = -90
 
 
+class Resolution(str, Enum):
+    UHD = "4K"
+    UHD_2160P = "2160p"
+    UHD_1440P = "1440p"
+    FHD = "1080p"
+    HD = "720p"
+    SD_576P = "576p"
+    SD_480P = "480p"
+    SD_360P = "360p"
+    SD = "480p"  # Default SD resolution
+    UNKNOWN = "unknown"
+
+
 class CustomRank(BaseModel):
     """Custom Ranks used in SettingsModel."""
-
-    enable: bool = False
-    fetch: bool = False
+    fetch: bool = True
+    use_custom_rank: bool = False
     rank: int = 0
 
 
@@ -284,25 +296,23 @@ class SettingsModel(BaseModel):
     advanced customization and fine-grained control over the ranking process.
 
     Attributes:
-        `profile` (str): Identifier for the settings profile, allowing for multiple configurations.
-        `require` (List[Union[str, Pattern]]): Patterns torrents must match to be considered.
-        `exclude` (List[Union[str, Pattern]]): Patterns that, if matched, result in torrent exclusion.
-        `preferred` (List[Union[str, Pattern]]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
-        `custom_ranks` (Dict[str, CustomRank]): Custom ranking configurations for specific attributes, allowing users to define
-                                              how different torrent qualities and features affect the overall rank.
+    - `profile` (str): Identifier for the settings profile, allowing for multiple configurations.
+    - `require` (List[Union[str, Pattern]]): Patterns torrents must match to be considered.
+    - `exclude` (List[Union[str, Pattern]]): Patterns that, if matched, result in torrent exclusion.
+    - `preferred` (List[Union[str, Pattern]]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
+    - `custom_ranks` (Dict[str, CustomRank]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
 
     Methods:
-        __init__(**kwargs): Initializes the settings model with user-defined preferences. Automatically compiles string
-                            regex patterns into Patterns, taking into account case sensitivity based on the pattern syntax.
+        __init__(**kwargs): Initializes the settings model with user-defined preferences. Automatically compiles string regex patterns into Patterns, taking into account case sensitivity based on the pattern syntax.
         __getitem__(item: str) -> CustomRank: Access custom rank settings via attribute keys.
 
     Note:
-        - The `profile` attribute allows users to define multiple settings profiles for different use cases.
-        - The `require`, `exclude`, and `preferred` attributes are optional! If not provided, they default to an empty list.
-        - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
-        - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
-        - Patterns enclosed in '/' with a trailing 'i' are compiled as case-insensitive.
-        - Patterns not enclosed are compiled as case-insensitive by default.
+    - The `profile` attribute allows users to define multiple settings profiles for different use cases.
+    - The `require`, `exclude`, and `preferred` attributes are optional! If not provided, they default to an empty list.
+    - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
+    - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
+    - Patterns enclosed in '/' with a trailing 'i' are compiled as case-insensitive.
+    - Patterns not enclosed are compiled as case-insensitive by default.
 
     This model supports advanced regex features, enabling powerful and precise filtering and ranking based on torrent titles and attributes.
 
@@ -313,8 +323,8 @@ class SettingsModel(BaseModel):
                 exclude=["CAM", "TS"],
                 preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/i"],
                 custom_ranks={
-                    "uhd": CustomRank(enable=True, fetch=False, rank=150),
-                    "fhd": CustomRank(enable=True, fetch=True, rank=90),
+                    "uhd": CustomRank(fetch=True, fetch=False, rank=150),
+                    "fhd": CustomRank(fetch=True, fetch=True, rank=90),
                     ...
                 },
             )
@@ -327,53 +337,100 @@ class SettingsModel(BaseModel):
     """
 
     profile: str = "default"
-    require: List[Union[str, Pattern]] = []
-    exclude: List[Union[str, Pattern]] = []
-    preferred: List[Union[str, Pattern]] = []
+    max_resolution: str = "1080p"
+    min_resolution: str = "720p"
+    require: List[str | Pattern] = []
+    exclude: List[str | Pattern] = []
+    preferred: List[str | Pattern] = []
     options: Dict[str, Any] = {
-        "lev_ratio": 0.821,
-        "remove_trash": True,
-        "strict_mode": False,
+        "title_similarity": 0.9,
+        "max_filesize": 99999, # MB
+        "min_filesize": 100,   # MB
+        "remove_all_trash": True,
+        "remove_all_rips": False,
+        "remove_lowquality_rips": True,
         "allow_unknown_resolutions": True,
     }
     languages: Dict[str, Any] = {
         "allow_unknown_languages": True,
-        "require": [],
-        "exclude": ["hi", "ta"],
+        "required": [],
+        "exclude": ["de", "fr", "es", "hi", "ta", "ru", "ua", "th"],
         "preferred": [],
     }
-    custom_ranks: Dict[str, CustomRank] = {
-        "uhd": CustomRank(enable=False, fetch=True, rank=120),
-        "fhd": CustomRank(enable=False, fetch=True, rank=90),
-        "hd": CustomRank(enable=False, fetch=True, rank=80),
-        "sd": CustomRank(enable=False, fetch=True, rank=-120),
-        "hdr": CustomRank(enable=False, fetch=True, rank=40),
-        "hdr10": CustomRank(enable=False, fetch=True, rank=50),
-        "dolby_video": CustomRank(enable=False, fetch=True, rank=-100),
-        "h264": CustomRank(enable=False, fetch=True, rank=0),
-        "h265": CustomRank(enable=False, fetch=True, rank=0),
-        "hevc": CustomRank(enable=False, fetch=True, rank=0),
-        "avc": CustomRank(enable=False, fetch=True, rank=0),
-        "av1": CustomRank(enable=False, fetch=True, rank=0),
-        "dts_x": CustomRank(enable=False, fetch=True, rank=0),
-        "dts_hd": CustomRank(enable=False, fetch=True, rank=0),
-        "dts_hd_ma": CustomRank(enable=False, fetch=True, rank=0),
-        "atmos": CustomRank(enable=False, fetch=True, rank=0),
-        "truehd": CustomRank(enable=False, fetch=True, rank=0),
-        "ddplus": CustomRank(enable=False, fetch=True, rank=0),
-        "aac": CustomRank(enable=False, fetch=True, rank=70),
-        "ac3": CustomRank(enable=False, fetch=True, rank=50),
-        "bluray": CustomRank(enable=False, fetch=True, rank=80),
-        "webdl": CustomRank(enable=False, fetch=True, rank=90),
-        "remux": CustomRank(enable=False, fetch=True, rank=-1000),
-        "dvdrip": CustomRank(enable=False, fetch=True, rank=5),
-        "bdrip": CustomRank(enable=False, fetch=True, rank=5),
-        "brrip": CustomRank(enable=False, fetch=True, rank=0),
-        "hdtv": CustomRank(enable=False, fetch=True, rank=0),
-        "repack": CustomRank(enable=False, fetch=True, rank=5),
-        "proper": CustomRank(enable=False, fetch=True, rank=4),
-        "dubbed": CustomRank(enable=False, fetch=True, rank=4),
-        "subbed": CustomRank(enable=False, fetch=True, rank=2),
+    custom_ranks: Dict[str, Dict[str, CustomRank]] = {
+        "quality": {
+            "av1": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "avc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "bluray": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dvd": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "hdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "hevc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "mpeg": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "remux": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "vhs": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "web": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "webdl": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "webmux": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "xvid": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "pdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+        },
+        "rips": {
+            "bdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "brrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dvdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "hdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "ppvrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "tvrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "uhdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "webdlrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "webrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+        },
+        "hdr": {
+            "10bit": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dolby_vision": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "hdr": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "hdr10plus": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "sdr": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+        },
+        "audio": {
+            "aac": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "ac3": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "atmos": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "ddplus": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dts": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dts_x": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "eac3": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "flac": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "mono": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "stereo": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "surround": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "truehd": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+        },
+        "extras": {
+            "3d": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "converted": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "documentary": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "dubbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "edition": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "hardcoded": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "network": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "proper": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "repack": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "retail": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "subbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "upscaled": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+        },
+        "trash": {
+            "cam": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "hq_audio": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "r5": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "screener": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "site": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "size": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "telecine": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "workprint": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+        },
     }
 
     @model_validator(mode="before")
@@ -384,9 +441,7 @@ class SettingsModel(BaseModel):
             compiled_patterns = []
             for pattern in raw_patterns:
                 if isinstance(pattern, str):
-                    if pattern.startswith("/") and pattern.endswith("/i"):  # case-insensitive
-                        compiled_patterns.append(regex.compile(pattern[1:-2], regex.IGNORECASE))
-                    elif pattern.startswith("/") and pattern.endswith("/"):  # case-sensitive
+                    if pattern.startswith("/") and pattern.endswith("/"):  # case-sensitive
                         compiled_patterns.append(regex.compile(pattern[1:-1]))
                     else:  # case-insensitive by default
                         compiled_patterns.append(regex.compile(pattern, regex.IGNORECASE))

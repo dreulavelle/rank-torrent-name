@@ -20,7 +20,7 @@ from RTN.extras import (
             "quality": "BluRay",
             "seasons": [1],
             "episodes": [1, 2],
-            "codec": "x265",
+            "codec": "hevc",
             "audio": ["aac"],
             "languages": [],
             "bit_depth": "10bit"
@@ -59,13 +59,14 @@ def test_default_title_matching(title, query, expected):
 
 @pytest.mark.parametrize("release_name, expected", [
     ("www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv", {
-        "title": "Khel Khel Mein",
+        "raw_title": "www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv",
+        "parsed_title": "Khel Khel Mein",
         "year": 2024,
         "languages": ["hi"],
         "seasons": [],
         "episodes": [],
         "quality": "SCR",
-        "codec": "x264",
+        "codec": "avc",
         "audio": ["aac"],
         "resolution": "1080p",
         "container": "mkv",
@@ -75,14 +76,15 @@ def test_default_title_matching(title, query, expected):
         "trash": True
     })
 ])
-def test_random_releases_parse(parser, release_name, expected):
-    assert parser.parse(release_name) == expected
+def test_random_releases_parse(release_name, expected):
+    assert parse(release_name, json=True) == expected, f"Failed with {expected}"
 
 
 @pytest.mark.parametrize("release_name, expected", [
     ("www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv", ParsedData(
         raw_title="www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv",
         parsed_title="Khel Khel Mein",
+        normalized_title="khel khel mein",
         trash=True,
         year=2024,
         resolution="1080p",
@@ -90,11 +92,11 @@ def test_random_releases_parse(parser, release_name, expected):
         episodes=[],
         languages=["hi"],
         quality="SCR",
-        codec="x264",
+        codec="avc",
         audio=["aac"],
-        site="www.5MovieRulz.show",
         container="mkv",
         extension="mkv",
+        site="www.5MovieRulz.show",
         size="2.3GB"
     ))
 ])

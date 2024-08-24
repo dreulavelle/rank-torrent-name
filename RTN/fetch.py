@@ -42,7 +42,7 @@ Examples:
     True
 """
 
-from .models import ParsedData, SettingsModel
+from .models import ParsedData, Resolution, SettingsModel
 
 
 def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
@@ -66,7 +66,8 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
         raise TypeError("Settings must be an instance of SettingsModel.")
 
     if hasattr(data, "trash") and data.trash:
-        return False
+        if settings.options.remove_trash:
+            return False
     if check_required(data, settings):
         return True
     if check_exclude(data, settings):
@@ -119,6 +120,8 @@ def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
             return settings.custom_ranks["bdrip"].fetch
         case "brrip":
             return settings.custom_ranks["brrip"].fetch
+        case "TeleSync" | "TeleCine" | "SCR" | "CAM" | "SATRip":
+            return settings.options.remove_trash
         case _:
             return True
 
@@ -128,18 +131,22 @@ def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
     if not data.resolution:
         return True
 
-    resolution = data.resolution.lower()
-    match resolution:
-        case "4k" | "2160p" | "1440p":
-            return settings.custom_ranks["uhd"].fetch
-        case "1080p":
-            return settings.custom_ranks["fhd"].fetch
-        case "720p":
-            return settings.custom_ranks["hd"].fetch
-        case "576p" | "480p" | "360p":
-            return settings.custom_ranks["sd"].fetch
-        case _:
-            return True
+    resolution_map = {
+        "4k": Resolution.UHD,
+        "2160p": Resolution.UHD,
+        "1440p": Resolution.UHD,
+        "1080p": Resolution.FHD,
+        "720p": Resolution.HD,
+        "576p": Resolution.SD,
+        "480p": Resolution.SD,
+        "360p": Resolution.SD,
+    }
+
+    resolution = resolution_map.get(data.resolution.lower(), None)
+    if resolution is None:
+        return settings.options["allow_unknown_resolutions"]
+
+    return settings.min_resolution <= resolution <= settings.max_resolution
 
 
 def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
@@ -147,7 +154,7 @@ def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
     if not data.codec:
         return True
 
-    match data.codec[0]:
+    match data.codec:
         case "AV1":
             return settings.custom_ranks["av1"].fetch
         case "H.264":

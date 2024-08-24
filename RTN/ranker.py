@@ -60,7 +60,8 @@ def get_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingM
     if not data.raw_title:
         raise ValueError("Parsed data cannot be empty.")
 
-    rank: int = calculate_resolution_rank(data, settings, rank_model)
+    # rank: int = calculate_resolution_rank(data, settings, rank_model)
+    rank: int = 0
     rank += calculate_quality_rank(data, settings, rank_model)
     rank += calculate_codec_rank(data, settings, rank_model)
     rank += calculate_audio_rank(data, settings, rank_model)
@@ -84,30 +85,30 @@ def calculate_preferred(data: ParsedData, settings: SettingsModel) -> int:
     """Calculate the preferred ranking of a given parsed data."""
     if not settings.preferred or all(pattern is None for pattern in settings.preferred):
         return 0
-    return 5000 if any(pattern.search(data.raw_title) for pattern in settings.preferred if pattern) else 0  # type: ignore
+    return 5000 if any(pattern.search(data.raw_title) for pattern in settings.preferred if pattern) else 0
 
 
-def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
-    """Calculate the resolution ranking of the given parsed data."""
-    if not data.resolution:
-        return 0
+# def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+#     """Calculate the resolution ranking of the given parsed data."""
+#     if not data.resolution:
+#         return 0
 
-    resolution: str = data.resolution[0].lower()
-    match resolution:
-        case "4k":
-            return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
-        case "2160p":
-            return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
-        case "1440p":
-            return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
-        case "1080p":
-            return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
-        case "720p":
-            return rank_model.hd if not settings.custom_ranks["hd"].enable else settings.custom_ranks["hd"].rank
-        case "576p" | "480p" | "360p":
-            return rank_model.sd if not settings.custom_ranks["sd"].enable else settings.custom_ranks["sd"].rank
-        case _:
-            return 0
+#     resolution: str = data.resolution.lower()
+#     match resolution:
+#         case "4k":
+#             return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
+#         case "2160p":
+#             return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
+#         case "1440p":
+#             return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
+#         case "1080p":
+#             return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
+#         case "720p":
+#             return rank_model.hd if not settings.custom_ranks["hd"].enable else settings.custom_ranks["hd"].rank
+#         case "576p" | "480p" | "360p":
+#             return rank_model.sd if not settings.custom_ranks["sd"].enable else settings.custom_ranks["sd"].rank
+#         case _:
+#             return 0
 
 
 def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
@@ -115,7 +116,7 @@ def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model
     if not data.quality:
         return 0
 
-    quality = data.quality[0].lower()
+    quality = data.quality.lower()
     match quality:
         case "web-dl":
             return rank_model.webdl if not settings.custom_ranks["webdl"].enable else settings.custom_ranks["webdl"].rank

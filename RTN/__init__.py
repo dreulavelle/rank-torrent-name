@@ -49,13 +49,7 @@ from PTT import Parser, add_defaults, parse_title
 
 from RTN import exceptions, fetch, models, parser, patterns, ranker
 
-from .extras import (
-    episodes_from_season,
-    sort_torrents,
-    title_match,
-    get_lev_ratio,
-
-)
+from .extras import episodes_from_season, get_lev_ratio, sort_torrents, title_match
 from .fetch import check_fetch
 from .models import BaseRankingModel, DefaultRanking, ParsedData, SettingsModel
 from .parser import RTN, Torrent, parse

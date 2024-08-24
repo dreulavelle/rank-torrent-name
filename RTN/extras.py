@@ -21,16 +21,13 @@ Examples:
 {'is_multi_audio': False, 'is_multi_subtitle': False, 'is_complete': False, 'is_4k': True, 'hdr': '', 'episode': [3]}
 ```
 """
-
-from collections import defaultdict
 from typing import Any, Dict, List, Set
 
 from Levenshtein import ratio
 from PTT import parse_title
-from .models import ParsedData, Torrent
-from .patterns import (
-    normalize_title,
-)
+
+from .models import Resolution, Torrent
+from .patterns import normalize_title
 
 
 def title_match(correct_title: str, raw_title: str, threshold: int | float = 0.821) -> bool:
@@ -87,19 +84,34 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
       infohash as the key.
     """
 
-    buckets = defaultdict(lambda: 0, {
-        "4k": 4,
-        "1080p": 3,
-        "720p": 2,
-        "480p": 1,
-        "_": 0
-    })
+    buckets = {
+        Resolution.UHD: 4,
+        Resolution.UHD_2160P: 4,
+        Resolution.UHD_1440P: 4,
+        Resolution.FHD: 3,
+        Resolution.HD: 2,
+        Resolution.SD_576P: 1,
+        Resolution.SD_480P: 1,
+        Resolution.SD_360P: 1,
+        Resolution.UNKNOWN: 0,
+    }
 
     if not isinstance(torrents, set) or not all(isinstance(t, Torrent) for t in torrents):
         raise TypeError("The input must be a set of Torrent objects.")
 
     def get_bucket(torrent: Torrent) -> int:
-        resolution = torrent.data.resolution.lower() if torrent.data.resolution else "_"
+        resolution_map = {
+            "4k": Resolution.UHD,
+            "2160p": Resolution.UHD_2160P,
+            "1440p": Resolution.UHD_1440P,
+            "1080p": Resolution.FHD,
+            "720p": Resolution.HD,
+            "576p": Resolution.SD_576P,
+            "480p": Resolution.SD_480P,
+            "360p": Resolution.SD_360P,
+            "unknown": Resolution.UNKNOWN,
+        }
+        resolution = resolution_map.get(torrent.data.resolution.lower(), Resolution.UNKNOWN)
         return buckets[resolution]
 
     sorted_torrents: List[Torrent] = sorted(
