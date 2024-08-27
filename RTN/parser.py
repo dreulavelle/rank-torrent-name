@@ -39,6 +39,7 @@ Example:
     0.95
 """
 from typing import Any, Dict, List
+from Levenshtein import ratio
 
 from PTT import parse_title
 
@@ -63,7 +64,7 @@ class RTN:
         `rank`: Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
     """
 
-    def __init__(self, settings: SettingsModel, ranking_model: BaseRankingModel, lev_threshold: float = 0.9):
+    def __init__(self, settings: SettingsModel, ranking_model: BaseRankingModel):
         """
         Initializes the RTN class with settings and a ranking model.
 
@@ -93,7 +94,7 @@ class RTN:
 
         self.settings = settings
         self.ranking_model = ranking_model
-        self.lev_threshold = lev_threshold
+        self.lev_threshold = self.settings.options.get("title_similarity", 0.85)
 
     def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False) -> Torrent:
         """
@@ -141,12 +142,13 @@ class RTN:
         if len(infohash) != 40:
             raise GarbageTorrent("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
-        parsed_data: ParsedData = parse(raw_title)
+        parsed_data: ParsedData = parse(raw_title) # type: ignore
 
         if remove_trash:
             if parsed_data.trash:
                 raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
 
+        lev_ratio = 0.0
         if correct_title:
             lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold)
 
@@ -162,11 +164,11 @@ class RTN:
             data=parsed_data,
             fetch=fetch,
             rank=rank,
-            lev_ratio=lev_ratio or 0.0
+            lev_ratio=lev_ratio
         )
 
 
-def parse(raw_title: str, json: bool = False) -> ParsedData | Dict[str, Any]:
+def parse(raw_title: str, translate_langs: bool = False, json: bool = False) -> ParsedData | Dict[str, Any]:
     """
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
 
@@ -180,46 +182,13 @@ def parse(raw_title: str, json: bool = False) -> ParsedData | Dict[str, Any]:
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
 
-    data: Dict[str, Any] = parse_title(raw_title)
+    data: Dict[str, Any] = parse_title(raw_title, translate_langs)
     item = ParsedData(
         **data,
         raw_title=raw_title,
         parsed_title=data.get("title", ""),
         normalized_title=normalize_title(data.get("title", "")),
+        _3d=data.get("3d", False)
     )
 
     return item if not json else data
-
-
-def parse_chunk(chunk: List[str]) -> List[ParsedData]:
-    """
-    Parses a chunk of torrent titles.
-
-    Args:
-        `chunk` (List[str]): A list of torrent titles to parse.
-        `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
-
-    Returns:
-        List[ParsedData]: A list of ParsedData objects containing the parsed metadata from the torrent titles.
-    """
-    return [parse(title) for title in chunk]
-
-
-def batch_parse(titles: List[str], chunk_size: int = 50) -> List[ParsedData]:
-    """
-    Parses a list of torrent titles in batches for improved performance.
-
-    Args:
-        `titles` (List[str]): A list of torrent titles to parse.
-        `chunk_size` (int): The number of titles to process in each batch.
-        `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
-
-    Returns:
-        List[ParsedData]: A list of ParsedData objects for each title.
-    """
-    chunks = [titles[i : i + chunk_size] for i in range(0, len(titles), chunk_size)]
-    parsed_data = []
-    for chunk in chunks:
-        chunk_result = parse_chunk(chunk)
-        parsed_data.extend(chunk_result)
-    return parsed_data

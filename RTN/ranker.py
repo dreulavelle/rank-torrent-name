@@ -35,7 +35,6 @@ Examples:
 """
 
 import regex
-
 from .models import BaseRankingModel, ParsedData, SettingsModel
 
 
@@ -60,24 +59,15 @@ def get_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingM
     if not data.raw_title:
         raise ValueError("Parsed data cannot be empty.")
 
-    # rank: int = calculate_resolution_rank(data, settings, rank_model)
     rank: int = 0
     rank += calculate_quality_rank(data, settings, rank_model)
-    rank += calculate_codec_rank(data, settings, rank_model)
+    rank += calculate_hdr_rank(data, settings, rank_model)
+    rank += calculate_channels_rank(data, settings, rank_model)
     rank += calculate_audio_rank(data, settings, rank_model)
-    rank += calculate_other_ranks(data, settings, rank_model)
+    rank += calculate_codec_rank(data, settings, rank_model)
+    rank += calculate_extra_ranks(data, settings, rank_model)
     rank += calculate_preferred(data, settings)
-
-    if data.repack:
-        rank += rank_model.repack if not settings.custom_ranks["repack"].enable else settings.custom_ranks["repack"].rank
-    if data.proper:
-        rank += rank_model.proper if not settings.custom_ranks["proper"].enable else settings.custom_ranks["proper"].rank
-    if data.remux:
-        rank += rank_model.remux if not settings.custom_ranks["remux"].enable else settings.custom_ranks["remux"].rank
-    if data.dubbed:
-        rank += rank_model.dubbed if not settings.custom_ranks["dubbed"].enable else settings.custom_ranks["dubbed"].rank
-    if data.subbed:
-        rank += rank_model.subbed if not settings.custom_ranks["subbed"].enable else settings.custom_ranks["subbed"].rank
+    rank += calculate_preferred_langs(data, settings)
     return rank
 
 
@@ -85,30 +75,14 @@ def calculate_preferred(data: ParsedData, settings: SettingsModel) -> int:
     """Calculate the preferred ranking of a given parsed data."""
     if not settings.preferred or all(pattern is None for pattern in settings.preferred):
         return 0
-    return 5000 if any(pattern.search(data.raw_title) for pattern in settings.preferred if pattern) else 0
+    return 10000 if any(regex.search(pattern, data.raw_title) for pattern in settings.preferred if pattern) else 0
 
 
-# def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
-#     """Calculate the resolution ranking of the given parsed data."""
-#     if not data.resolution:
-#         return 0
-
-#     resolution: str = data.resolution.lower()
-#     match resolution:
-#         case "4k":
-#             return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
-#         case "2160p":
-#             return rank_model.uhd if not settings.custom_ranks["uhd"].enable else settings.custom_ranks["uhd"].rank
-#         case "1440p":
-#             return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
-#         case "1080p":
-#             return rank_model.fhd if not settings.custom_ranks["fhd"].enable else settings.custom_ranks["fhd"].rank
-#         case "720p":
-#             return rank_model.hd if not settings.custom_ranks["hd"].enable else settings.custom_ranks["hd"].rank
-#         case "576p" | "480p" | "360p":
-#             return rank_model.sd if not settings.custom_ranks["sd"].enable else settings.custom_ranks["sd"].rank
-#         case _:
-#             return 0
+def calculate_preferred_langs(data: ParsedData, settings: SettingsModel) -> int:
+    """Calculate the preferred languages ranking of a given parsed data."""
+    if not settings.languages["preferred"]:
+        return 0
+    return 10000 if any(lang in data.languages for lang in settings.languages["preferred"]) else 0
 
 
 def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
@@ -116,22 +90,61 @@ def calculate_quality_rank(data: ParsedData, settings: SettingsModel, rank_model
     if not data.quality:
         return 0
 
-    quality = data.quality.lower()
+    quality = data.quality
     match quality:
-        case "web-dl":
-            return rank_model.webdl if not settings.custom_ranks["webdl"].enable else settings.custom_ranks["webdl"].rank
-        case "blu-ray":
-            return rank_model.bluray if not settings.custom_ranks["bluray"].enable else settings.custom_ranks["bluray"].rank
-        case "dvdrip":
-            return rank_model.dvdrip if not settings.custom_ranks["dvdrip"].enable else settings.custom_ranks["dvdrip"].rank
-        case "bdrip":
-            return rank_model.bdrip if not settings.custom_ranks["bdrip"].enable else settings.custom_ranks["bdrip"].rank
-        case "brrip":
-            return rank_model.brrip if not settings.custom_ranks["brrip"].enable else settings.custom_ranks["brrip"].rank
-        case "hdtv":
-            return rank_model.hdtv if not settings.custom_ranks["hdtv"].enable else settings.custom_ranks["hdtv"].rank
-        case "webcap" | "cam" | "telesync" | "telecine" | "screener" | "vodrip" | "tvrip" | "dvd-r":
-            return -1000
+        # Quality
+        case "WEB":
+            return rank_model.web if not settings.custom_ranks["quality"]["web"].use_custom_rank else settings.custom_ranks["quality"]["web"].rank
+        case "WEB-DL":
+            return rank_model.webdl if not settings.custom_ranks["quality"]["webdl"].use_custom_rank else settings.custom_ranks["quality"]["webdl"].rank
+        case "BluRay":
+            return rank_model.bluray if not settings.custom_ranks["quality"]["bluray"].use_custom_rank else settings.custom_ranks["quality"]["bluray"].rank
+        case "HDTV":
+            return rank_model.hdtv if not settings.custom_ranks["quality"]["hdtv"].use_custom_rank else settings.custom_ranks["quality"]["hdtv"].rank
+        case "VHS":
+            return rank_model.vhs if not settings.custom_ranks["quality"]["vhs"].use_custom_rank else settings.custom_ranks["quality"]["vhs"].rank
+        case "WEBMux":
+            return rank_model.webmux if not settings.custom_ranks["quality"]["webmux"].use_custom_rank else settings.custom_ranks["quality"]["webmux"].rank
+        case "BluRay REMUX" | "REMUX":
+            return rank_model.remux if not settings.custom_ranks["quality"]["remux"].use_custom_rank else settings.custom_ranks["quality"]["remux"].rank
+
+        # Rips
+        case "WEBRip":
+            return rank_model.webrip if not settings.custom_ranks["rips"]["webrip"].use_custom_rank else settings.custom_ranks["rips"]["webrip"].rank
+        case "WEB-DLRip":
+            return rank_model.webdlrip if not settings.custom_ranks["rips"]["webdlrip"].use_custom_rank else settings.custom_ranks["rips"]["webdlrip"].rank
+        case "UHDRip":
+            return rank_model.uhdrip if not settings.custom_ranks["rips"]["uhdrip"].use_custom_rank else settings.custom_ranks["rips"]["uhdrip"].rank
+        case "HDRip":
+            return rank_model.hdrip if not settings.custom_ranks["rips"]["hdrip"].use_custom_rank else settings.custom_ranks["rips"]["hdrip"].rank
+        case "DVDRip":
+            return rank_model.dvdrip if not settings.custom_ranks["rips"]["dvdrip"].use_custom_rank else settings.custom_ranks["rips"]["dvdrip"].rank
+        case "BDRip":
+            return rank_model.bdrip if not settings.custom_ranks["rips"]["bdrip"].use_custom_rank else settings.custom_ranks["rips"]["bdrip"].rank
+        case "BRRip":
+            return rank_model.brrip if not settings.custom_ranks["rips"]["brrip"].use_custom_rank else settings.custom_ranks["rips"]["brrip"].rank
+        case "VHSRip":
+            return rank_model.vhsrip if not settings.custom_ranks["rips"]["vhsrip"].use_custom_rank else settings.custom_ranks["rips"]["vhsrip"].rank
+        case "PPVRip":
+            return rank_model.ppvrip if not settings.custom_ranks["rips"]["ppvrip"].use_custom_rank else settings.custom_ranks["rips"]["ppvrip"].rank
+        case "SATRip":
+            return rank_model.satrip if not settings.custom_ranks["rips"]["satrip"].use_custom_rank else settings.custom_ranks["rips"]["satrip"].rank
+        case "TVRip":
+            return rank_model.tvrip if not settings.custom_ranks["rips"]["tvrip"].use_custom_rank else settings.custom_ranks["rips"]["tvrip"].rank
+
+        # Trash
+        case "TeleCine":
+            return rank_model.telecine if not settings.custom_ranks["trash"]["telecine"].use_custom_rank else settings.custom_ranks["trash"]["telecine"].rank
+        case "TeleSync":
+            return rank_model.telesync if not settings.custom_ranks["trash"]["telesync"].use_custom_rank else settings.custom_ranks["trash"]["telesync"].rank
+        case "SCR":
+            return rank_model.screener if not settings.custom_ranks["trash"]["screener"].use_custom_rank else settings.custom_ranks["trash"]["screener"].rank
+        case "R5":
+            return rank_model.r5 if not settings.custom_ranks["trash"]["r5"].use_custom_rank else settings.custom_ranks["trash"]["r5"].rank
+        case "CAM":
+            return rank_model.cam if not settings.custom_ranks["trash"]["cam"].use_custom_rank else settings.custom_ranks["trash"]["cam"].rank
+        case "PDTV":
+            return rank_model.pdtv if not settings.custom_ranks["trash"]["pdtv"].use_custom_rank else settings.custom_ranks["trash"]["pdtv"].rank
         case _:
             return 0
 
@@ -141,22 +154,45 @@ def calculate_codec_rank(data: ParsedData, settings: SettingsModel, rank_model: 
     if not data.codec:
         return 0
 
-    codec = data.codec[0].lower()
+    codec = data.codec.lower()
     match codec:
-        case "xvid" | "h.263" | "vc-1" | "mpeg-2":
-            return -1000
-        case "h.264":
-            return rank_model.h264 if not settings.custom_ranks["h264"].enable else settings.custom_ranks["h264"].rank
-        case "h.265" | "h.265 main 10":
-            return rank_model.h265 if not settings.custom_ranks["h265"].enable else settings.custom_ranks["h265"].rank
-        case "hevc":
-            return rank_model.hevc if not settings.custom_ranks["hevc"].enable else settings.custom_ranks["hevc"].rank
-        case "av1":
-            return rank_model.av1 if not settings.custom_ranks["av1"].enable else settings.custom_ranks["av1"].rank
         case "avc":
-            return rank_model.avc if not settings.custom_ranks["avc"].enable else settings.custom_ranks["avc"].rank
+            return rank_model.avc if not settings.custom_ranks["quality"]["avc"].use_custom_rank else settings.custom_ranks["quality"]["avc"].rank
+        case "hevc":
+            return rank_model.hevc if not settings.custom_ranks["quality"]["hevc"].use_custom_rank else settings.custom_ranks["quality"]["hevc"].rank
+        case "xvid":
+            return rank_model.xvid if not settings.custom_ranks["quality"]["xvid"].use_custom_rank else settings.custom_ranks["quality"]["xvid"].rank
+        case "av1":
+            return rank_model.av1 if not settings.custom_ranks["quality"]["av1"].use_custom_rank else settings.custom_ranks["quality"]["av1"].rank
+        case "mpeg":
+            return rank_model.mpeg if not settings.custom_ranks["quality"]["mpeg"].use_custom_rank else settings.custom_ranks["quality"]["mpeg"].rank
         case _:
             return 0
+
+
+def calculate_hdr_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+    """Calculate the codec ranking of the given parsed data."""
+    if not data.hdr:
+        return 0
+
+    total_rank = 0
+    for hdr in data.hdr:
+        match hdr:
+            case "DV":
+                total_rank += rank_model.dolby_vision if not settings.custom_ranks["hdr"]["dolby_vision"].use_custom_rank else settings.custom_ranks["hdr"]["dolby_vision"].rank
+            case "HDR":
+                total_rank += rank_model.hdr if not settings.custom_ranks["hdr"]["hdr"].use_custom_rank else settings.custom_ranks["hdr"]["hdr"].rank
+            case "HDR10+":
+                total_rank += rank_model.hdr10plus if not settings.custom_ranks["hdr"]["hdr10plus"].use_custom_rank else settings.custom_ranks["hdr"]["hdr10plus"].rank
+            case "SDR":
+                total_rank += rank_model.sdr if not settings.custom_ranks["hdr"]["sdr"].use_custom_rank else settings.custom_ranks["hdr"]["sdr"].rank
+            case _:
+                total_rank += 0
+
+    if data.bit_depth:
+        total_rank += rank_model.bit_10 if not settings.custom_ranks["hdr"]["10bit"].use_custom_rank else settings.custom_ranks["hdr"]["10bit"].rank
+
+    return total_rank
 
 
 def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
@@ -164,74 +200,113 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
     if not data.audio:
         return 0
 
-    audio_format: str = data.audio[0]
+    total_rank = 0
 
-    # Remove any unwanted audio formats. We dont support surround sound formats yet.
-    # These also make it harder to compare audio formats.
-    audio_format = regex.sub(r"7.1|5.1|Dual|Mono|Original|LiNE", "", audio_format).strip()
-    match audio_format:
-        case "Dolby TrueHD":
-            return rank_model.truehd if not settings.custom_ranks["truehd"].enable else settings.custom_ranks["truehd"].rank
-        case "Dolby Atmos":
-            return rank_model.atmos if not settings.custom_ranks["atmos"].enable else settings.custom_ranks["atmos"].rank
-        case "Dolby Digital":
-            return rank_model.ac3 if not settings.custom_ranks["ac3"].enable else settings.custom_ranks["ac3"].rank
-        case "Dolby Digital EX":
-            return rank_model.dts_x if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
-        case "Dolby Digital Plus":
-            return rank_model.ddplus if not settings.custom_ranks["ddplus"].enable else settings.custom_ranks["ddplus"].rank
-        case "DTS":
-            return rank_model.dts_hd if not settings.custom_ranks["dts_hd"].enable else settings.custom_ranks["dts_hd"].rank
-        case "DTS-HD":
-            return (
-                (rank_model.dts_hd + 5) if not settings.custom_ranks["dts_hd"].enable else settings.custom_ranks["dts_hd"].rank
-            )
-        case "DTS-HD MA":
-            return (
-                (rank_model.dts_hd_ma + 10)
-                if not settings.custom_ranks["dts_hd_ma"].enable
-                else settings.custom_ranks["dts_hd_ma"].rank
-            )
-        case "DTS-ES" | "DTS-EX":
-            return rank_model.dts_x + 5 if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
-        case "DTS:X":
-            return rank_model.dts_x + 10 if not settings.custom_ranks["dts_x"].enable else settings.custom_ranks["dts_x"].rank
-        case "AAC":
-            return rank_model.aac if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
-        case "AAC-LC":
-            return rank_model.aac + 2 if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
-        case "HE-AAC":
-            return rank_model.aac + 5 if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
-        case "HE-AAC v2":
-            return rank_model.aac + 10 if not settings.custom_ranks["aac"].enable else settings.custom_ranks["aac"].rank
-        case "AC3":
-            return rank_model.ac3 if not settings.custom_ranks["ac3"].enable else settings.custom_ranks["ac3"].rank
-        case "FLAC" | "OGG":
-            return -1000
-        case _:
-            return 0
+    for audio_format in data.audio:
+        match audio_format:
+            case "AAC":
+                total_rank += rank_model.aac if not settings.custom_ranks["audio"]["aac"].use_custom_rank else settings.custom_ranks["audio"]["aac"].rank
+            case "AC3":
+                total_rank += rank_model.ac3 if not settings.custom_ranks["audio"]["ac3"].use_custom_rank else settings.custom_ranks["audio"]["ac3"].rank
+            case "Atmos":
+                total_rank += rank_model.atmos if not settings.custom_ranks["audio"]["atmos"].use_custom_rank else settings.custom_ranks["audio"]["atmos"].rank
+            case "Dolby Digital":
+                total_rank += rank_model.dolby_digital if not settings.custom_ranks["audio"]["dolby_digital"].use_custom_rank else settings.custom_ranks["audio"]["dolby_digital"].rank
+            case "Dolby Digital Plus":
+                total_rank += rank_model.dolby_digital_plus if not settings.custom_ranks["audio"]["dolby_digital_plus"].use_custom_rank else settings.custom_ranks["audio"]["dolby_digital_plus"].rank
+            case "DTS Lossy":
+                total_rank += rank_model.dts_lossy if not settings.custom_ranks["audio"]["dts_lossy"].use_custom_rank else settings.custom_ranks["audio"]["dts_lossy"].rank
+            case "DTS Lossless":
+                total_rank += rank_model.dts_lossless if not settings.custom_ranks["audio"]["dts_lossless"].use_custom_rank else settings.custom_ranks["audio"]["dts_lossless"].rank
+            case "EAC3":
+                total_rank += rank_model.eac3 if not settings.custom_ranks["audio"]["eac3"].use_custom_rank else settings.custom_ranks["audio"]["eac3"].rank
+            case "FLAC":
+                total_rank += rank_model.flac if not settings.custom_ranks["audio"]["flac"].use_custom_rank else settings.custom_ranks["audio"]["flac"].rank
+            case "MP3":
+                total_rank += rank_model.mp3 if not settings.custom_ranks["audio"]["mp3"].use_custom_rank else settings.custom_ranks["audio"]["mp3"].rank
+            case "TrueHD":
+                total_rank += rank_model.truehd if not settings.custom_ranks["audio"]["truehd"].use_custom_rank else settings.custom_ranks["audio"]["truehd"].rank
+            case "HQ Clean Audio":
+                total_rank += rank_model.clean_audio if not settings.custom_ranks["trash"]["clean_audio"].use_custom_rank else settings.custom_ranks["trash"]["clean_audio"].rank
+            case _:
+                total_rank += 0
+
+    return total_rank
 
 
-def calculate_other_ranks(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+def calculate_channels_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+    """Calculate the channels ranking of the given parsed data."""
+    if not data.channels:
+        return 0
+    
+    total_rank = 0
+    for channel in data.channels:
+        match channel:
+            case "5.1" | "7.1":
+                total_rank += rank_model.surround if not settings.custom_ranks["audio"]["surround"].use_custom_rank else settings.custom_ranks["audio"]["surround"].rank
+            case "stereo" | "2.0":
+                total_rank += rank_model.stereo if not settings.custom_ranks["audio"]["stereo"].use_custom_rank else settings.custom_ranks["audio"]["stereo"].rank
+            case "mono":
+                total_rank += rank_model.mono if not settings.custom_ranks["audio"]["mono"].use_custom_rank else settings.custom_ranks["audio"]["mono"].rank
+            case _:
+                total_rank += 0
+
+    return total_rank
+
+
+def calculate_extra_ranks(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
     """Calculate all the other rankings of the given parsed data."""
     if not data.bit_depth and not data.hdr and not data.seasons and not data.episodes:
         return 0
 
     total_rank = 0
-    if data.hdr:
-        if data.hdr == "HDR":
-            total_rank += settings.custom_ranks["hdr"].rank if settings.custom_ranks["hdr"].enable else rank_model.hdr
-        elif data.hdr == "HDR10+":
-            total_rank += settings.custom_ranks["hdr10"].rank if settings.custom_ranks["hdr10"].enable else rank_model.hdr10
-        elif data.hdr == "DV":
-            total_rank += (
-                settings.custom_ranks["dolby_video"].rank
-                if settings.custom_ranks["dolby_video"].enable
-                else rank_model.dolby_video
-            )
 
-    # if len(data.season) > 0 and len(data.episode) == 0:
-    #     total_rank += 125 * len(data.season)
-    # if len(data.episode) > 0:
-    #     total_rank += 10 * len(data.episode)
+    if data._3d:
+        total_rank += rank_model.remux if not settings.custom_ranks["extras"]["3d"].use_custom_rank else settings.custom_ranks["extras"]["3d"].rank
+    if data.converted:
+        total_rank += rank_model.converted if not settings.custom_ranks["extras"]["converted"].use_custom_rank else settings.custom_ranks["extras"]["converted"].rank
+    if data.documentary:
+        total_rank += rank_model.documentary if not settings.custom_ranks["extras"]["documentary"].use_custom_rank else settings.custom_ranks["extras"]["documentary"].rank
+    if data.dubbed:
+        total_rank += rank_model.dubbed if not settings.custom_ranks["extras"]["dubbed"].use_custom_rank else settings.custom_ranks["extras"]["dubbed"].rank
+    if data.edition:
+        total_rank += rank_model.edition if not settings.custom_ranks["extras"]["edition"].use_custom_rank else settings.custom_ranks["extras"]["edition"].rank
+    if data.hardcoded:
+        total_rank += rank_model.hardcoded if not settings.custom_ranks["extras"]["hardcoded"].use_custom_rank else settings.custom_ranks["extras"]["hardcoded"].rank
+    if data.network:
+        total_rank += rank_model.network if not settings.custom_ranks["extras"]["network"].use_custom_rank else settings.custom_ranks["extras"]["network"].rank
+    if data.proper:
+        total_rank += rank_model.proper if not settings.custom_ranks["extras"]["proper"].use_custom_rank else settings.custom_ranks["extras"]["proper"].rank
+    if data.repack:
+        total_rank += rank_model.repack if not settings.custom_ranks["extras"]["repack"].use_custom_rank else settings.custom_ranks["extras"]["repack"].rank
+    if data.retail:
+        total_rank += rank_model.retail if not settings.custom_ranks["extras"]["retail"].use_custom_rank else settings.custom_ranks["extras"]["retail"].rank
+    if data.subbed:
+        total_rank += rank_model.subbed if not settings.custom_ranks["extras"]["subbed"].use_custom_rank else settings.custom_ranks["extras"]["subbed"].rank
+    if data.upscaled:
+        total_rank += rank_model.upscaled if not settings.custom_ranks["extras"]["upscaled"].use_custom_rank else settings.custom_ranks["extras"]["upscaled"].rank
+
+    return total_rank
+
+def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
+    """Calculate the resolution ranking of the given parsed data."""
+    if not data.resolution:
+        return 0
+    
+    total_rank = 0
+
+    match data.resolution.lower():
+        case "2160p" | "4k":
+            total_rank += rank_model.uhd if not settings.custom_ranks["resolution"]["2160p"].use_custom_rank else settings.custom_ranks["resolution"]["2160p"].rank
+        case "1080p" | "1080i" | "1440p":
+            total_rank += rank_model.fhd if not settings.custom_ranks["resolution"]["1080p"].use_custom_rank else settings.custom_ranks["resolution"]["1080p"].rank
+        case "720p" | "720i":
+            total_rank += rank_model.hd if not settings.custom_ranks["resolution"]["720p"].use_custom_rank else settings.custom_ranks["resolution"]["720p"].rank
+        case "480p" | "576p" | "480i" | "576i":
+            total_rank += rank_model.sd if not settings.custom_ranks["resolution"]["480p"].use_custom_rank else settings.custom_ranks["resolution"]["480p"].rank
+        case "360p" | "240p" | "360i" | "240i":
+            total_rank += rank_model.sd if not settings.custom_ranks["resolution"]["360p"].use_custom_rank else settings.custom_ranks["resolution"]["360p"].rank
+        case _:
+            total_rank += 0
+
     return total_rank

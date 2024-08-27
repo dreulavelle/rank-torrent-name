@@ -30,43 +30,43 @@ from .models import Resolution, Torrent
 from .patterns import normalize_title
 
 
-def title_match(correct_title: str, raw_title: str, threshold: int | float = 0.821) -> bool:
+def title_match(correct_title: str, parsed_title: str, threshold: float = 0.85) -> bool:
     """
     Compares two titles using the Levenshtein ratio to determine similarity.
 
     Args:
         `correct_title` (str): The reference title to compare against.
-        `raw_title` (str): The title to compare with the reference title.
-        `threshold` (int | float): The similarity threshold to consider the titles as matching.
+        `parsed_title` (str): The title to compare with the reference title.
+        `threshold` (float): The similarity threshold to consider the titles as matching.
 
     Returns:
         `bool`: True if the titles match, False otherwise.
     """
-    check = get_lev_ratio(correct_title, raw_title, threshold)
+    check = get_lev_ratio(correct_title, parsed_title, threshold)
     return check >= threshold
 
 
-def get_lev_ratio(correct_title: str, raw_title: str, threshold: int | float = 0.821) -> float:
+def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85) -> float:
     """
     Compares two titles using the Levenshtein ratio to determine similarity.
 
     Args:
         `correct_title` (str): The reference title to compare against.
-        `raw_title` (str): The title to compare with the reference title.
-        `threshold` (int | float): The similarity threshold to consider the titles as matching.
+        `parsed_title` (str): The title to compare with the reference title.
+        `threshold` (float): The similarity threshold to consider the titles as matching.
 
     Returns:
-        `bool`: True if the titles match, False otherwise.
+        `float`: The Levenshtein ratio between the two titles.
     """
-    if not (correct_title or raw_title):
+    if not (correct_title or parsed_title):
         raise ValueError("Both titles must be provided.")
-    if not isinstance(correct_title, str) or not isinstance(raw_title, str):
+    if not isinstance(correct_title, str) or not isinstance(parsed_title, str):
         raise TypeError("Both titles must be strings.")
     if not isinstance(threshold, (int, float)) or not 0 <= threshold <= 1:
-        raise ValueError("The threshold must be a float between 0 and 1.")
+        raise ValueError("The threshold must be a number between 0 and 1.")
 
     normalized_correct_title = normalize_title(correct_title)
-    normalized_parsed_title = normalize_title(raw_title)
+    normalized_parsed_title = normalize_title(parsed_title)
     lev_ratio: float = ratio(normalized_correct_title, normalized_parsed_title, score_cutoff=threshold)
     return round(lev_ratio, 3)
 

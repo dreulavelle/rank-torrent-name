@@ -21,7 +21,7 @@ from RTN.extras import (
             "seasons": [1],
             "episodes": [1, 2],
             "codec": "hevc",
-            "audio": ["aac"],
+            "audio": ["AAC"],
             "languages": [],
             "bit_depth": "10bit"
         }
@@ -67,7 +67,7 @@ def test_default_title_matching(title, query, expected):
         "episodes": [],
         "quality": "SCR",
         "codec": "avc",
-        "audio": ["aac"],
+        "audio": ["AAC"],
         "resolution": "1080p",
         "container": "mkv",
         "extension": "mkv",
@@ -93,7 +93,7 @@ def test_random_releases_parse(release_name, expected):
         languages=["hi"],
         quality="SCR",
         codec="avc",
-        audio=["aac"],
+        audio=["AAC"],
         container="mkv",
         extension="mkv",
         site="www.5MovieRulz.show",

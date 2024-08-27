@@ -45,34 +45,37 @@ class ParsedData(BaseModel):
     """Parsed data model for a torrent title."""
 
     raw_title: str
-    parsed_title: str
-    normalized_title: str = None
+    parsed_title: str = ""
+    normalized_title: str = ""
     trash: bool = False
-    year: int = None
+    year: Optional[int] = None
     resolution: str = "unknown"
     seasons: List[int] = []
     episodes: List[int] = []
     complete: bool = False
     volumes: List[int] = []
     languages: List[str] = []
-    quality: str = None
+    quality: Optional[str] = None
     hdr: List[str] = []
-    codec: str = None
+    codec: Optional[str] = None
     audio: List[str] = []
     channels: List[str] = []
     dubbed: bool = False
     subbed: bool = False
-    date: str = None
-    group: str = None
-    edition: str = None
-    bit_depth: str = None
-    bitrate: str = None
+    date: Optional[str] = None
+    group: Optional[str] = None
+    edition: Optional[str] = None
+    bit_depth: Optional[str] = None
+    bitrate: Optional[str] = None
+    network: Optional[str] = None
     extended: bool = False
-    convert: bool = False
+    converted: bool = False
     hardcoded: bool = False
-    region: str = None
+    region: Optional[str] = None
     ppv: bool = False
-    site: str = None
+    _3d: bool = False
+    site: Optional[str] = None
+    size: Optional[str] = None
     proper: bool = False
     repack: bool = False
     retail: bool = False
@@ -80,10 +83,10 @@ class ParsedData(BaseModel):
     remastered: bool = False
     unrated: bool = False
     documentary: bool = False
-    episode_code: str = None
-    country: str = None
-    container: str = None
-    extension: str = None
+    episode_code: Optional[str] = None
+    country: Optional[str] = None
+    container: Optional[str] = None
+    extension: Optional[str] = None
     torrent: bool = False
 
     class Config:
@@ -212,61 +215,174 @@ class BaseRankingModel(BaseModel):
         - The default ranking values are set to 0, which means that the attribute does not affect the overall rank.
         - Users can customize the ranking values based on their preferences and requirements by using inheritance.
     """
-
     # resolution
-    uhd: int = 0  # 4K
-    fhd: int = 0  # 1080p
-    hd: int = 0  # 720p
-    sd: int = 0  # 480p
+    uhd: int = 2000
+    fhd: int = 1000
+    hd: int = 500
+    sd: int = -100
+
     # quality
-    bluray: int = 0
-    hdr: int = 0
-    hdr10: int = 0
-    dolby_video: int = 0
-    # codec
-    h264: int = 0
-    h265: int = 0
-    hevc: int = 0
-    avc: int = 0
     av1: int = 0
-    # audio
-    dts_x: int = 0
-    dts_hd: int = 0
-    dts_hd_ma: int = 0
-    atmos: int = 0
-    truehd: int = 0
-    ddplus: int = 0
-    ac3: int = 0
-    aac: int = 0
-    # other
+    avc: int = 0
+    bluray: int = 0
+    dvd: int = 0
+    hdtv: int = 0
+    hevc: int = 0
+    mpeg: int = 0
     remux: int = 0
+    vhs: int = 0
+    web: int = 0
     webdl: int = 0
-    dvdrip: int = 0
+    webmux: int = 0
+    xvid: int = 0
+
+    # rips
     bdrip: int = 0
     brrip: int = 0
-    hdtv: int = 0
-    repack: int = 5
-    proper: int = 4
-    # languages
-    dubbed: int = 4
-    subbed: int = 2
+    dvdrip: int = 0
+    hdrip: int = 0
+    ppvrip: int = 0
+    tvrip: int = 0
+    uhdrip: int = 0
+    vhsrip: int = 0
+    webdlrip: int = 0
+    webrip: int = 0
+
+    # hdr
+    bit_10: int = 0
+    dolby_vision: int = 0
+    hdr: int = 0
+    hdr10plus: int = 0
+    sdr: int = 0
+
+    # audio
+    aac: int = 0
+    ac3: int = 0
+    atmos: int = 0
+    dolby_digital: int = 0
+    dolby_digital_plus: int = 0
+    dts_lossy: int = 0
+    dts_lossless: int = 0
+    eac3: int = 0
+    flac: int = 0
+    mono: int = 0
+    mp3: int = 0
+    stereo: int = 0
+    surround: int = 0
+    truehd: int = 0
+
+    # extras
+    three_d: int = 0
+    converted: int = 0
+    documentary: int = 0
+    dubbed: int = 0
+    edition: int = 0
+    hardcoded: int = 0
+    network: int = 0
+    proper: int = 0
+    repack: int = 0
+    retail: int = 0
+    subbed: int = 0
+    upscaled: int = 0
+
+    # trash
+    cam: int = 0
+    clean_audio: int = 0
+    r5: int = 0
+    pdtv: int = 0
+    satrip: int = 0
+    screener: int = 0
+    site: int = 0
+    size: int = 0
+    telecine: int = 0
+    telesync: int = 0
+    workprint: int = 0
 
 
 class DefaultRanking(BaseRankingModel):
     """Default ranking model preset that should cover most common use cases."""
-
-    uhd: int = 140
-    fhd: int = 100
-    hd: int = 50
+    # resolution
+    uhd: int = 2000
+    fhd: int = 1000
+    hd: int = 500
     sd: int = -100
-    dolby_video: int = -1000
-    hdr: int = -1000
-    hdr10: int = -1000
-    aac: int = 70
-    ac3: int = 50
+
+    # quality
+    av1: int = 0
+    avc: int = 100
+    bluray: int = 100
+    dvd: int = -1000
+    hdtv: int = -1000
+    hevc: int = 100
+    mpeg: int = -100
     remux: int = -1000
-    webdl: int = 90
-    bluray: int = -90
+    vhs: int = -10000
+    web: int = 150
+    webdl: int = 100
+    webmux: int = -10000
+    xvid: int = -10000
+    pdtv: int = -10000
+
+    # rips
+    bdrip: int = -1000
+    brrip: int = -1000
+    dvdrip: int = -1000
+    hdrip: int = -1000
+    ppvrip: int = -1000
+    tvrip: int = -10000
+    uhdrip: int = -1000
+    vhsrip: int = -10000
+    webdlrip: int = -10000
+    webrip: int = 30
+
+    # hdr
+    bit_10: int = -1000
+    dolby_vision: int = -1000
+    hdr: int = -1000
+    hdr10plus: int = -1000
+    sdr: int = -1000
+
+    # audio
+    aac: int = 80
+    ac3: int = 50
+    atmos: int = -1000
+    dolby_digital: int = -1000
+    dolby_digital_plus: int = -1000
+    dts_lossy: int = 20
+    dts_lossless: int = 150
+    eac3: int = 40
+    flac: int = 0
+    mono: int = -1000
+    mp3: int = -1000
+    stereo: int = 0
+    surround: int = 0
+    truehd: int = 0
+
+    # extras
+    three_d: int = -10000
+    converted: int = -1250
+    documentary: int = -250
+    dubbed: int = 0
+    edition: int = 100
+    hardcoded: int = 0
+    network: int = 100
+    proper: int = 20
+    repack: int = 20
+    retail: int = 0
+    subbed: int = 0
+    upscaled: int = -10000
+
+    # trash
+    cam: int = -10000
+    clean_audio: int = -10000
+    r5: int = -10000
+    satrip: int = -10000
+    screener: int = -10000
+    site: int = -10000
+    size: int = -10000
+    telecine: int = -10000
+    telesync: int = -10000
+    workprint: int = -10000
 
 
 class Resolution(str, Enum):
@@ -278,8 +394,7 @@ class Resolution(str, Enum):
     SD_576P = "576p"
     SD_480P = "480p"
     SD_360P = "360p"
-    SD = "480p"  # Default SD resolution
-    UNKNOWN = "unknown"
+    UNKNOWN = "unknown"  # default
 
 
 class CustomRank(BaseModel):
@@ -337,18 +452,12 @@ class SettingsModel(BaseModel):
     """
 
     profile: str = "default"
-    max_resolution: str = "1080p"
-    min_resolution: str = "720p"
     require: List[str | Pattern] = []
     exclude: List[str | Pattern] = []
     preferred: List[str | Pattern] = []
     options: Dict[str, Any] = {
         "title_similarity": 0.9,
-        "max_filesize": 99999, # MB
-        "min_filesize": 100,   # MB
         "remove_all_trash": True,
-        "remove_all_rips": False,
-        "remove_lowquality_rips": True,
         "allow_unknown_resolutions": True,
     }
     languages: Dict[str, Any] = {
@@ -358,12 +467,19 @@ class SettingsModel(BaseModel):
         "preferred": [],
     }
     custom_ranks: Dict[str, Dict[str, CustomRank]] = {
+        "resolution": {
+            "2160p": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "1080p": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "720p": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "480p": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "360p": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+        },
         "quality": {
             "av1": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "avc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "bluray": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "dvd": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "hdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "hdtv": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "hevc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "mpeg": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "remux": CustomRank(fetch=False, use_custom_rank=False, rank=0),
@@ -372,7 +488,6 @@ class SettingsModel(BaseModel):
             "webdl": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "webmux": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "xvid": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "pdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
         },
         "rips": {
             "bdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
@@ -380,8 +495,10 @@ class SettingsModel(BaseModel):
             "dvdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "hdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "ppvrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "satrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "tvrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "uhdrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "vhsrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "webdlrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "webrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
         },
@@ -396,12 +513,14 @@ class SettingsModel(BaseModel):
             "aac": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "ac3": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "atmos": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "ddplus": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dts": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dts_x": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dolby_digital": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dolby_digital_plus": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dts_lossy": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "dts_lossless": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "eac3": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "flac": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "mono": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "mp3": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "stereo": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "surround": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "truehd": CustomRank(fetch=True, use_custom_rank=False, rank=0),
@@ -418,11 +537,12 @@ class SettingsModel(BaseModel):
             "repack": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "retail": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "subbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "upscaled": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "upscaled": CustomRank(fetch=False, use_custom_rank=False, rank=0),
         },
         "trash": {
             "cam": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "hq_audio": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "clean_audio": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "pdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "r5": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "screener": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "site": CustomRank(fetch=False, use_custom_rank=False, rank=0),
