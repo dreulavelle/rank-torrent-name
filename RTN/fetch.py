@@ -194,7 +194,7 @@ def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
         case "360p" | "240p" | "360i" | "240i":
             return settings.custom_ranks["resolution"]["360p"].fetch
         case _:
-            return True
+            return settings.options.get("allow_unknown_resolutions", False)
 
 
 def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
@@ -258,7 +258,7 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
                 if not settings.custom_ranks["audio"]["truehd"].fetch:
                     return False
             case "HQ Clean Audio":
-                if not settings.custom_ranks["audio"]["clean_audio"].fetch:
+                if not settings.custom_ranks["trash"]["clean_audio"].fetch:
                     return False
     return True
 
