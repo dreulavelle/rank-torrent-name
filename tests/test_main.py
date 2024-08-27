@@ -2,6 +2,7 @@ import pytest
 
 from RTN import parse, RTN
 from RTN.extras import title_match, get_lev_ratio, sort_torrents
+from RTN.fetch import check_exclude_languages, check_fetch
 from RTN.models import ParsedData, SettingsModel, Torrent, DefaultRanking
 from RTN.patterns import normalize_title
 
@@ -69,5 +70,15 @@ def test_sort_torrents(settings, ranking):
         "1234567890123456789012345678901234567892",  # Guardians of the Galaxy Vol. 2 (2017) 720p HDTC x264 MKVTV
         "1234567890123456789012345678901234567894"   # ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
     ]
-    
+
     assert list(sorted_torrents.keys()) == expected_order, f"Expected order: {expected_order}, Actual order: {list(sorted_torrents.keys())}"
+
+@pytest.mark.parametrize("raw_title, expected_result", [
+    ("The Walking Dead S05E03", True),
+    ("The Walking Dead S05E03 [English]", True),
+    ("The Walking Dead S05E03 [English] [Spanish]", False)
+])
+def test_remove_languages(raw_title, expected_result, settings):
+    data = parse(raw_title)
+    result = check_fetch(data, settings)
+    assert result == expected_result, f"Expected result: {expected_result}, Actual result: {result}"

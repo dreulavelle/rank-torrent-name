@@ -82,9 +82,8 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     if not settings.languages["allow_unknown_languages"] and not data.languages:
         return False
 
-    if settings.languages["required"]:
-        if not any(language in settings.languages["required"] for language in data.languages):
-            return False
+    if settings.languages["required"] and not check_exclude_languages(data, settings):
+        return False
 
     return all(
         [
@@ -116,7 +115,7 @@ def check_exclude_languages(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the languages are excluded based on user settings."""
     if not data.languages:
         return True
-    return all(language not in settings.languages["exclude"] for language in data.languages)
+    return not any(language in settings.languages["exclude"] for language in data.languages)
 
 
 def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
