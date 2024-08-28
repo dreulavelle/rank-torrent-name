@@ -2,8 +2,8 @@ import pytest
 
 from RTN import parse, RTN
 from RTN.extras import title_match, get_lev_ratio, sort_torrents
-from RTN.fetch import check_exclude_languages, check_fetch
-from RTN.models import ParsedData, SettingsModel, Torrent, DefaultRanking
+from RTN.fetch import language_handler, check_fetch, trash_handler
+from RTN.models import SettingsModel, DefaultRanking
 from RTN.patterns import normalize_title
 
 
@@ -73,12 +73,32 @@ def test_sort_torrents(settings, ranking):
 
     assert list(sorted_torrents.keys()) == expected_order, f"Expected order: {expected_order}, Actual order: {list(sorted_torrents.keys())}"
 
-@pytest.mark.parametrize("raw_title, expected_result", [
-    ("The Walking Dead S05E03", True),
-    ("The Walking Dead S05E03 [English]", True),
-    ("The Walking Dead S05E03 [English] [Spanish]", False)
+
+@pytest.mark.parametrize("raw_title, expected_overall, expected_exclude", [
+    ("The Walking Dead S05E03", True, False),
+    ("The Walking Dead S05E03 [English]", True, False),
+    ("The Walking Dead S05E03 [English] [Spanish]", False, True)
 ])
-def test_remove_languages(raw_title, expected_result, settings):
+def test_exclude_languages(raw_title, settings, expected_overall, expected_exclude):
     data = parse(raw_title)
-    result = check_fetch(data, settings)
-    assert result == expected_result, f"Expected result: {expected_result}, Actual result: {result}"
+    overall_fetch_result = check_fetch(data, settings)
+    exclude_languages_result = language_handler(data, settings)
+    assert overall_fetch_result == expected_overall, f"Expected overall language result: {expected_overall}, Actual result: {overall_fetch_result}"
+    assert exclude_languages_result == expected_exclude, f"Expected exclude language result: {expected_exclude}, Actual result: {exclude_languages_result}"
+
+
+@pytest.mark.parametrize("raw_title, expected_result, expected_overall", [
+    ("Deadpool & Wolverine (2024) Eng 1080p V3 HDTS AAC ESub mkv", True, False),
+    ("Deadpool & Wolverine (2024) HDTS mkv", True, False),
+    ("Deadpool&Wolverine 2024-TeleSync mkv", True, False),
+    ("Deadpool & Wolverine (2024) 1080p TELESYNC V4 [Hindi + English] AAC Dual Audio ESub x264 AVC - 2700MB - [PotonMovies]", True, False),
+    ("Deadpool.And.Wolverine.2024.2160p.HDR.Multi.Audio.TELESYNC.HEVC.COLLECTiVE", True, False),
+    ("The Walking Dead S05E03 720p x264-ASAP", False, True) # This should get fetched, so reverse the expected results
+])
+def test_trash_handler(settings, raw_title, expected_result, expected_overall):
+    """All of these items should get trashed"""
+    data = parse(raw_title)
+    trash_handler_result = trash_handler(data, settings) # True if trash is detected
+    overall_fetch_result = check_fetch(data, settings) # False if trash is detected
+    assert trash_handler_result == expected_result, f"Expected trash result: {expected_result}, Actual result: {trash_handler_result}"
+    assert overall_fetch_result == expected_overall, f"Expected overall trash result: {expected_overall}, Actual result: {overall_fetch_result}"

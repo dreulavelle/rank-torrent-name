@@ -36,7 +36,7 @@ Extras:
     - `ptn_parse`: Function for parsing torrent names using PTN.
     - `get_rank`: Function for calculating the rank of parsed data.
     - `check_fetch`: Function for checking if a torrent should be fetched.
-    - `check_trash`: Function for checking if a torrent is trash.
+    - `trash_handler`: Function for checking if a torrent is trash.
     - `title_match`: Function for matching torrent titles.
     - `sort_torrents`: Function for sorting torrents based on rank.
     - `parse_extras`: Function for parsing additional torrent information.

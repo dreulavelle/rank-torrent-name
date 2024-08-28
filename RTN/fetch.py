@@ -45,6 +45,20 @@ Examples:
 from .models import ParsedData, SettingsModel
 
 
+ANIME = {"ja", "zh", "ko"}
+NON_ANIME = {
+    "de", "es", "hi", "ta", "ru", "ua", "th", "it",
+    "ar", "pt", "fr", "pa", "mr", "gu", "te", "kn",
+    "ml", "vi", "id", "tr", "he", "fa", "el", "lt",
+    "lv", "et", "pl", "cs", "sk", "hu", "ro", "bg",
+    "sr", "hr", "sl", "nl", "da", "fi", "sv", "no",
+    "ms"
+}
+
+COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh"}
+ALL = ANIME | NON_ANIME
+
+
 def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     """
     Check user settings and unwanted quality to determine if torrent should be fetched.
@@ -65,24 +79,13 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     if not isinstance(settings, SettingsModel):
         raise TypeError("Settings must be an instance of SettingsModel.")
 
-    if settings.options["remove_all_trash"]:
-        if hasattr(data, "trash") and data.trash:
-            return False
-        if data.quality in ["CAM", "PDTV", "R5", "SCR", "TeleCine", "TeleSync"]:
-            return False
-
+    if trash_handler(data, settings):
+        return False
     if check_required(data, settings):
         return True
     if check_exclude(data, settings):
         return False
-
-    if not settings.options["allow_unknown_resolutions"] and data.resolution == "unknown":
-        return False
-
-    if not settings.languages["allow_unknown_languages"] and not data.languages:
-        return False
-
-    if settings.languages["required"] and not check_exclude_languages(data, settings):
+    if language_handler(data, settings):
         return False
 
     return all(
@@ -92,9 +95,38 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
             fetch_audio(data, settings),
             fetch_codec(data, settings),
             fetch_other(data, settings),
-            check_exclude_languages(data, settings),
         ]
     )
+
+
+def trash_handler(data: ParsedData, settings: SettingsModel) -> bool:
+    """Check if the title is trash based on user settings, return True if trash is detected."""
+    if settings.options["remove_all_trash"]:
+        if data.quality in ["CAM", "PDTV", "R5", "SCR", "TeleCine", "TeleSync"]:
+            return True
+        if "HQ Clean Audio" in data.audio:
+            return True
+        if hasattr(data, "trash") and data.trash:
+            return True
+    return False
+
+
+def language_handler(data: ParsedData, settings: SettingsModel) -> bool:
+    """Check if the languages are excluded based on user settings."""
+    if not data.languages and settings.options.get("remove_unknown_languages", False):
+        return False
+
+    exclude_languages = set(settings.languages.get("exclude", []))
+    if "anime" in exclude_languages:
+        exclude_languages.update(ANIME)
+    if "non_anime" in exclude_languages:
+        exclude_languages.update(NON_ANIME)
+    if "common" in exclude_languages:
+        exclude_languages.update(COMMON)
+    if "all" in exclude_languages:
+        exclude_languages.update(ALL)
+
+    return any(language in exclude_languages for language in data.languages)
 
 
 def check_required(data: ParsedData, settings: SettingsModel) -> bool:
@@ -111,109 +143,77 @@ def check_exclude(data: ParsedData, settings: SettingsModel) -> bool:
     return False
 
 
-def check_exclude_languages(data: ParsedData, settings: SettingsModel) -> bool:
-    """Check if the languages are excluded based on user settings."""
-    if not data.languages:
-        return True
-    return not any(language in settings.languages["exclude"] for language in data.languages)
-
-
 def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the quality is fetchable based on user settings."""
     if not data.quality:
         return True
 
-    quality = data.quality
+    quality_map = {
+        # parse result, (settings location, settings key)
+        "WEB": ("quality", "web"),
+        "WEB-DL": ("quality", "webdl"),
+        "BluRay": ("quality", "bluray"),
+        "HDTV": ("quality", "hdtv"),
+        "VHS": ("quality", "vhs"),
+        "WEBMux": ("quality", "webmux"),
+        "BluRay REMUX": ("quality", "remux"),
+        "REMUX": ("quality", "remux"),
+        "WEBRip": ("rips", "webrip"),
+        "WEB-DLRip": ("rips", "webdlrip"),
+        "UHDRip": ("rips", "uhdrip"),
+        "HDRip": ("rips", "hdrip"),
+        "DVDRip": ("rips", "dvdrip"),
+        "BDRip": ("rips", "bdrip"),
+        "BRRip": ("rips", "brrip"),
+        "VHSRip": ("rips", "vhsrip"),
+        "PPVRip": ("rips", "ppvrip"),
+        "SATRip": ("rips", "satrip"),
+        "TeleCine": ("trash", "telecine"),
+        "TeleSync": ("trash", "telesync"),
+        "SCR": ("trash", "screener"),
+        "R5": ("trash", "r5"),
+        "CAM": ("trash", "cam"),
+        "PDTV": ("trash", "pdtv")
+    }
 
-    match quality:
-        case "WEB":
-            return settings.custom_ranks["quality"]["web"].fetch
-        case "WEB-DL":
-            return settings.custom_ranks["quality"]["webdl"].fetch
-        case "BluRay":
-            return settings.custom_ranks["quality"]["bluray"].fetch
-        case "HDTV":
-            return settings.custom_ranks["quality"]["hdtv"].fetch
-        case "VHS":
-            return settings.custom_ranks["quality"]["vhs"].fetch
-        case "WEBMux":
-            return settings.custom_ranks["quality"]["webmux"].fetch
-        case "BluRay REMUX" | "REMUX":
-            return settings.custom_ranks["quality"]["remux"].fetch
-        case "WEBRip":
-            return settings.custom_ranks["rips"]["webrip"].fetch
-        case "WEB-DLRip":
-            return settings.custom_ranks["rips"]["webdlrip"].fetch
-        case "UHDRip":
-            return settings.custom_ranks["rips"]["uhdrip"].fetch
-        case "HDRip":
-            return settings.custom_ranks["rips"]["hdrip"].fetch
-        case "DVDRip":
-            return settings.custom_ranks["rips"]["dvdrip"].fetch
-        case "BDRip":
-            return settings.custom_ranks["rips"]["bdrip"].fetch
-        case "BRRip":
-            return settings.custom_ranks["rips"]["brrip"].fetch
-        case "VHSRip":
-            return settings.custom_ranks["rips"]["vhsrip"].fetch
-        case "PPVRip":
-            return settings.custom_ranks["rips"]["ppvrip"].fetch
-        case "SATRip":
-            return settings.custom_ranks["rips"]["satrip"].fetch
-        case "TeleCine":
-            return settings.custom_ranks["trash"]["telecine"].fetch
-        case "TeleSync":
-            return settings.custom_ranks["trash"]["telesync"].fetch
-        case "SCR":
-            return settings.custom_ranks["trash"]["screener"].fetch
-        case "R5":
-            return settings.custom_ranks["trash"]["r5"].fetch
-        case "CAM":
-            return settings.custom_ranks["trash"]["cam"].fetch
-        case "PDTV":
-            return settings.custom_ranks["trash"]["pdtv"].fetch
-        case _:
-            return True
+    category, key = quality_map.get(data.quality, (None, None))
+    return settings.custom_ranks[category][key].fetch if category and key else True
 
 
 def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the resolution is fetchable based on user settings."""
     if not data.resolution:
-        return settings.options.get("allow_unknown_resolutions", False)
+        return settings.resolutions["unknown"]
 
     match data.resolution.lower():
         case "2160p" | "4k" | "2160i":
-            return settings.custom_ranks["resolution"]["2160p"].fetch
+            return settings.resolutions["2160p"]
         case "1080p" | "1080i" | "1440p":
-            return settings.custom_ranks["resolution"]["1080p"].fetch
+            return settings.resolutions["1080p"]
         case "720p" | "720i":
-            return settings.custom_ranks["resolution"]["720p"].fetch
+            return settings.resolutions["720p"]
         case "480p" | "576p" | "480i" | "576i":
-            return settings.custom_ranks["resolution"]["480p"].fetch
+            return settings.resolutions["480p"]
         case "360p" | "240p" | "360i" | "240i":
-            return settings.custom_ranks["resolution"]["360p"].fetch
+            return settings.resolutions["360p"]
         case _:
-            return settings.options.get("allow_unknown_resolutions", False)
+            return settings.resolutions["unknown"]
 
 
 def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
-
+    """Check if the codec is fetchable based on user settings."""
     if not data.codec:
         return True
 
-    match data.codec:
-        case "avc":
-            return settings.custom_ranks["quality"]["avc"].fetch
-        case "hevc":
-            return settings.custom_ranks["quality"]["hevc"].fetch
-        case "av1":
-            return settings.custom_ranks["quality"]["av1"].fetch
-        case "xvid":
-            return settings.custom_ranks["quality"]["xvid"].fetch
-        case "mpeg":
-            return settings.custom_ranks["quality"]["mpeg"].fetch
-        case _:
-            return True
+    codec_map = {
+        "avc": settings.custom_ranks["quality"]["avc"].fetch,
+        "hevc": settings.custom_ranks["quality"]["hevc"].fetch,
+        "av1": settings.custom_ranks["quality"]["av1"].fetch,
+        "xvid": settings.custom_ranks["quality"]["xvid"].fetch,
+        "mpeg": settings.custom_ranks["quality"]["mpeg"].fetch,
+    }
+
+    return codec_map.get(data.codec, True)
 
 
 def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
@@ -221,71 +221,49 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
     if not data.audio:
         return True
 
+    audio_map = {
+        "AAC": "aac",
+        "AC3": "ac3",
+        "Atmos": "atmos",
+        "Dolby Digital": "dolby_digital",
+        "Dolby Digital Plus": "dolby_digital_plus",
+        "DTS Lossy": "dts_lossy",
+        "DTS Lossless": "dts_lossless",
+        "EAC3": "eac3",
+        "FLAC": "flac",
+        "MP3": "mp3",
+        "TrueHD": "truehd",
+        "HQ Clean Audio": "clean_audio"
+    }
+
     for audio_format in data.audio:
-        match audio_format:
-            case "AAC":
-                if not settings.custom_ranks["audio"]["aac"].fetch:
-                    return False
-            case "AC3":
-                if not settings.custom_ranks["audio"]["ac3"].fetch:
-                    return False
-            case "Atmos":
-                if not settings.custom_ranks["audio"]["atmos"].fetch:
-                    return False
-            case "Dolby Digital":
-                if not settings.custom_ranks["audio"]["dolby_digital"].fetch:
-                    return False
-            case "Dolby Digital Plus":
-                if not settings.custom_ranks["audio"]["dolby_digital_plus"].fetch:
-                    return False
-            case "DTS Lossy":
-                if not settings.custom_ranks["audio"]["dts_lossy"].fetch:
-                    return False
-            case "DTS Lossless":
-                if not settings.custom_ranks["audio"]["dts_lossless"].fetch:
-                    return False
-            case "EAC3":
-                if not settings.custom_ranks["audio"]["eac3"].fetch:
-                    return False
-            case "FLAC":
-                if not settings.custom_ranks["audio"]["flac"].fetch:
-                    return False
-            case "MP3":
-                if not settings.custom_ranks["audio"]["mp3"].fetch:
-                    return False
-            case "TrueHD":
-                if not settings.custom_ranks["audio"]["truehd"].fetch:
-                    return False
-            case "HQ Clean Audio":
-                if not settings.custom_ranks["trash"]["clean_audio"].fetch:
-                    return False
+        category = "trash" if audio_format == "HQ Clean Audio" else "audio"
+        if not settings.custom_ranks[category][audio_map[audio_format]].fetch:
+            return False
     return True
 
 
 def fetch_other(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the other data is fetchable based on user settings."""
-    if data._3d:
-        return settings.custom_ranks["extras"]["3d"].fetch
-    if data.converted:
-        return settings.custom_ranks["extras"]["converted"].fetch
-    if data.documentary:
-        return settings.custom_ranks["extras"]["documentary"].fetch
-    if data.dubbed:
-        return settings.custom_ranks["extras"]["dubbed"].fetch
-    if data.edition:
-        return settings.custom_ranks["extras"]["edition"].fetch
-    if data.hardcoded:
-        return settings.custom_ranks["extras"]["hardcoded"].fetch
-    if data.network:
-        return settings.custom_ranks["extras"]["network"].fetch
-    if data.proper:
-        return settings.custom_ranks["extras"]["proper"].fetch
-    if data.repack:
-        return settings.custom_ranks["extras"]["repack"].fetch
-    if data.retail:
-        return settings.custom_ranks["extras"]["retail"].fetch
-    if data.subbed:
-        return settings.custom_ranks["extras"]["subbed"].fetch
-    if data.upscaled:
-        return settings.custom_ranks["extras"]["upscaled"].fetch
+    fetch_map = {
+        "_3d": ("extras", "3d"),
+        "converted": ("extras", "converted"),
+        "documentary": ("extras", "documentary"),
+        "dubbed": ("extras", "dubbed"),
+        "edition": ("extras", "edition"),
+        "hardcoded": ("extras", "hardcoded"),
+        "network": ("extras", "network"),
+        "proper": ("extras", "proper"),
+        "repack": ("extras", "repack"),
+        "retail": ("extras", "retail"),
+        "subbed": ("extras", "subbed"),
+        "upscaled": ("extras", "upscaled"),
+        "site": ("extras", "site"),
+        "size": ("trash", "size"),
+        "bit_depth": ("hdr", "10bit")
+    }
+
+    for attr, (category, key) in fetch_map.items():
+        if getattr(data, attr) and not settings.custom_ranks[category][key].fetch:
+            return False
     return True

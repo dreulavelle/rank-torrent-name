@@ -38,14 +38,13 @@ Example:
     >>> torrent.lev_ratio
     0.95
 """
-from typing import Any, Dict, List
-from Levenshtein import ratio
+from typing import Any, Dict
 
 from PTT import parse_title
 
 from .exceptions import GarbageTorrent
-from .extras import get_lev_ratio, title_match
-from .fetch import check_fetch
+from .extras import get_lev_ratio
+from .fetch import check_exclude, check_fetch, trash_handler
 from .models import BaseRankingModel, ParsedData, SettingsModel, Torrent
 from .patterns import normalize_title
 from .ranker import get_rank
@@ -144,19 +143,21 @@ class RTN:
 
         parsed_data: ParsedData = parse(raw_title) # type: ignore
 
-        if remove_trash:
-            if parsed_data.trash:
-                raise GarbageTorrent("This title is trash and should be ignored by the scraper.")
-
         lev_ratio = 0.0
         if correct_title:
             lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold)
 
-        if remove_trash and lev_ratio < self.lev_threshold:
-            raise GarbageTorrent(f"This title does not match the correct title, got ratio of {lev_ratio}")
-
         fetch: bool = check_fetch(parsed_data, self.settings)
         rank: int = get_rank(parsed_data, self.settings, self.ranking_model)
+
+        if remove_trash:
+            if not fetch:
+                raise GarbageTorrent(f"'{raw_title}' is trash and should be ignored by the scraper.")
+            if lev_ratio < self.lev_threshold:
+                raise GarbageTorrent(f"'{raw_title}' does not match the correct title, got ratio of {lev_ratio}")
+
+        if rank < self.settings.options["remove_ranks_under"]:
+            raise GarbageTorrent(f"'{raw_title}' does not meet the minimum rank requirement, got rank of {rank}")
 
         return Torrent(
             infohash=infohash,

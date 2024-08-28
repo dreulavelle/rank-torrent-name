@@ -12,7 +12,6 @@ from RTN.parser import Torrent, parse
 from RTN.ranker import (
     get_rank,
     calculate_preferred,
-    calculate_resolution_rank,
     calculate_audio_rank
 )
 
@@ -24,10 +23,6 @@ def ranking_model():
 @pytest.fixture
 def custom_ranking_model():
     return BaseRankingModel(
-        uhd=1,
-        fhd=1,
-        hd=1,
-        sd=1,
         av1=1,
         avc=1,
         bluray=1,
@@ -90,7 +85,6 @@ def custom_ranking_model():
         size=1,
         telecine=1,
         telesync=1,
-        workprint=1,
     )
 
 @pytest.fixture
@@ -106,26 +100,35 @@ def custom_settings_model():
 
 
 @pytest.mark.parametrize("raw_title, expected_fetch", [
-    ("The Walking Dead S05E03 720p Remux x264-ASAP[ettv]", False),
-    ("The Walking Dead.S05E03.2019.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-JATO", False),
+    ("The Walking Dead S05E03 720p Remux x264-ASAP[ettv]", GarbageTorrent),
+    ("The Walking Dead.S05E03.2019.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-JATO", GarbageTorrent),
     ("The Walking Dead S05E03 720p x264-ASAP", True),
 ])
 def test_valid_torrent_from_title(settings_model, ranking_model, raw_title, expected_fetch):
     rtn = RTN(settings_model, ranking_model)
 
-    torrent: Torrent = rtn.rank(
-        raw_title,
-        "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", 
-        correct_title="The Walking Dead",
-        remove_trash=True
-    )
+    if expected_fetch is GarbageTorrent:
+        with pytest.raises(GarbageTorrent):
+            rtn.rank(
+                raw_title,
+                "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", 
+                correct_title="The Walking Dead",
+                remove_trash=True
+            )
+    else:
+        torrent: Torrent = rtn.rank(
+            raw_title,
+            "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", 
+            correct_title="The Walking Dead",
+            remove_trash=True
+        )
 
-    assert isinstance(torrent, Torrent)
-    assert isinstance(torrent.data, ParsedData)
-    assert torrent.data.parsed_title == "The Walking Dead", f"Parsed title was {torrent.data.parsed_title} instead of The Walking Dead"
-    assert torrent.fetch is expected_fetch, f"Fetch was {torrent.fetch} instead of {expected_fetch}"
-    assert torrent.rank != 0, f"Rank was {torrent.rank} instead of 60"
-    assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
+        assert isinstance(torrent, Torrent)
+        assert isinstance(torrent.data, ParsedData)
+        assert torrent.data.parsed_title == "The Walking Dead", f"Parsed title was {torrent.data.parsed_title} instead of The Walking Dead"
+        assert torrent.fetch is expected_fetch, f"Fetch was {torrent.fetch} instead of {expected_fetch}"
+        assert torrent.rank != 0, f"Rank was {torrent.rank} instead of 60"
+        assert torrent.lev_ratio > 0.0, f"Levenshtein ratio was {torrent.lev_ratio} instead of > 0.0"
 
 
 @pytest.mark.parametrize("raw_title, infohash, correct_title, exception_type", [
@@ -195,25 +198,7 @@ def test_preference_handling(settings_model, ranking_model):
     # their own preferred patterns dynamically.
     parsed_data = parse("Wonder Woman 1984 (2020) [UHDRemux 2160p DoVi P8 Es-DTSHD AC3 En-AC3")
     rank_with_preference = get_rank(parsed_data, settings_model, ranking_model)
-    assert rank_with_preference < 0, "Preferred title should have negative rank (remux)"
-
-
-def test_resolution_ranking(settings_model, ranking_model):
-    test_dict = {
-        "4K": 2000,
-        "2160p": 2000,
-        "1440p": 1000,
-        "1080p": 1000,
-        "720p": 500,
-        "576p": -100,
-        "480p": -100,
-    }
-
-    for key, rank in test_dict.items():
-        parsed_data = ParsedData(raw_title=key, parsed_title=key, resolution=key)
-        assert calculate_resolution_rank(parsed_data, settings_model, ranking_model) == rank, f"{key} resolution should have rank {rank}"
-    assert calculate_resolution_rank(ParsedData(raw_title="Other", parsed_title="Other", resolution="Other"), settings_model, ranking_model) == 0, "Other resolution should have rank 0"
-    assert calculate_resolution_rank(ParsedData(raw_title="None", parsed_title="None", resolution=""), settings_model, ranking_model) == 0, "No resolution should have rank 0"
+    assert rank_with_preference < 0, "Preferred title should have negative rank (remux) on default profile"
 
 
 def test_quality_ranking(settings_model, ranking_model):

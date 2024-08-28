@@ -285,28 +285,8 @@ def calculate_extra_ranks(data: ParsedData, settings: SettingsModel, rank_model:
         total_rank += rank_model.subbed if not settings.custom_ranks["extras"]["subbed"].use_custom_rank else settings.custom_ranks["extras"]["subbed"].rank
     if data.upscaled:
         total_rank += rank_model.upscaled if not settings.custom_ranks["extras"]["upscaled"].use_custom_rank else settings.custom_ranks["extras"]["upscaled"].rank
-
-    return total_rank
-
-def calculate_resolution_rank(data: ParsedData, settings: SettingsModel, rank_model: BaseRankingModel) -> int:
-    """Calculate the resolution ranking of the given parsed data."""
-    if not data.resolution:
-        return 0
-    
-    total_rank = 0
-
-    match data.resolution.lower():
-        case "2160p" | "4k":
-            total_rank += rank_model.uhd if not settings.custom_ranks["resolution"]["2160p"].use_custom_rank else settings.custom_ranks["resolution"]["2160p"].rank
-        case "1080p" | "1080i" | "1440p":
-            total_rank += rank_model.fhd if not settings.custom_ranks["resolution"]["1080p"].use_custom_rank else settings.custom_ranks["resolution"]["1080p"].rank
-        case "720p" | "720i":
-            total_rank += rank_model.hd if not settings.custom_ranks["resolution"]["720p"].use_custom_rank else settings.custom_ranks["resolution"]["720p"].rank
-        case "480p" | "576p" | "480i" | "576i":
-            total_rank += rank_model.sd if not settings.custom_ranks["resolution"]["480p"].use_custom_rank else settings.custom_ranks["resolution"]["480p"].rank
-        case "360p" | "240p" | "360i" | "240i":
-            total_rank += rank_model.sd if not settings.custom_ranks["resolution"]["360p"].use_custom_rank else settings.custom_ranks["resolution"]["360p"].rank
-        case _:
-            total_rank += 0
-
+    if data.site:
+        total_rank += rank_model.site if not settings.custom_ranks["extras"]["site"].use_custom_rank else settings.custom_ranks["trash"]["site"].rank
+    if data.size:
+        total_rank += rank_model.size if not settings.custom_ranks["trash"]["size"].use_custom_rank else settings.custom_ranks["trash"]["size"].rank
     return total_rank

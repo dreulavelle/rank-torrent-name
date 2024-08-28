@@ -382,7 +382,6 @@ class DefaultRanking(BaseRankingModel):
     size: int = -10000
     telecine: int = -10000
     telesync: int = -10000
-    workprint: int = -10000
 
 
 class Resolution(str, Enum):
@@ -455,25 +454,26 @@ class SettingsModel(BaseModel):
     require: List[str | Pattern] = []
     exclude: List[str | Pattern] = []
     preferred: List[str | Pattern] = []
+    resolutions: Dict[str, bool] = {
+        "2160p": False,
+        "1080p": True,
+        "720p": True,
+        "480p": False,
+        "360p": False,
+        "unknown": True
+    }
     options: Dict[str, Any] = {
-        "title_similarity": 0.9,
+        "title_similarity": 0.85,
         "remove_all_trash": True,
-        "allow_unknown_resolutions": True,
+        "remove_ranks_under": -10000,
+        "remove_unknown_languages": False
     }
     languages: Dict[str, Any] = {
-        "allow_unknown_languages": True,
         "required": [],
-        "exclude": ["de", "fr", "es", "hi", "ta", "ru", "ua", "th"],
+        "exclude": ["common"],
         "preferred": [],
     }
     custom_ranks: Dict[str, Dict[str, CustomRank]] = {
-        "resolution": {
-            "2160p": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "1080p": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "720p": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "480p": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "360p": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-        },
         "quality": {
             "av1": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "avc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
@@ -536,6 +536,7 @@ class SettingsModel(BaseModel):
             "proper": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "repack": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "retail": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "site": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "subbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "upscaled": CustomRank(fetch=False, use_custom_rank=False, rank=0),
         },
@@ -545,11 +546,9 @@ class SettingsModel(BaseModel):
             "pdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "r5": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "screener": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "site": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "size": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "telecine": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "workprint": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0)
         },
     }
 

@@ -10,7 +10,7 @@ from RTN.fetch import (
     fetch_quality,
     fetch_resolution,
 )
-from RTN.models import ParsedData, SettingsModel
+from RTN.models import SettingsModel
 from RTN import parse
 
 
