@@ -35,6 +35,7 @@ Examples:
 """
 
 import regex
+
 from .models import BaseRankingModel, ParsedData, SettingsModel
 
 

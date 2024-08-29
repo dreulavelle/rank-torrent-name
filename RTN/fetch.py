@@ -44,7 +44,6 @@ Examples:
 
 from .models import ParsedData, SettingsModel
 
-
 ANIME = {"ja", "zh", "ko"}
 NON_ANIME = {
     "de", "es", "hi", "ta", "ru", "ua", "th", "it",

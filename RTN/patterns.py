@@ -14,8 +14,8 @@ For more information on each function, refer to the respective docstrings.
 """
 
 from typing import Any
-import regex
 
+import regex
 
 # Translation table for normalizing unicode characters
 translationTable: dict[str, Any] = {
