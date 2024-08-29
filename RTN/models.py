@@ -369,6 +369,7 @@ class DefaultRanking(BaseRankingModel):
     proper: int = 20
     repack: int = 20
     retail: int = 0
+    site: int = -10000
     subbed: int = 0
     upscaled: int = -10000
 
@@ -378,7 +379,6 @@ class DefaultRanking(BaseRankingModel):
     r5: int = -10000
     satrip: int = -10000
     screener: int = -10000
-    site: int = -10000
     size: int = -10000
     telecine: int = -10000
     telesync: int = -10000
@@ -466,7 +466,8 @@ class SettingsModel(BaseModel):
         "title_similarity": 0.85,
         "remove_all_trash": True,
         "remove_ranks_under": -10000,
-        "remove_unknown_languages": False
+        "remove_unknown_languages": False,
+        "allow_english_in_languages": False
     }
     languages: Dict[str, Any] = {
         "required": [],

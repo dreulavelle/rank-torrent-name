@@ -55,7 +55,7 @@ NON_ANIME = {
     "ms"
 }
 
-COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh"}
+COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh", "ar", "fr"}
 ALL = ANIME | NON_ANIME
 
 
@@ -114,7 +114,7 @@ def trash_handler(data: ParsedData, settings: SettingsModel) -> bool:
 def language_handler(data: ParsedData, settings: SettingsModel) -> bool:
     """Check if the languages are excluded based on user settings."""
     if not data.languages and settings.options.get("remove_unknown_languages", False):
-        return False
+        return True
 
     exclude_languages = set(settings.languages.get("exclude", []))
     if "anime" in exclude_languages:
@@ -125,6 +125,9 @@ def language_handler(data: ParsedData, settings: SettingsModel) -> bool:
         exclude_languages.update(COMMON)
     if "all" in exclude_languages:
         exclude_languages.update(ALL)
+
+    if "en" in data.languages and settings.options.get("allow_english_in_languages", False):
+        return True
 
     return any(language in exclude_languages for language in data.languages)
 

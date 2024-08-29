@@ -412,13 +412,13 @@ files = [
 
 [[package]]
 name = "parsett"
-version = "1.2.2"
+version = "1.2.3"
 description = "PTT"
 optional = false
 python-versions = "<4.0,>=3.11"
 files = [
-    {file = "parsett-1.2.2-py3-none-any.whl", hash = "sha256:372a17b6cf3a794afdda13d6886eb85f5eb4bcef361489b0683596f944079417"},
-    {file = "parsett-1.2.2.tar.gz", hash = "sha256:50490a4a1346bb3b78674cb6dcb991b879702a90b83a80fcffb4c0f244cd457c"},
+    {file = "parsett-1.2.3-py3-none-any.whl", hash = "sha256:22cba9f02bcda2e89269012248f3e60831cf34c090be34bdc6eea5e0c4c3ed8a"},
+    {file = "parsett-1.2.3.tar.gz", hash = "sha256:7ed3e00ca4f4e2a5f471efbfef21955872b31b7882164c17834c75ed3ec67e4b"},
 ]
 
 [package.dependencies]
@@ -611,13 +611,13 @@ dev = ["importlib-metadata", "tox"]
 
 [[package]]
 name = "pyright"
-version = "1.1.377"
+version = "1.1.378"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.377-py3-none-any.whl", hash = "sha256:af0dd2b6b636c383a6569a083f8c5a8748ae4dcde5df7914b3f3f267e14dd162"},
-    {file = "pyright-1.1.377.tar.gz", hash = "sha256:aabc30fedce0ded34baa0c49b24f10e68f4bfc8f68ae7f3d175c4b0f256b4fcf"},
+    {file = "pyright-1.1.378-py3-none-any.whl", hash = "sha256:8853776138b01bc284da07ac481235be7cc89d3176b073d2dba73636cb95be79"},
+    {file = "pyright-1.1.378.tar.gz", hash = "sha256:78a043be2876d12d0af101d667e92c7734f3ebb9db71dccc2c220e7e7eb89ca2"},
 ]
 
 [package.dependencies]
@@ -1001,4 +1001,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "16d3c237316ccea019371cd42c1de3618e272e27e25a40dae110b036dbc7cb6b"
+content-hash = "2fa4fb447be815a3bff929e4b2352563746adad3cf92418bb0bfd83927841cd5"
