@@ -3,7 +3,6 @@ This module contains additional parsing patterns and utilities that are used in 
 
 Functions:
 - `normalize_title`: Normalize the title string to remove unwanted characters and patterns.
-- `check_video_extension`: Check if the title contains a video extension.
 - `check_pattern`: Check if a pattern is found in the input string.
 
 Arguments:
@@ -51,11 +50,6 @@ def normalize_title(raw_title: str, lower: bool = True) -> str:
     # Remove punctuation
     cleaned_title = ''.join(c for c in translated if c.isalnum() or c.isspace())
     return cleaned_title.strip()
-
-
-def check_video_extension(raw_title: str) -> bool:
-    """Check if the title contains a video extension."""
-    return bool(regex.search(r"\.(mkv|mp4|avi)$", raw_title, regex.IGNORECASE))
 
 
 def check_pattern(patterns: list[regex.Pattern], raw_title: str) -> bool:

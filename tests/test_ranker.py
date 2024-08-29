@@ -2,18 +2,9 @@ import pytest
 
 from RTN import RTN
 from RTN.exceptions import GarbageTorrent
-from RTN.models import (
-    BaseRankingModel,
-    DefaultRanking,
-    ParsedData,
-    SettingsModel,
-)
+from RTN.models import BaseRankingModel, DefaultRanking, ParsedData, SettingsModel
 from RTN.parser import Torrent, parse
-from RTN.ranker import (
-    get_rank,
-    calculate_preferred,
-    calculate_audio_rank
-)
+from RTN.ranker import calculate_audio_rank, calculate_preferred, get_rank
 
 
 @pytest.fixture
@@ -204,20 +195,20 @@ def test_preference_handling(settings_model, ranking_model):
 def test_quality_ranking(settings_model, ranking_model):
     test_dict = {
         "WEB": 150,
-        "WEB-DL": 100,
+        "WEB-DL": 5000,
         "BluRay": 100,
         "HDTV": -1000,
         "VHS": -10000,
         "WEBMux": -10000,
-        "BluRay REMUX": -1000,
-        "REMUX": -1000,
+        "BluRay REMUX": -10000,
+        "REMUX": -10000,
         "WEBRip": 30,
         "WEB-DLRip": -10000,
         "UHDRip": -1000,
         "HDRip": -1000,
         "DVDRip": -1000,
         "BDRip": -1000,
-        "BRRip": -1000,
+        "BRRip": -10000,
         "VHSRip": -10000,
         "PPVRip": -1000,
         "SATRip": -10000,
@@ -239,8 +230,8 @@ def test_quality_ranking(settings_model, ranking_model):
 
 def test_codec_ranking(settings_model, ranking_model):
     test_dict = {
-        "avc": 100,
-        "hevc": 100,
+        "avc": 500,
+        "hevc": 0,
         "xvid": -10000,
         "av1": 0,
         "mpeg": -100,

@@ -4,11 +4,10 @@ This module contains functions to rank parsed data based on user settings and cu
 Functions:
 - `get_rank`: Calculate the ranking of the given parsed data.
 - `calculate_preferred`: Calculate the preferred ranking of a given parsed data.
-- `calculate_resolution_rank`: Calculate the resolution ranking of the given parsed data.
 - `calculate_quality_rank`: Calculate the quality ranking of the given parsed data.
 - `calculate_codec_rank`: Calculate the codec ranking of the given parsed data.
 - `calculate_audio_rank`: Calculate the audio ranking of the given parsed data.
-- `calculate_other_ranks`: Calculate all the other rankings of the given parsed data.
+- `calculate_extra_ranks`: Calculate all the other rankings of the given parsed data.
 
 Arguments:
 - `data` (ParsedData): The parsed data object containing information about the torrent title.
@@ -20,18 +19,6 @@ For more information on each function, refer to the respective docstrings.
 Examples:
     >>> get_rank(ParsedData, SettingsModel, BaseRankingModel)
     250
-    >>> calculate_preferred(ParsedData, SettingsModel)
-    5000
-    >>> calculate_resolution_rank(ParsedData, SettingsModel, BaseRankingModel)
-    25
-    >>> calculate_quality_rank(ParsedData, SettingsModel, BaseRankingModel)
-    20
-    >>> calculate_codec_rank(ParsedData, SettingsModel, BaseRankingModel)
-    10
-    >>> calculate_audio_rank(ParsedData, SettingsModel, BaseRankingModel)
-    5
-    >>> calculate_other_ranks(ParsedData, SettingsModel, BaseRankingModel)
-    25
 """
 
 import regex

@@ -1,5 +1,6 @@
 import pytest
 
+from RTN import parse
 from RTN.fetch import (
     check_exclude,
     check_fetch,
@@ -11,7 +12,6 @@ from RTN.fetch import (
     fetch_resolution,
 )
 from RTN.models import SettingsModel
-from RTN import parse
 
 
 @pytest.fixture

@@ -2,33 +2,21 @@
 This module contains models used in the RTN package for parsing torrent titles, ranking media quality, and defining user settings.
 
 Models:
-- `ParsedData`: Parsed data model for a torrent title.
+- `ParsedData`: Model for storing parsed information from a torrent title.
 - `BaseRankingModel`: Base class for ranking models used in the context of media quality and attributes.
-- `CustomRank`: Custom ranking model used in the `SettingsModel` for defining custom ranks for specific attributes.
+- `Torrent`: Model for representing a torrent with metadata parsed from its title and additional computed properties.
+- `DefaultRanking`: Default ranking model preset that covers the most common use cases.
+- `BestRanking`: Ranking model preset that prioritizes the highest quality and most desirable attributes.
+- `CustomRank`: Model used in the `SettingsModel` for defining custom ranks for specific attributes.
 - `SettingsModel`: User-defined settings model for ranking torrents, including preferences for filtering torrents based on regex patterns and customizing ranks for specific torrent attributes.
 
 For more information on each model, refer to the respective docstrings.
 
 Note:
 - The `ParsedData` model contains attributes for storing parsed information from a torrent title.
-- The `BaseRankingModel` model is a base class for ranking
+- The `BaseRankingModel` model is a base class for ranking models used in the context of media quality and attributes.
 - The `CustomRank` model is used in the `SettingsModel` for defining custom ranks for specific attributes.
 - The `SettingsModel` model allows users to define custom settings for ranking torrents based on quality attributes and regex patterns.
-
-Example:
-    >>> rank_model = DefaultRanking()
-    >>> settings = SettingsModel(
-            profile="default",
-            require=["\\b4K|1080p\\b", "720p"],
-            exclude=["CAM", "TS"],
-            preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/i"],
-            custom_ranks={
-                "uhd": CustomRank(enable=True, fetch=False, rank=150),
-                "fhd": CustomRank(enable=True, fetch=True, rank=90),
-                ...
-            },
-        )
-    >>> rtn = RTN(rank_model, settings)
 """
 
 from enum import Enum
@@ -185,42 +173,11 @@ class BaseRankingModel(BaseModel):
     A base class for ranking models used in the context of media quality and attributes.
     The ranking values are used to determine the quality of a media item based on its attributes.
 
-    Attributes:
-        `uhd` (int): The ranking value for Ultra HD (4K) resolution.
-        `fhd` (int): The ranking value for Full HD (1080p) resolution.
-        `hd` (int): The ranking value for HD (720p) resolution.
-        `sd` (int): The ranking value for SD (480p) resolution.
-        `bluray` (int): The ranking value for Blu-ray quality.
-        `hdr` (int): The ranking value for HDR quality.
-        `hdr10` (int): The ranking value for HDR10 quality.
-        `dolby_video` (int): The ranking value for Dolby video quality.
-        `dts_x` (int): The ranking value for DTS:X audio quality.
-        `dts_hd` (int): The ranking value for DTS-HD audio quality.
-        `dts_hd_ma` (int): The ranking value for DTS-HD Master Audio audio quality.
-        `atmos` (int): The ranking value for Dolby Atmos audio quality.
-        `truehd` (int): The ranking value for Dolby TrueHD audio quality.
-        `ddplus` (int): The ranking value for Dolby Digital Plus audio quality.
-        `ac3` (int): The ranking value for AC3 audio quality.
-        `aac` (int): The ranking value for AAC audio quality.
-        `remux` (int): The ranking value for remux attribute.
-        `webdl` (int): The ranking value for web-dl attribute.
-        `repack` (int): The ranking value for repack attribute.
-        `proper` (int): The ranking value for proper attribute.
-        `dubbed` (int): The ranking value for dubbed attribute.
-        `subbed` (int): The ranking value for subbed attribute.
-        `av1` (int): The ranking value for AV1 attribute.
-
     Note:
         - The higher the ranking value, the better the quality of the media item.
         - The default ranking values are set to 0, which means that the attribute does not affect the overall rank.
         - Users can customize the ranking values based on their preferences and requirements by using inheritance.
     """
-    # resolution
-    uhd: int = 2000
-    fhd: int = 1000
-    hd: int = 500
-    sd: int = -100
-
     # quality
     av1: int = 0
     avc: int = 0
@@ -300,32 +257,27 @@ class BaseRankingModel(BaseModel):
 
 
 class DefaultRanking(BaseRankingModel):
-    """Default ranking model preset that should cover most common use cases."""
-    # resolution
-    uhd: int = 2000
-    fhd: int = 1000
-    hd: int = 500
-    sd: int = -100
+    """Ranking model preset that covers the most common use cases."""
 
     # quality
     av1: int = 0
-    avc: int = 100
+    avc: int = 500
     bluray: int = 100
     dvd: int = -1000
     hdtv: int = -1000
-    hevc: int = 100
+    hevc: int = 0
     mpeg: int = -100
-    remux: int = -1000
+    remux: int = -10000
     vhs: int = -10000
     web: int = 150
-    webdl: int = 100
+    webdl: int = 5000
     webmux: int = -10000
     xvid: int = -10000
     pdtv: int = -10000
 
     # rips
     bdrip: int = -1000
-    brrip: int = -1000
+    brrip: int = -10000
     dvdrip: int = -1000
     hdrip: int = -1000
     ppvrip: int = -1000
@@ -336,31 +288,31 @@ class DefaultRanking(BaseRankingModel):
     webrip: int = 30
 
     # hdr
-    bit_10: int = -1000
-    dolby_vision: int = -1000
-    hdr: int = -1000
-    hdr10plus: int = -1000
-    sdr: int = -1000
+    bit_10: int = 5
+    dolby_vision: int = 50
+    hdr: int = 50
+    hdr10plus: int = 0
+    sdr: int = 0
 
     # audio
-    aac: int = 80
+    aac: int = 100
     ac3: int = 50
-    atmos: int = -1000
-    dolby_digital: int = -1000
-    dolby_digital_plus: int = -1000
-    dts_lossy: int = 20
-    dts_lossless: int = 150
+    atmos: int = 100
+    dolby_digital: int = 0
+    dolby_digital_plus: int = 0
+    dts_lossy: int = 100
+    dts_lossless: int = 0
     eac3: int = 40
     flac: int = 0
     mono: int = -1000
     mp3: int = -1000
     stereo: int = 0
     surround: int = 0
-    truehd: int = 0
+    truehd: int = -100
 
     # extras
     three_d: int = -10000
-    converted: int = -1250
+    converted: int = -1000
     documentary: int = -250
     dubbed: int = 0
     edition: int = 100
@@ -384,8 +336,88 @@ class DefaultRanking(BaseRankingModel):
     telesync: int = -10000
 
 
+class BestRanking(BaseRankingModel):
+    """Ranking model preset that covers the highest qualities like 4K HDR."""
+
+    # quality
+    av1: int = 0
+    avc: int = 500
+    bluray: int = 100
+    dvd: int = -5000
+    hdtv: int = -5000
+    hevc: int = 500
+    mpeg: int = -1000
+    remux: int = 10000
+    vhs: int = -10000
+    web: int = 100
+    webdl: int = 200
+    webmux: int = -10000
+    xvid: int = -10000
+    pdtv: int = -10000
+
+    # rips
+    bdrip: int = -5000
+    brrip: int = -10000
+    dvdrip: int = -5000
+    hdrip: int = -10000
+    ppvrip: int = -10000
+    tvrip: int = -10000
+    uhdrip: int = -5000
+    vhsrip: int = -10000
+    webdlrip: int = -10000
+    webrip: int = -1000
+
+    # hdr
+    bit_10: int = 100
+    dolby_vision: int = 1000
+    hdr: int = 500
+    hdr10plus: int = 1000
+    sdr: int = 0
+
+    # audio
+    aac: int = 100
+    ac3: int = 50
+    atmos: int = 1000
+    dolby_digital: int = 0
+    dolby_digital_plus: int = 0
+    dts_lossy: int = 100
+    dts_lossless: int = 1000
+    eac3: int = 150
+    flac: int = 0
+    mono: int = -1000
+    mp3: int = -1000
+    stereo: int = 0
+    surround: int = 0
+    truehd: int = 1000
+
+    # extras
+    three_d: int = -10000
+    converted: int = -1000
+    documentary: int = -250
+    dubbed: int = -1000
+    edition: int = 100
+    hardcoded: int = 0
+    network: int = 0
+    proper: int = 20
+    repack: int = 20
+    retail: int = 0
+    site: int = -10000
+    subbed: int = 0
+    upscaled: int = -10000
+
+    # trash
+    cam: int = -10000
+    clean_audio: int = -10000
+    r5: int = -10000
+    satrip: int = -10000
+    screener: int = -10000
+    size: int = -10000
+    telecine: int = -10000
+    telesync: int = -10000
+
+
 class Resolution(str, Enum):
-    UHD = "4K"
+    UHD = "4k"
     UHD_2160P = "2160p"
     UHD_1440P = "1440p"
     FHD = "1080p"
@@ -537,7 +569,7 @@ class SettingsModel(BaseModel):
             "proper": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "repack": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "retail": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "site": CustomRank(fetch=True, use_custom_rank=False, rank=0),
+            "site": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "subbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "upscaled": CustomRank(fetch=False, use_custom_rank=False, rank=0),
         },

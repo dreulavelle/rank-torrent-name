@@ -1,45 +1,18 @@
 """
-This module contains functions to check if a torrent should be fetched based on user settings.
+This module contains functions to determine if a torrent should be fetched based on user settings.
 
 Functions:
-- `check_trash`: Check if the title contains any unwanted patterns.
-- `check_fetch`: Check user settings and unwanted quality to determine if torrent should be fetched.
-- `check_required`: Check if the title meets the required patterns.
-- `check_exclude`: Check if the title contains excluded patterns.
-- `fetch_quality`: Check if the quality is fetchable based on user settings.
-- `fetch_resolution`: Check if the resolution is fetchable based on user settings.
-- `fetch_codec`: Check if the codec is fetchable based on user settings.
-- `fetch_audio`: Check if the audio is fetchable based on user settings.
-- `fetch_other`: Check if the other data is fetchable based on user settings.
+- `check_fetch`: Evaluates user settings and unwanted quality to decide if a torrent should be fetched.
+- `check_trash`: Identifies if the title contains any unwanted patterns.
+- `trash_handler`: Checks if the title is trash based on user settings, return True if trash is detected.
+- `language_handler`: Checks if the languages are excluded based on user settings.
 
-Arguments:
-- `raw_title` (str): The raw title string to check.
+Parameters:
+- `raw_title` (str): The raw title string to evaluate.
 - `data` (ParsedData): The parsed data object containing information about the torrent title.
 - `settings` (SettingsModel): The user settings object containing custom ranking models.
 
 For more information on each function, refer to the respective docstrings.
-
-Examples:
-    >>> check_trash("Some.Title.CAM.720p.WEB-DL.x264-Group")
-    True
-    >>> check_trash("Some.Title.720p.WEB-DL.x264-Group")
-    False
-    >>> check_fetch(ParsedData, SettingsModel)
-    True
-    >>> check_required(ParsedData, SettingsModel)
-    True
-    >>> check_exclude(ParsedData, SettingsModel)
-    False
-    >>> fetch_resolution(ParsedData, SettingsModel)
-    True
-    >>> fetch_quality(ParsedData, SettingsModel)
-    True
-    >>> fetch_audio(ParsedData, SettingsModel)
-    True
-    >>> fetch_codec(ParsedData, SettingsModel)
-    True
-    >>> fetch_other(ParsedData, SettingsModel)
-    True
 """
 
 from .models import ParsedData, SettingsModel
@@ -188,15 +161,15 @@ def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
         return settings.resolutions["unknown"]
 
     match data.resolution.lower():
-        case "2160p" | "4k" | "2160i":
+        case "2160p" | "4k":
             return settings.resolutions["2160p"]
-        case "1080p" | "1080i" | "1440p":
+        case "1080p" | "1440p":
             return settings.resolutions["1080p"]
-        case "720p" | "720i":
+        case "720p":
             return settings.resolutions["720p"]
-        case "480p" | "576p" | "480i" | "576i":
+        case "480p" | "576p":
             return settings.resolutions["480p"]
-        case "360p" | "240p" | "360i" | "240i":
+        case "360p" | "240p":
             return settings.resolutions["360p"]
         case _:
             return settings.resolutions["unknown"]

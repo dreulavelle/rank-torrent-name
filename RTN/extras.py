@@ -2,25 +2,15 @@
 Extras module for additional functionality related to RTN processing.
 
 Functions:
-- `parse_chunk`: Parse a chunk of torrent titles.
-- `batch_parse`: Parse a list of torrent titles in batches for improved performance.
 - `title_match`: Compare two titles using the Levenshtein ratio to determine similarity.
-- `sort_torrents`: Sort a set of Torrent objects by their rank in descending order.
-- `is_movie`: Determine if the item is a movie based on the absence of typical show indicators.
-- `get_type`: Determine the type of media based on the parsed data.
+- `sort_torrents`: Sort a set of Torrent objects by their resolution and rank in descending order.
+- `extract_seasons`: Extract season numbers from the title.
+- `extract_episodes`: Extract episode numbers from the title.
 - `episodes_from_season`: Extract episode numbers for a specific season from the title.
 
 For more details, please refer to the documentation.
-
-Examples:
-```py
->>> from RTN import parse_extras
->>> raw_title = "The Walking Dead S05E03 2160p HDTV x264-ASAP[ettv]"
->>> parsed_data = parse_extras(raw_title)
->>> print(parsed_data)
-{'is_multi_audio': False, 'is_multi_subtitle': False, 'is_complete': False, 'is_4k': True, 'hdr': '', 'episode': [3]}
-```
 """
+
 from typing import Any, Dict, List, Set
 
 from Levenshtein import ratio
@@ -76,13 +66,19 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
     Sorts a set of Torrent objects by their resolution bucket and then by their rank in descending order.
     Returns a dictionary with infohash as keys and Torrent objects as values.
 
-    Parameters:
-    - torrents: A set of Torrent objects.
+    Args:
+    - torrents (Set[Torrent]): A set of Torrent objects.
+
+    Raises:
+    - TypeError: If the input is not a set of Torrent objects.
 
     Returns:
-    - A dictionary of Torrent objects sorted by resolution and rank in descending order, with the torrent's
-      infohash as the key.
+    - Dict[str, Torrent]: A dictionary of Torrent objects sorted by resolution and rank in descending order,
+    with the torrent's infohash as the key.
     """
+
+    if not isinstance(torrents, set) or not all(isinstance(t, Torrent) for t in torrents):
+        raise TypeError("The input must be a set of Torrent objects.")
 
     buckets = {
         Resolution.UHD: 4,
@@ -96,9 +92,6 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
         Resolution.UNKNOWN: 0,
     }
 
-    if not isinstance(torrents, set) or not all(isinstance(t, Torrent) for t in torrents):
-        raise TypeError("The input must be a set of Torrent objects.")
-
     def get_bucket(torrent: Torrent) -> int:
         resolution_map = {
             "4k": Resolution.UHD,
@@ -111,7 +104,7 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
             "360p": Resolution.SD_360P,
             "unknown": Resolution.UNKNOWN,
         }
-        resolution = resolution_map.get(torrent.data.resolution.lower(), Resolution.UNKNOWN)
+        resolution = resolution_map.get(torrent.data.resolution, Resolution.UNKNOWN)
         return buckets[resolution]
 
     sorted_torrents: List[Torrent] = sorted(
@@ -126,6 +119,12 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
 def extract_seasons(raw_title: str) -> List[int]:
     """
     Extract season numbers from the title or filename.
+
+    Parameters:
+    - `raw_title` (str): The original title of the torrent to analyze.
+
+    Returns:
+    - List[int]: A list of extracted season numbers from the title.
     """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")

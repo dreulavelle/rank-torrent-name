@@ -1,12 +1,8 @@
 import pytest
 
 from RTN import parse
+from RTN.extras import episodes_from_season, extract_episodes, title_match
 from RTN.models import ParsedData
-from RTN.extras import (
-    extract_episodes,
-    episodes_from_season,
-    title_match,
-)
 
 
 @pytest.mark.parametrize("test_string, expected_data", [

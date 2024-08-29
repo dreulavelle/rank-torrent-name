@@ -2,7 +2,7 @@ import pytest
 
 from RTN import RTN
 from RTN.exceptions import GarbageTorrent
-from RTN.models import SettingsModel, DefaultRanking
+from RTN.models import DefaultRanking, SettingsModel
 
 
 @pytest.fixture()
@@ -31,7 +31,7 @@ SCRAPED_DATA = [
     {"title": "Game of Thrones Season 1 to 8 The Complete Collection [NVEnc H265 1080p][AAC 6Ch][English Subs]", "fetch": True, "rank": 1, "languages": ["en"]},
     {"title": "Game.of.Thrones.S01.1080p.BluRay.10bit.HEVC-MkvCage Season 1 One", "fetch": True, "rank": 1},
     {"title": "Game of Thrones S01 1080p BluRay-RMZ x264-Belex Dual Audio DTS +", "fetch": True, "rank": 1},
-    {"title": "Game of Thrones s01e01 2011 1080p Rifftrax 6ch x265 HEVC", "fetch": True, "rank": 1},
+    {"title": "Game of Thrones s01e01 2011 1080p Rifftrax 6ch x265 HEVC", "fetch": True, "rank": 0},
     {"title": "Game of Thrones S01 1080p BluRay H264 AC3 Will1869", "fetch": True, "rank": 1},
     {"title": "Game.of.Thrones.S01.1080p.BluRay.x264-HD4U Season 1 One Complete", "fetch": True, "rank": 1},
     {"title": "Game of Thrones Seasons 1 to 8 The Complete Box Set/Series [English Subs][NVEnc H265 720p][AAC 6Ch]", "fetch": True, "rank": 1, "languages": ["en"]},
@@ -44,8 +44,8 @@ SCRAPED_DATA = [
 
     # These items will NOT be fetched based on default settings
     {"title": "Game of Thrones (2011) Complete [2160p] [HDR] [5.1 5.1] [ger eng] [Vio]", "fetch": False, "rank": -1, "languages": ["de", "en"]},
-    {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265.10bit.HDR.TrueHD.7.1.Atmos-DON[rartv]", "fetch": False, "rank": -1},
-    {"title": "Game of Thrones Season 1 (S01) 2160p HDR 5.1 x265 10bit Phun Psyz", "fetch": False, "rank": -1},
+    {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265.10bit.HDR.TrueHD.7.1.Atmos-DON[rartv]", "fetch": False, "rank": 1},
+    {"title": "Game of Thrones Season 1 (S01) 2160p HDR 5.1 x265 10bit Phun Psyz", "fetch": False, "rank": 1},
     {"title": "Game.of.Thrones.S01.2160p.DoVi.HDR.BluRay.REMUX.HEVC.DTS-HD.MA.TrueHD.7.1.Atmos-PB69", "fetch": False, "rank": -1},
     {"title": "Game.of.Thrones.S01.2160p.BluRay.REMUX.HEVC.DTS-HD.MA.TrueHD.7.1.Atmos-FGT", "fetch": False, "rank": -1},
     {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265-SCOTLUHD", "fetch": False, "rank": 1},

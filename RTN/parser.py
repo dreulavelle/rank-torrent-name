@@ -10,21 +10,19 @@ Classes:
 - `Torrent`: Represents a torrent with metadata parsed from its title and additional computed properties.
 - `RTN`: Rank Torrent Name class for parsing and ranking torrent titles based on user preferences.
 
+Methods
+- `rank`: Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
+
 For more information on each function or class, refer to the respective docstrings.
 
 Example:
-    >>> from RTN import parse, Torrent
-    >>> data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
-    >>> isinstance(data, ParsedData)
-    True
-    >>> torrent = Torrent(
-    ...     raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]",
-    ...     infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7",
-    ...     data=data,
-    ...     fetch=True,
-    ...     rank=500,
-    ...     lev_ratio=0.95,
-    ... )
+    >>> from RTN import RTN
+    >>> from RTN.models import SettingsModel, DefaultRanking
+    >>>
+    >>> settings_model = SettingsModel()
+    >>> ranking_model = DefaultRanking()
+    >>> rtn = RTN(settings_model, ranking_model)
+    >>> torrent = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
     >>> torrent.raw_title
     'The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]'
     >>> torrent.infohash
@@ -44,7 +42,7 @@ from PTT import parse_title
 
 from .exceptions import GarbageTorrent
 from .extras import get_lev_ratio
-from .fetch import check_exclude, check_fetch, trash_handler
+from .fetch import check_fetch
 from .models import BaseRankingModel, ParsedData, SettingsModel, Torrent
 from .patterns import normalize_title
 from .ranker import get_rank
@@ -152,8 +150,8 @@ class RTN:
 
         if remove_trash:
             if not fetch:
-                raise GarbageTorrent(f"'{raw_title}' is trash and should be ignored by the scraper.")
-            if lev_ratio < self.lev_threshold:
+                raise GarbageTorrent(f"'{raw_title}' has been identified as trash based on user settings and will be ignored.")
+            if lev_ratio < self.lev_threshold and correct_title:
                 raise GarbageTorrent(f"'{raw_title}' does not match the correct title, got ratio of {lev_ratio}")
 
         if rank < self.settings.options["remove_ranks_under"]:
@@ -174,11 +172,12 @@ def parse(raw_title: str, translate_langs: bool = False, json: bool = False) -> 
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
 
     Args:
-        `raw_title` (str): The original torrent title to parse.
-        `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
+    - `raw_title` (str): The original torrent title to parse.
+    - `translate_langs` (bool): Whether to translate the language codes in the parsed title. Defaults to False.
+    - `json` (bool): Whether to return the parsed data as a dictionary. Defaults to False.
 
     Returns:
-        ParsedData: A data model containing the parsed metadata from the torrent title.
+        `ParsedData`: A data model containing the parsed metadata from the torrent title.
     """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
