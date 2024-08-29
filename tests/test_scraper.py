@@ -18,12 +18,10 @@ SCRAPED_DATA = [
     # These items will be fetched based on default settings
     {"title": "Game of Thrones S01-S05 1080p 10bit BluRay 6CH x265 HEVC", "fetch": True, "rank": 1},
     {"title": "Game.Of.Thrones.S01-S06.1080p.Bluray.x265.10bit.AAC.7.1.DUAL.Tigole", "fetch": True, "rank": 1},
-    {"title": "Game.of.Thrones.S01-07.BDRip.1080p", "fetch": True, "rank": -1},
     {"title": "Game Of Thrones - Season 1 to 6 (Eng Subs) - Mp4 1080p", "fetch": True, "rank": 0, "languages": ["en"]},
     {"title": "Game Of Thrones Season 1 S01 Complete (1080p Bluray X265 HEVC AAC 5.1 Joy) [UTR]", "fetch": True, "rank": 1},
     {"title": "Game.of.Thrones.Season.1-8.S01-08.COMPLETE.1080p.BluRay.WEB.x265.10bit.6CH.ReEnc-LUMI", "fetch": True, "rank": 1},
     {"title": "Game of Thrones (2011) 1080p MKV S01E01 Eng NL Subs DMT", "fetch": True, "rank": 0, "languages": ["en"]},
-    {"title": "Game Of Thrones - The Complete Collection (2011-2019) BDRip 1080p", "fetch": True, "rank": -1},
     {"title": "Game.of.Thrones.SEASON.01.S01.COMPLETE.1080p.10bit.BluRay.6CH.x265.HEVC-PSA", "fetch": True, "rank": 1},
     {"title": "Game.of.Thrones.S01-S08.COMPLETE.SERIES.REPACK.1080p.Bluray.x265-HiQVE", "fetch": True, "rank": 1},
     {"title": "Game of Thrones (Integrale) MULTi HDLight 1080p HDTV", "fetch": True, "rank": -1, "languages": []},
@@ -43,6 +41,8 @@ SCRAPED_DATA = [
     {"title": "Game of Thrones Seasons 1-5 CENSORED", "fetch": True, "rank": 0},
 
     # These items will NOT be fetched based on default settings
+    {"title": "Game.of.Thrones.S01-07.BDRip.1080p", "fetch": False, "rank": -1},
+    {"title": "Game Of Thrones - The Complete Collection (2011-2019) BDRip 1080p", "fetch": False, "rank": -1},
     {"title": "Game of Thrones (2011) Complete [2160p] [HDR] [5.1 5.1] [ger eng] [Vio]", "fetch": False, "rank": -1, "languages": ["de", "en"]},
     {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265.10bit.HDR.TrueHD.7.1.Atmos-DON[rartv]", "fetch": False, "rank": 1},
     {"title": "Game of Thrones Season 1 (S01) 2160p HDR 5.1 x265 10bit Phun Psyz", "fetch": False, "rank": 1},

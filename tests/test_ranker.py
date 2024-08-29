@@ -91,7 +91,7 @@ def custom_settings_model():
 
 
 @pytest.mark.parametrize("raw_title, expected_fetch", [
-    ("The Walking Dead S05E03 720p Remux x264-ASAP[ettv]", GarbageTorrent),
+    ("The Walking Dead S05E03 720p WebDL-Rip x264-ASAP[ettv]", GarbageTorrent),
     ("The Walking Dead.S05E03.2019.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-JATO", GarbageTorrent),
     ("The Walking Dead S05E03 720p x264-ASAP", True),
 ])
