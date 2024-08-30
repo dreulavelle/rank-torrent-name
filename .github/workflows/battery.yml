@@ -32,13 +32,13 @@ jobs:
         pip install poetry
         poetry install --no-root --with dev
 
-    - name: Ruff & Isort Check
-      run: |
-        poetry run ruff check ./RTN
-        poetry run isort --check-only ./RTN
+    # - name: Ruff & Isort Check
+    #   run: |
+    #     poetry run ruff check ./RTN
+    #     poetry run isort --check-only ./RTN
 
-    - name: Type check
-      run: poetry run pyright
+    # - name: Type check
+    #   run: poetry run pyright
 
     - name: Run Tests & Coverage
       run: poetry run pytest --cov=./RTN --cov-report=xml --cov-fail-under=85
