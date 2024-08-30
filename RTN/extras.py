@@ -109,7 +109,7 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
 
     sorted_torrents: List[Torrent] = sorted(
         torrents,
-        key=lambda torrent: (get_bucket(torrent), torrent.rank if torrent.rank is not None else float('-inf')),
+        key=lambda torrent: (get_bucket(torrent), torrent.rank if torrent.rank is not None else float("-inf")),
         reverse=True
     )
 

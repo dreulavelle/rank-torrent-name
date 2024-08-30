@@ -12,7 +12,7 @@ python = "^3.11"
 pydantic = "^2.6.3"
 regex = "^2023.12.25"
 levenshtein = "^0.25.0"
-parsett = "1.2.3"
+parsett = "^1.2.3"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.3"

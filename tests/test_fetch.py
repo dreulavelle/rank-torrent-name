@@ -5,10 +5,6 @@ from RTN.fetch import (
     check_exclude,
     check_fetch,
     check_required,
-    fetch_audio,
-    fetch_codec,
-    fetch_other,
-    fetch_quality,
     fetch_resolution,
 )
 from RTN.models import SettingsModel

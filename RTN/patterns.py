@@ -44,11 +44,11 @@ def normalize_title(raw_title: str, lower: bool = True) -> str:
     translation_table = str.maketrans(translationTable)
     lowered = raw_title.lower() if lower else raw_title
     # Normalize unicode characters to their closest ASCII equivalent
-    normalized = unicodedata.normalize('NFKC', lowered)
+    normalized = unicodedata.normalize("NFKC", lowered)
     # Apply specific translations
     translated = normalized.translate(translation_table)
     # Remove punctuation
-    cleaned_title = ''.join(c for c in translated if c.isalnum() or c.isspace())
+    cleaned_title = "".join(c for c in translated if c.isalnum() or c.isspace())
     return cleaned_title.strip()
 
 
