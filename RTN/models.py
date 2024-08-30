@@ -265,7 +265,7 @@ class DefaultRanking(BaseRankingModel):
     bluray: int = 100
     dvd: int = -1000
     hdtv: int = -1000
-    hevc: int = 4000
+    hevc: int = 500
     mpeg: int = -100
     remux: int = -10000
     vhs: int = -10000
@@ -443,10 +443,10 @@ class SettingsModel(BaseModel):
 
     Attributes:
     - `profile` (str): Identifier for the settings profile, allowing for multiple configurations.
-    - `require` (List[Union[str, Pattern]]): Patterns torrents must match to be considered.
-    - `exclude` (List[Union[str, Pattern]]): Patterns that, if matched, result in torrent exclusion.
-    - `preferred` (List[Union[str, Pattern]]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
-    - `custom_ranks` (Dict[str, CustomRank]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
+    - `require` (List[str | Pattern]]): Patterns torrents must match to be considered.
+    - `exclude` (List[str | Pattern]]): Patterns that, if matched, result in torrent exclusion.
+    - `preferred` (List[str | Pattern]]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
+    - `custom_ranks` (Dict[str, Dict[str, CustomRank]]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
 
     Methods:
         __init__(**kwargs): Initializes the settings model with user-defined preferences. Automatically compiles string regex patterns into Patterns, taking into account case sensitivity based on the pattern syntax.
@@ -454,10 +454,9 @@ class SettingsModel(BaseModel):
 
     Note:
     - The `profile` attribute allows users to define multiple settings profiles for different use cases.
-    - The `require`, `exclude`, and `preferred` attributes are optional! If not provided, they default to an empty list.
+    - The `require`, `exclude`, and `preferred` attributes are optional!
     - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
     - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
-    - Patterns enclosed in '/' with a trailing 'i' are compiled as case-insensitive.
     - Patterns not enclosed are compiled as case-insensitive by default.
 
     This model supports advanced regex features, enabling powerful and precise filtering and ranking based on torrent titles and attributes.
@@ -467,11 +466,8 @@ class SettingsModel(BaseModel):
                 profile="default",
                 require=["\\b4K|1080p\\b", "720p"],
                 exclude=["CAM", "TS"],
-                preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/i"],
-                custom_ranks={
-                    "uhd": CustomRank(fetch=True, fetch=False, rank=150),
-                    "fhd": CustomRank(fetch=True, fetch=True, rank=90),
-                    ...
+                preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/"],
+                ...
                 },
             )
         >>> print([pattern.pattern for pattern in settings.require])
