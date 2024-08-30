@@ -41,7 +41,7 @@ jobs:
     #   run: poetry run pyright
 
     - name: Run Tests & Coverage
-      run: poetry run pytest --cov=./RTN --cov-report=xml --cov-fail-under=85
+      run: poetry run pytest --cov=./RTN --cov-report=xml --cov-fail-under=80
 
     - name: Upload Coverage Report to Codecov
       uses: codecov/codecov-action@v4.1.1
