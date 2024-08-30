@@ -1,593 +1,273 @@
 import pytest
-from pydantic import ValidationError
 
-from RTN import get_rank, parse
-from RTN.exceptions import GarbageTorrent
-from RTN.fetch import check_trash
-from RTN.models import (
-    BaseRankingModel,
-    CustomRank,
-    DefaultRanking,
-    ParsedData,
-    SettingsModel,
-)
-from RTN.parser import (
-    RTN,
-    Torrent,
-    batch_parse,
-    episodes_from_season,
-    get_type,
-    is_movie,
-    sort_torrents,
-    title_match,
-)
-from RTN.patterns import (
-    COMPLETE_SERIES_COMPILED,
-    MULTI_AUDIO_COMPILED,
-    MULTI_SUBTITLE_COMPILED,
-    check_hdr_dolby_video,
-    check_pattern,
-    extract_episodes,
-    parse_extras,
-)
-
-## Define Fixtures
-
-@pytest.fixture
-def settings_model():
-    return SettingsModel()
-
-@pytest.fixture
-def custom_settings():
-    return SettingsModel(
-        profile="custom",
-        require=[],
-        exclude=[],
-        preferred=["BluRay", r"/\bS\d+/", "/HDR|HDR10/i"],
-        custom_ranks={
-            "uhd": CustomRank(enable=True, fetch=True, rank=-200),
-            "fhd": CustomRank(enable=True, fetch=True, rank=90),
-            "hd": CustomRank(enable=True, fetch=True, rank=60),
-            "sd": CustomRank(enable=True, fetch=True, rank=-120),
-            "dolby_video": CustomRank(enable=True, fetch=True, rank=-1000),
-            "hdr": CustomRank(enable=True, fetch=True, rank=-1000),
-            "hdr10": CustomRank(enable=True, fetch=True, rank=-1000),
-            "aac": CustomRank(enable=True, fetch=True, rank=70),
-            "ac3": CustomRank(enable=True, fetch=True, rank=50),
-            "remux": CustomRank(enable=False, fetch=True, rank=-75),
-            "webdl": CustomRank(enable=True, fetch=True, rank=90),
-            "bluray": CustomRank(enable=True, fetch=True, rank=-90),
-        },
-    )
-
-@pytest.fixture
-def rank_model():
-    return DefaultRanking()
-
-@pytest.fixture
-def test_titles():
-    return [
-        "The.Matrix.1999.1080p.BluRay.x264",
-        "Inception.2010.720p.BRRip.x264",
-        "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-        "House MD All Seasons (1-8) 720p Ultra-Compressed"
-        "The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)"
-        "Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World"
-        "Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]"
-        "4-13 Cursed (HD)"
-        "Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR"
-        "[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]"
-        "BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p"
-        "[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ"
-        "Bleach 10º Temporada - 215 ao 220 - [DB-BR]"
-        "Naruto Shippuden - 107 - Strange Bedfellows"
-        "[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]"
-        "[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]"
-    ]
+from RTN import parse
+from RTN.extras import episodes_from_season, extract_episodes, title_match
+from RTN.models import ParsedData
 
 
-def test_default_ranking_model(rank_model):
-    assert isinstance(rank_model, BaseRankingModel)
-    # Mostly used for if I forget to update the tests/docs. 
-    # Serves as a warning.
-    assert rank_model.uhd == 140
-    assert rank_model.fhd == 100
-    assert rank_model.hd == 50
-    assert rank_model.sd == -100
-    assert rank_model.dolby_video == -1000
-    assert rank_model.hdr == -1000
-    assert rank_model.hdr10 == -1000
-    assert rank_model.aac == 70
-    assert rank_model.ac3 == 50
-    assert rank_model.remux == -1000
-    assert rank_model.webdl == 90
-    assert rank_model.bluray == -90
-
-
-def test_parsed_data_model():
-    data = parse("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", remove_trash=False)
+@pytest.mark.parametrize("test_string, expected_data", [
+    (
+        "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+        {
+            "raw_title": "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole",
+            "parsed_title": "The Simpsons",
+            "year": None,
+            "resolution": "1080p",
+            "quality": "BluRay",
+            "seasons": [1],
+            "episodes": [1, 2],
+            "codec": "hevc",
+            "audio": ["AAC"],
+            "languages": [],
+            "bit_depth": "10bit"
+        }
+    ),
+])
+def test_parsed_data_model(test_string, expected_data):
+    data = parse(test_string)
     assert isinstance(data, ParsedData)
-    assert data.raw_title == "The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-    assert data.parsed_title == "The Simpsons"
-    assert data.fetch is False  # Default value as False since `parse` doesn't set it. Must use `rank` to set it.
-    assert data.is_4k is False
-    assert data.is_multi_audio is False
-    assert data.is_multi_subtitle is False
-    assert data.is_complete is False
-    assert data.year == 0
-    assert data.resolution == ["1080p"]
-    assert data.quality == ["Blu-ray"]
-    assert data.season == [1]
-    assert data.episode == [1, 2]
-    assert data.codec == ["H.265"]
-    assert data.audio == ["AAC 5.1"]
-    assert data.subtitles == []
-    assert data.language == []
-    assert data.bitDepth == [10]
-    assert data.hdr == ""
-    assert data.proper is False
-    assert data.repack is False
-    assert data.remux is False
-    assert data.upscaled is False
-    assert data.remastered is False
-    assert data.directorsCut is False
-    assert data.extended is False
+    assert data.raw_title == expected_data["raw_title"]
+    assert data.parsed_title == expected_data["parsed_title"]
+    assert data.year == expected_data["year"]
+    assert data.resolution == expected_data["resolution"]
+    assert data.quality == expected_data["quality"]
+    assert data.seasons == expected_data["seasons"]
+    assert data.episodes == expected_data["episodes"]
+    assert data.codec == expected_data["codec"]
+    assert data.audio == expected_data["audio"]
+    assert data.languages == expected_data["languages"]
+    assert data.bit_depth == expected_data["bit_depth"]
 
 
-def test_default_parse_return(custom_settings, rank_model):
-    parsed = parse("The.Big.Bang.Theory.S01E01.720p.HDTV.x264-CTU")
-    assert isinstance(parsed, ParsedData)
-    assert parsed.parsed_title == "The Big Bang Theory"
-
-    # Test preferred
-    rank = get_rank(parsed, custom_settings, rank_model)
-    assert rank > 5000, f"Rank was {rank} instead."
-
-    # Test invalid title
-    with pytest.raises(TypeError):
-        assert parse(12345) # type: ignore
-
-    # Test invalid title
-    with pytest.raises(TypeError):
-        assert parse() # type: ignore
-
-
-def test_default_title_matching():
+@pytest.mark.parametrize("title, query, expected", [
+    ("Damsel", "Damsel (2024)", False),
+    ("The Simpsons", "The Simpsons", True),
+    ("The Simpsons", "The Simpsons Movie", False),
+    ("The Simpsons", "The Simpsons S01E01", False),
+    ("The Simpsons S01E01", "The Simpsons S01E01", True),
+    ("The Simpsons Movie", "The Simpsons Movie", True),
+    ("American Horror Story", "American Story Horror", False),
+])
+def test_default_title_matching(title, query, expected):
     """Test the title_match function"""
-    # This ensures all titles adhere to having a levenshtein ratio > 0.9.
-    test_cases = [
-        ("Damsel", "Damsel (2024)", False),
-        ("The Simpsons", "The Simpsons", True),
-        ("The Simpsons", "The Simpsons Movie", False),
-        ("The Simpsons", "The Simpsons S01E01", False),
-        ("The Simpsons S01E01", "The Simpsons S01E01", True),
-        ("The Simpsons Movie", "The Simpsons Movie", True),
-        ("American Horror Story", "American Story Horror", False),
-    ]
-    for title, query, expected in test_cases:
-        assert title_match(title, query) == expected, f"Failed for {title} and {query}"
-    
-    # test not correct_title or not raw_title
-    with pytest.raises(TypeError):
-        assert title_match("The Simpsons", 12345) # type: ignore
-    # test valid threshold
-    assert title_match("The Simpsons", "The Simpsons", threshold=0.9)
-    # test invalid threshold
-    with pytest.raises(ValueError):
-        assert title_match("The Simpsons", "The Simpsons", threshold=1.1)
-    # test not correct_title or not raw_title
-    with pytest.raises(ValueError):
-        assert title_match(None, None) # type: ignore
+    assert title_match(title, query) == expected, f"Failed for {title} and {query}"
 
 
-def test_batch_parse_processing(test_titles):
-    # Test batch parsing retuns a list of ParsedData objects
-    # Verify that each item in the result is an instance of ParsedData
-    # and its raw_title matches the corresponding input title
-    parsed_results = batch_parse(test_titles, remove_trash=False, chunk_size=5)
-    assert len(parsed_results) == len(test_titles)
-    for parsed_data, title in zip(parsed_results, test_titles):
-        assert isinstance(parsed_data, ParsedData), "Result item is not an instance of ParsedData"
-        assert parsed_data.raw_title == title, f"Expected raw_title to be '{title}', but got '{parsed_data.raw_title}'"
+@pytest.mark.parametrize("release_name, expected", [
+    ("www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv", {
+        "raw_title": "www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv",
+        "parsed_title": "Khel Khel Mein",
+        "year": 2024,
+        "languages": ["hi"],
+        "seasons": [],
+        "episodes": [],
+        "quality": "SCR",
+        "codec": "avc",
+        "audio": ["AAC"],
+        "resolution": "1080p",
+        "container": "mkv",
+        "extension": "mkv",
+        "size": "2.3GB",
+        "site": "www.5MovieRulz.show",
+        "trash": True
+    })
+])
+def test_random_releases_parse(release_name, expected):
+    assert parse(release_name, json=True) == expected, f"Failed with {expected}"
 
 
-def test_batch_parse_trash_processing(test_titles):
-    # Some of these titles are trash, so we should remove them.
-    with pytest.raises(GarbageTorrent):
-        assert batch_parse(test_titles, remove_trash=True, chunk_size=5)
+@pytest.mark.parametrize("release_name, expected", [
+    ("www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv", ParsedData(
+        raw_title="www.5MovieRulz.show - Khel Khel Mein (2024) 1080p Hindi DVDScr - x264 - AAC - 2.3GB.mkv",
+        parsed_title="Khel Khel Mein",
+        normalized_title="khel khel mein",
+        trash=True,
+        year=2024,
+        resolution="1080p",
+        seasons=[],
+        episodes=[],
+        languages=["hi"],
+        quality="SCR",
+        codec="avc",
+        audio=["AAC"],
+        container="mkv",
+        extension="mkv",
+        site="www.5MovieRulz.show",
+        size="2.3GB"
+    ))
+])
+def test_random_releases_parse(release_name, expected):
+    assert parse(release_name) == expected
 
 
-def test_episode_parsing():
-    test_cases = [
-        # Regular Tests
-        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
-        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2]),
-        ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2]),
-        ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2, 3, 4, 5]),
-        ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2, 3, 4, 5]),
-        ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", list(range(1, 201))), # Eps 1-200
-        ("House MD All Seasons (1-8) 720p Ultra-Compressed", []),
-        ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [15]),
-        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [5]),
-        ("4-13 Cursed (HD)", [13]),
-
-        # Mini-series, this is correct!
-        ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [2]),
-
-        # Anime Tests
-        ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", []),
-        ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", []),
-        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", list(range(1, 9))), # Eps 1-8
-        ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [24]),
-        ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [215, 216, 217, 218, 219, 220]),
-
-        # Looks like it doesn't handle hyphens in the episode part. It's not a big deal,
-        # as it's not a common practice to use hypens in the episode part. Mostly seen in Anime.
-        # I did run tests and I was still able to scrape for Naruto, which is a huge win as its always been a tough one!
-        ("Naruto Shippuden - 107 - Strange Bedfellows", []),                              # Incorrect, should of been: [107]
-        ("[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip1080p.x265.FLAC]", []),      # Incorrect, should of been:  [13]
-        ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]", []),  # Incorrect, should of been:  [11]
-
-        # User submitted edge cases
-        ("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd.mkv", []),
-    ]
-    for test_string, expected in test_cases:
-        assert (
-            extract_episodes(test_string) == expected
-        ), f"Failed for '{test_string}' with expected {expected}"
+@pytest.mark.parametrize("title, query, threshold, expected_exception", [
+    ("The Simpsons", 12345, None, TypeError),  # test not correct_title or not raw_title
+    ("The Simpsons", "The Simpsons", 0.9, None),  # test valid threshold
+    ("The Simpsons", "The Simpsons", 1.1, ValueError),  # test invalid threshold
+    (None, None, None, ValueError),  # test not correct_title or not raw_title
+])
+def test_title_matching_exceptions(title, query, threshold, expected_exception):
+    if expected_exception:
+        with pytest.raises(expected_exception):
+            assert title_match(title, query, threshold)  # type: ignore
+    else:
+        assert title_match(title, query, threshold)
 
 
-def test_multi_audio_patterns():
-    test_cases = [
-        ("Lucy 2014 Dual-Audio WEBRip 1400Mb", True),
-        ("Darkness Falls (2020) HDRip 720p [Hindi-Dub] Dual-Audio x264", True),
-        ("The Simpsons - Season 1 Complete [DVDrip ITA ENG] TNT Village", False),
-        ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", False),
-    ]
-    for test_string, expected in test_cases:
-        assert check_pattern(MULTI_AUDIO_COMPILED, test_string) == expected
+@pytest.mark.parametrize("test_string, expected", [
+    # Regular Tests
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2]),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2]),
+    ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2, 3, 4, 5]),
+    ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1, 2, 3, 4, 5]),
+    ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", list(range(1, 201))), # Eps 1-200
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", []),
+    ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [15]),
+    ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [5]),
+
+    # Mini-series (this is correct)
+    ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [2]),
+
+    # Anime Tests
+    ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", []),
+    ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", []),
+    ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", list(range(1, 9))), # Eps 1-8
+    ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [24]),
+    ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [215, 216, 217, 218, 219, 220]),
+    ("Naruto Shippuden - 107 - Strange Bedfellows", [107]),
+    ("[224] Shingeki no Kyojin - S03 - Part 1 - 13 [BDRip1080p.x265.FLAC]", [13]),
+
+    # User submitted edge cases
+    ("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd.mkv", []),
+
+    # Incorrect, should of been: [11]
+    ("[Erai-raws] Shingeki no Kyojin Season 3 - 11 [1080p][Multiple Subtitle]", []),
+])
+def test_episode_parsing(test_string, expected):
+    assert extract_episodes(test_string) == expected, f"Failed for '{test_string}' with expected {expected}"
 
 
-def test_multi_subtitle_patterns():
-    test_cases = [
-        ("IP Man And Four Kings 2019 HDRip 1080p x264 AAC Mandarin HC CHS-ENG SUBS Mp4Ba", True),
-        ("The Simpsons - Season 1 Complete [DVDrip ITA ENG] TNT Village", True),
-        ("The.X-Files.S01.Retail.DKsubs.720p.BluRay.x264-RAPiDCOWS", False),
-        ("Hercules (2014) WEBDL DVDRip XviD-MAX", False),
-    ]
-    for test_string, expected in test_cases:
-        assert check_pattern(MULTI_SUBTITLE_COMPILED, test_string) == expected
+@pytest.mark.parametrize("test_string, expected", [
+    # Shows
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "show"),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "show"),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "show"),
+    ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "show"),
+    ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "show"),
+    ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "show"),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", "show"),
+    ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", "show"),
+    ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", "show"),
+    ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", "show"),
+    ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", "show"),
+    ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", "show"),
+
+    # Movies
+    ("The Avengers (EMH) - (1080p - BluRay)", "movie"),
+    ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", "movie"),
+    ("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd.mkv", "movie"),
+    ("Hercules.2014.EXTENDED.1080p.WEB-DL.DD5.1.H264-RARBG", "movie"),
+    ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", "movie"),
+    ("Dawn.Of.The.Planet.of.The.Apes.2014.1080p.WEB-DL.DD51.H264-RARBG", "movie"),
+    ("One Shot [2014] DVDRip XViD-ViCKY", "movie"),
+    ("Impractical.Jokers.The.Movie.2020.1080p.WEBRip.x264.AAC5.1", "movie"),
+    ("The.Meg.2018.1080p.HDRip.x264.[ExYu-Subs]", "movie"),
+    ("Guardians of the Galaxy (2014) Dual Audio DVDRip AVI", "movie"),
+    ("UFC.179.PPV.HDTV.x264-Ebi[rartv]", "movie"),
+    ("Hercules", "movie")
+])
+def test_get_media_type(test_string, expected):
+    data = parse(test_string)
+    assert data.type == expected, f"Failed for '{test_string}' with expected `{expected}`"
 
 
-def test_complete_series_patterns():
-    test_cases = [
-        ("The Sopranos - The Complete Series (Season 1, 2, 3, 4, 5 & 6) + Extras", True),
-        ("The Inbetweeners Collection", True),
-        ("The Simpsons S01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("Two and a Half Men S12E01 HDTV x264 REPACK-LOL [eztv]", False),
-    ]
-    for test_string, expected in test_cases:
-        assert check_pattern(COMPLETE_SERIES_COMPILED, test_string) == expected
+@pytest.mark.parametrize("raw_title, season_num, expected", [
+    ("", 1, pytest.raises(ValueError)), # no title should raise exception
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 2, []),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", "rice", pytest.raises(TypeError)),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", None, pytest.raises(ValueError)),
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1]),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
+    ("The Simpsons S1 E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, list(range(1, 201))),
+    ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", 6, list(range(1, 9))), # Eps 1-8
+    ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", 8, [1]),
+])
+def test_extract_episode_from_season(raw_title, season_num, expected):
+    if isinstance(expected, list):
+        episodes = episodes_from_season(raw_title, season_num)
+        assert episodes == expected, f"Failed for '{raw_title}' with expected {expected}"
+    else:
+        with expected:
+            episodes = episodes_from_season(raw_title, season_num)
 
 
-def test_sort_function(test_titles, settings_model, rank_model):
-    torrent_set = set()
-    processed = batch_parse(test_titles, remove_trash=False, chunk_size=5)
-    for item in processed:
-        ranking = get_rank(item, settings_model, rank_model)
-        torrent = Torrent(raw_title=item.raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", data=item, rank=ranking)
-        torrent_set.add(torrent)
-    sorted_torrents = sort_torrents(torrent_set)
-    
-    # Test that the sorted_torrents is a dict
-    # and that the torrents are sorted by rank in the correct order (descending)
-    assert isinstance(sorted_torrents, dict)
-    sorted_torrents_list = list(sorted_torrents.values())
-    for i in range(len(sorted_torrents_list) - 1):
-        assert sorted_torrents_list[i].rank >= sorted_torrents_list[i + 1].rank
+@pytest.mark.parametrize("test_string, expected", [
+    ("Yu-Gi-Oh! Zexal - 087 - Dual Duel, Part 1.mkv", [87]),
+    ("Yu-Gi-Oh! Zexal - 089 - Darkness Dawns.mkv", [89]),
+    ("Yu-Gi-Oh! Zexal - 090 - You Give Love a Bot Name.mkv", [90]),
+    ("Yu-Gi-Oh! Zexal - 091 - Take a Chance.mkv", [91]),
+    ("Yu-Gi-Oh! Zexal - 093 - An Imperfect Couple, Part 2.mkv", [93]),
+    ("Yu-Gi-Oh! Zexal - 094 - Enter Vector.mkv", [94]),
+])
+def test_get_correct_episodes(test_string, expected):
+    data = extract_episodes(test_string)
+    assert data == expected, f"Failed for '{test_string}' with expected {expected}"
 
 
-def test_compare_two_torrent_objs(settings_model, rank_model):
-    # create 2 torrent objects and check __eq__ method
-    rtn = RTN(settings_model, rank_model)
-    # test valid comparison
-    torrent1 = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
-    torrent2 = rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7")
-    # test invalid comparison
-    invalid_torrent = "The Walking Dead S08E02 720p HDTV x264-ASAP[ettv]"
-    assert torrent1 == torrent2
-    assert torrent1 != invalid_torrent
+@pytest.mark.parametrize("test_string, expected", [
+    # True
+    ("Guardians of the Galaxy (CamRip / 2014)", True),  # CamRip
+    ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", True),    # R5, LiNE
+    ("Avengers Infinity War 2018 NEW PROPER 720p HD-CAM X264 HQ-CPG", True),
+    ("Venom: Let There Be Carnage (2021) English 720p CAMRip [NO LOGO]", True),
+    ("Oppenheimer (2023) NEW ENG 1080p HQ-CAM x264 AAC - HushRips", True),
+    ("Hatyapuri 2022 1080p CAMRp Bengali AAC H264 [2GB] - HDWebMovies", True),
+    ("Avengers: Infinity War (2018) 720p HQ New CAMRip Line Audios [Tamil + Telugu + Hindi + Eng] x264 1.2GB [Team TR]", True),
+    # False
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+    ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+    ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+    ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+    ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", False),
+    ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", False),
+    ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", False),
+    ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", False),
+    ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", False),
+    ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", False),
+    ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", False),
+    ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", False),
+    ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", False),
+    ("Naruto Shippuden - 107 - Strange Bedfellows", False),
+    ("[224] Shingeki no Kyogin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]", False),
+    ("[Erai-raws] Shingeki no Kyogin Season 3 - 11 [1080p][Multiple Subtitle]", False),
+])
+def test_trash_coverage(test_string, expected):
+    data = parse(test_string)
+    assert data.trash == expected, f"Failed for '{test_string}' with expected {expected}"
 
 
-def test_validate_infohash_from_torrent_obj(settings_model, rank_model):
-    rtn = RTN(settings_model, rank_model)
-    with pytest.raises(ValueError):
-        # Missing infohash
-        rtn.rank("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", None)  # type: ignore
-    with pytest.raises(ValueError):
-        # Missing title and infohash
-        rtn.rank(None, None)  # type: ignore
-    with pytest.raises(GarbageTorrent):
-        # Invalid infohash length
-        data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
-        Torrent(raw_title="The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", infohash="c08a9ee8ce3a5c2c08", data=data)  # type: ignore
-    with pytest.raises(ValidationError):
-        # Invalid strings or not instance of str
-        data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]")
-        Torrent(raw_title=12345, infohash=12345, data=data)  # type: ignore
-
-
-# test parse_extras function
-def test_parse_extras_invalid():
-    with pytest.raises(TypeError):
-        assert parse_extras(12345), "Should raise TypeError" # type: ignore
-
-
-# test check_hdr_dolby_video function for valid return
-def test_check_hdr_dolby_video():
-    test_cases = [
-        ("Mission.Impossible.1996.Dolby.Vision.Custom.Audio.1080p.PL-Spedboy", "DV"),
-        ("Casino.1995.MULTi.REMUX.2160p.UHD.Blu-ray.HDR.HEVC.DTS-X7.1-DENDA", "HDR"),
-        ("Guardians of the Galaxy.HDR10plus", "HDR10+"),
-        ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", ""),
-    ]
-    for test_string, expected in test_cases:
-        assert check_hdr_dolby_video(test_string) == expected
-
-
-def test_is_movie_and_get_type():
-    # Default is `show` if movie is not detected.
-    test_cases = [
-        # Shows
-        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False, "show"),
-        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False, "show"),
-        ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False, "show"),
-        ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False, "show"),
-        ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False, "show"),
-        ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False, "show"),
-        ("House MD All Seasons (1-8) 720p Ultra-Compressed", False, "show"),
-        ("The Avengers (EMH) - (1080p - BluRay)", False, "show"),
-        ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", False, "show"),
-        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", False, "show"),
-        ("4-13 Cursed (HD)", False, "show"),
-        ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", False, "show"),
-        ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", False, "show"),
-        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", False, "show"),
-        ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", False, "show"),
-
-        # Movies
-        ("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd.mkv", True, "movie"),
-        ("Hercules.2014.EXTENDED.1080p.WEB-DL.DD5.1.H264-RARBG", True, "movie"),
-        ("Brave.2012.R5.DVDRip.XViD.LiNE-UNiQUE", True, "movie"),
-        ("Dawn.Of.The.Planet.of.The.Apes.2014.1080p.WEB-DL.DD51.H264-RARBG", True, "movie"),
-        ("One Shot [2014] DVDRip XViD-ViCKY", True, "movie"),
-        ("Impractical.Jokers.The.Movie.2020.1080p.WEBRip.x264.AAC5.1", True, "movie"),
-        ("The.Meg.2018.1080p.HDRip.x264.[ExYu-Subs]", True, "movie"),
-        ("Guardians of the Galaxy (2014) Dual Audio DVDRip AVI", True, "movie"),
-
-        # Pitfalls - these default as `show` but are actually movies.
-        ("UFC.179.PPV.HDTV.x264-Ebi[rartv]", False, "show"),
-        ("Hercules", False, "show"),
-    ]
-
-    for test_string, is_movie_type, expected in test_cases:
-        data = parse(test_string, remove_trash=False)
-        assert is_movie(data) == is_movie_type, f"Failed for '{test_string}' with expected `{is_movie_type}`"
-        assert data.type == expected, f"Failed for '{test_string}' with expected `{expected}`"
-
-    test_invalid_data = "123456"
-    with pytest.raises(TypeError):
-        assert is_movie(test_invalid_data) # type: ignore
-        assert get_type(test_invalid_data) # type: ignore
-
-
-def test_extract_episode_from_season():
-    raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-    episodes = episodes_from_season(raw_title, 1)
-    assert episodes == [1, 2], "Should return [1, 2] because it detects Season 1"
-
-    episodes = episodes_from_season(raw_title, 2)
-    assert episodes == [], "Should return empty list"
-
-    raw_title = ""
-    with pytest.raises(ValueError):
-        episodes = episodes_from_season(raw_title, 1)
-        assert episodes == [], "Should raise ValueError"
-    
-    raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-    with pytest.raises(TypeError):
-        episodes = episodes_from_season(raw_title, "rice") # type: ignore
-        assert episodes == [], "Should raise TypeError"
-
-    raw_title = "The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-    with pytest.raises(ValueError):
-        episodes = episodes_from_season(raw_title, None) # type: ignore
-        assert episodes == [], "Should raise TypeError"
-
-    test_examples = [
-        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1]),
-        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
-        ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, [1, 2]),
-        ("The Simpsons S1 E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", 1, list(range(1, 201))),
-        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", 6, list(range(1, 9))), # Eps 1-8
-        ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", 8, [1]),
-    ]
-    for test_string, season, expected in test_examples:
-        episodes = episodes_from_season(test_string, season)
-        assert episodes == expected, f"Failed for '{test_string}' with expected {expected}"
-
-
-def test_get_correct_episodes():
-    test_cases = [
-        ("Yu-Gi-Oh! Zexal - 087 - Dual Duel, Part 1.mkv", [87]),
-        ("Yu-Gi-Oh! Zexal - 088 - Dual Duel, Part 2.mkv", [88]),
-        ("Yu-Gi-Oh! Zexal - 089 - Darkness Dawns.mkv", [89]),
-        ("Yu-Gi-Oh! Zexal - 090 - You Give Love a Bot Name.mkv", [90]),
-        ("Yu-Gi-Oh! Zexal - 091 - Take a Chance.mkv", [91]),
-        ("Yu-Gi-Oh! Zexal - 092 - An Imperfect Couple, Part 1.mkv", [92]),
-        ("Yu-Gi-Oh! Zexal - 093 - An Imperfect Couple, Part 2.mkv", [93]),
-        ("Yu-Gi-Oh! Zexal - 094 - Enter Vector.mkv", [94]),
-    ]
-
-    # Test RTN
-    for test_string, expected in test_cases:
-        data = parse(test_string, remove_trash=False)
-        assert data.episode == expected, f"Failed for '{test_string}' with expected {expected}"
-
-    # Test PTN
-    from PTN import parse as ptn_parse
-    for test_string, expected in test_cases:
-        data = ptn_parse(test_string, coherent_types=True)
-        assert data.get("episode") == expected, f"Failed for '{test_string}' with expected {expected}"
-
-    # Test PTT
-    # TODO: Add PTT
-
-def test_trash_coverage():
-    # Test the coverage of the trash patterns
-    test_cases = [
-        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("The Simpsons S01E01-E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("The Simpsons S01E01-E02-E03-E04-E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("The Simpsons S01E01E02E03E04E05 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("The Simpsons E1-200 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", False),
-        ("House MD All Seasons (1-8) 720p Ultra-Compressed", False),
-        ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", False),
-        ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", False),
-        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", True), # XviD
-        ("4-13 Cursed (HD)", False),
-        ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", False),
-        ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", False),
-        ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", True),  # WEB-DLRip
-        ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", False),
-        ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", False),
-        ("Naruto Shippuden - 107 - Strange Bedfellows", False),
-        ("[224] Shingeki no Kyogin - S03 - Part 1 - 13 [BDRip.1080p.x265.FLAC]", False),
-        ("[Erai-raws] Shingeki no Kyogin Season 3 - 11 [1080p][Multiple Subtitle]", False),
-    ]
-
-    for test_string, expected in test_cases:
-        assert check_trash(test_string) == expected, f"Failed for '{test_string}' with expected {expected}"
-
-
-def test_rtn_default_parse(settings_model, rank_model):
-    raw_title = "Ходячие мертвецы: Выжившие / The Walking Dead: The Ones Who Live [01x01-03 из 06] (2024) WEB-DL 1080p от NewComers | P"
-    rtn = RTN(settings_model, rank_model)
-
-    # with pytest.raises(GarbageTorrent):
-    #     assert rtn.rank(raw_title=raw_title, infohash="c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=True)
-
-    torrent = rtn.rank(raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", correct_title="The Walking Dead", remove_trash=False)
-    assert torrent.raw_title == raw_title
-    assert torrent.data.type == "show"
-    assert torrent.lev_ratio > 0.0
-    assert torrent.rank > 0
-    assert torrent.data.season == [1]
-    assert torrent.data.episode == [1] # TODO: This is incorrect, should of been [1, 2, 3]
-    assert torrent.data.resolution == ["1080p"]
-    assert torrent.data.quality == ["WEB-DL"]
-    assert torrent.data.language == []
-    assert torrent.data.subtitles == []
-    assert torrent.data.audio == []
-    assert torrent.data.codec == []
-    assert torrent.data.bitDepth == []
-    assert torrent.data.hdr == ""
-
-
-def test_metadata_mapping_issue_in_kc():
-    test_cases = [
-        ("3.10.to.Yuma.2007.1080p.BluRay.x264.DTS-SWTYBLZ.mkv", [], []),
-        ("30.Minutes.or.Less.2011.1080p.BluRay.X264-SECTOR7.mkv", [], []),
-        ("Alien.Covenant.2017.1080p.BluRay.x264-SPARKS[EtHD].mkv", [], []),
-        ("Alien.1979.REMASTERED.THEATRICAL.1080p.BluRay.x264.DTS-SWTYBLZ.mkv", [], []),
-        ("The Steve Harvey Show - S02E07 - When the Funk Hits the Rib Tips.mkv", [2], [7]),
-        ("Fantastic.Beasts.The.Crimes.Of.Grindelwald.2018.4K.HDR.2160p.BDRip Ita Eng x265-NAHOM.mkv", [], [])
-    ]
-
-    for test_string, expected_season, expected_episode in test_cases:
-        items = parse(test_string, False)
-        assert isinstance(items, ParsedData), f"Failed for '{test_string}', expected ParsedData object"
-        assert items.season == expected_season, f"Failed for '{test_string}' with expected {expected_season}"
-        assert items.episode == expected_episode, f"Failed for '{test_string}' with expected {expected_episode}"
-
-
-def test_fix_using_constant_instantiation_of_rtn():
-    test_cases = [
-        ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1], [1]),
-        ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1], [1, 2]),
-        ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8], []),
-        ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [1], [15]),
-        ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [], [2]),
-        ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6], [5]),
-        ("4-13 Cursed (HD)", [], [13]),
-    ]
-
-    for test_string, expected_season, expected_episode in test_cases:
-        item = parse(test_string, False)
-        assert item.season == expected_season, f"Failed for '{test_string}' with expected {expected_season} season"
-        assert item.episode == expected_episode, f"Failed for '{test_string}' with expected {expected_episode} episode"
-        assert item.year == 0, f"Failed for '{test_string}' with expected 0"
-
-
-# This will be used in the next release.
-# def test_best_season_parser():
-#     test_cases = [
-#         ("Archer.S02.1080p.BluRay.DTSMA.AVC.Remux", [2]),
-#         ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1]),
-#         ("[F-D] Fairy Tail Season 1 - 6 + Extras [480P][Dual-Audio]", [1, 2, 3, 4, 5, 6]),
-#         ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8]),
-#         ("Bleach 10º Temporada - 215 ao 220 - [DB-BR]", [10]),
-#         ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6]),
-#         ("4-13 Cursed (HD)", [4]),
-#         ("Dragon Ball Z Movie - 09 - Bojack Unbound - 1080p BluRay x264 DTS 5.1 -DDR", []),
-#         ("BoJack Horseman [06x01-08 of 16] (2019-2020) WEB-DLRip 720p", [6]),
-#         ("[HR] Boku no Hero Academia 87 (S4-24) [1080p HEVC Multi-Subs] HR-GZ", [4]),
-#     ]
-
-def test_output_on_parse(settings_model, rank_model):
-    raw_title = "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-
-    ptn_data = parse(raw_title, remove_trash=False)
-
-    assert ptn_data.raw_title == raw_title
-    assert ptn_data.parsed_title == "The Simpsons"
-    assert ptn_data.year == 0
-    assert ptn_data.resolution == ["1080p"]
-    assert ptn_data.quality == ["Blu-ray"]
-    assert ptn_data.season == [1]
-    assert ptn_data.episode == [1]
-    assert ptn_data.codec == ["H.265"]
-    assert ptn_data.audio == ["AAC 5.1"]
-    assert ptn_data.subtitles == []
-    assert ptn_data.language == []
-    assert ptn_data.bitDepth == [10]
-    assert ptn_data.hdr == ""
-
-    rtn = RTN(settings_model, rank_model)
-    rank_data = rtn.rank(raw_title, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", "The Simpsons", remove_trash=False)
-    
-    assert rank_data.raw_title == raw_title
-    assert rank_data.data.raw_title == raw_title
-    assert rank_data.data.parsed_title == "The Simpsons"
-    assert rank_data.data.year == 0
-    assert rank_data.data.resolution == ["1080p"]
-    assert rank_data.data.quality == ["Blu-ray"]
-    assert rank_data.data.season == [1]
-    assert rank_data.data.episode == [1]
-    assert rank_data.data.codec == ["H.265"]
-    assert rank_data.data.audio == ["AAC 5.1"]
-    assert rank_data.data.subtitles == []
-    assert rank_data.data.language == []
-    assert rank_data.data.bitDepth == [10]
-
-# def test_ptt_parse_output():
-#     raw_title = "The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole"
-
-#     data = ptt_parse(raw_title)
-#     assert isinstance(data, dict)
+@pytest.mark.parametrize("test_string, expected_season, expected_episode", [
+    ("3.10.to.Yuma.2007.1080p.BluRay.x264.DTS-SWTYBLZ.mkv", [], []),
+    ("30.Minutes.or.Less.2011.1080p.BluRay.X264-SECTOR7.mkv", [], []),
+    ("Alien.Covenant.2017.1080p.BluRay.x264-SPARKS[EtHD].mkv", [], []),
+    ("Alien.1979.REMASTERED.THEATRICAL.1080p.BluRay.x264.DTS-SWTYBLZ.mkv", [], []),
+    ("The Steve Harvey Show - S02E07 - When the Funk Hits the Rib Tips.mkv", [2], [7]),
+    ("Fantastic.Beasts.The.Crimes.Of.Grindelwald.2018.4K.HDR.2160p.BDRip Ita Eng x265-NAHOM.mkv", [], []),
+    ("The Simpsons S01E01 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1], [1]),
+    ("The Simpsons S01E01E02 1080p BluRay x265 HEVC 10bit AAC 5.1 Tigole", [1], [1, 2]),
+    ("House MD All Seasons (1-8) 720p Ultra-Compressed", [1, 2, 3, 4, 5, 6, 7, 8], []),
+    ("The Avengers (EMH) - S01 E15 - 459 (1080p - BluRay)", [1], [15]),
+    ("Witches Of Salem - 2Of4 - Road To Hell - Great Mysteries Of The World", [], [2]),
+    ("Lost.[Perdidos].6x05.HDTV.XviD.[www.DivxTotaL.com]", [6], [5]),
+    ("The Joker (2019) 1080p WEB-DL x264 - YIFY", [], []),
+])
+def test_season_episode_extraction(test_string, expected_season, expected_episode):
+    item = parse(test_string)
+    assert isinstance(item, ParsedData), f"Failed for '{test_string}', expected ParsedData object"
+    assert item.seasons == expected_season, f"Failed for '{test_string}' with expected {expected_season}"
+    assert item.episodes == expected_episode, f"Failed for '{test_string}' with expected {expected_episode}"

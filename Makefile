@@ -27,9 +27,8 @@ check:
 	@poetry run pyright
 
 # Run tests
-test:
+test: clean
 	@poetry run pytest
-	@poetry run pyright $(SRC_DIR)
 
 # Run tests with coverage
 coverage: clean
