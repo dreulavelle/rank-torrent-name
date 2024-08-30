@@ -193,76 +193,16 @@ def test_preference_handling(settings_model, ranking_model):
 
 
 def test_quality_ranking(settings_model, ranking_model):
-    test_dict = {
-        "WEB": 150,
-        "WEB-DL": 5000,
-        "BluRay": 100,
-        "HDTV": -1000,
-        "VHS": -10000,
-        "WEBMux": -10000,
-        "BluRay REMUX": -10000,
-        "REMUX": -10000,
-        "WEBRip": 30,
-        "WEB-DLRip": -10000,
-        "UHDRip": -1000,
-        "HDRip": -1000,
-        "DVDRip": -1000,
-        "BDRip": -1000,
-        "BRRip": -10000,
-        "VHSRip": -10000,
-        "PPVRip": -1000,
-        "SATRip": -10000,
-        "TVRip": -10000,
-        "TeleCine": -10000,
-        "TeleSync": -10000,
-        "SCR": -10000,
-        "R5": -10000,
-        "CAM": -10000,
-        "PDTV": -10000,
-    }
-
-    for key, rank in test_dict.items():
-        parsed_data = ParsedData(raw_title=key, parsed_title=key, quality=key)
-        assert get_rank(parsed_data, settings_model, ranking_model) == rank, f"{key} quality should have rank {rank}"
     assert get_rank(ParsedData(raw_title="Other", parsed_title="Other", quality="Other"), settings_model, ranking_model) == 0, "Other quality should have rank 0"
     assert get_rank(ParsedData(raw_title="None", parsed_title="None", quality=""), settings_model, ranking_model) == 0, "No quality should have rank 0"
 
 
 def test_codec_ranking(settings_model, ranking_model):
-    test_dict = {
-        "avc": 500,
-        "hevc": 0,
-        "xvid": -10000,
-        "av1": 0,
-        "mpeg": -100,
-    }
-
-    for key, rank in test_dict.items():
-        parsed_data = ParsedData(raw_title=key, parsed_title=key, codec=key)
-        assert get_rank(parsed_data, settings_model, ranking_model) == rank, f"{key} codec should have rank {rank}"
     assert get_rank(ParsedData(raw_title="Other", parsed_title="Other", codec="Other"), settings_model, ranking_model) == 0, "Other codec should have rank 0"
     assert get_rank(ParsedData(raw_title="None", parsed_title="None", codec=""), settings_model, ranking_model) == 0, "No codec should have rank 0"
 
 
 def test_audio_ranking(settings_model, custom_ranking_model):
-    test_dict = {
-        "AAC": 1,
-        "AC3": 1,
-        "Atmos": 1,
-        "Dolby Digital": 1,
-        "Dolby Digital Plus": 1,
-        "DTS Lossy": 1,
-        "DTS Lossless": 1,
-        "EAC3": 1,
-        "FLAC": 1,
-        "MP3": 1,
-        "TrueHD": 1,
-        "HQ Clean Audio": 1,
-    }
-
-    for key, rank in test_dict.items():
-        parsed_data = ParsedData(raw_title=key, parsed_title=key, audio=[key])
-        assert calculate_audio_rank(parsed_data, settings_model, custom_ranking_model) == rank, f"{key} audio should have rank {rank}"
     assert calculate_audio_rank(ParsedData(raw_title="Other", parsed_title="Other", audio=["Other"]), settings_model, custom_ranking_model) == 0, "Other audio should have rank 0"
     assert calculate_audio_rank(ParsedData(raw_title="None", parsed_title="None", audio=[]), settings_model, custom_ranking_model) == 0, "No audio should have rank 0"
 

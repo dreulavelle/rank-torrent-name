@@ -265,7 +265,7 @@ class DefaultRanking(BaseRankingModel):
     bluray: int = 100
     dvd: int = -1000
     hdtv: int = -1000
-    hevc: int = 0
+    hevc: int = 4000
     mpeg: int = -100
     remux: int = -10000
     vhs: int = -10000
@@ -277,7 +277,7 @@ class DefaultRanking(BaseRankingModel):
 
     # rips
     bdrip: int = -1000
-    brrip: int = -10000
+    brrip: int = -1000
     dvdrip: int = -1000
     hdrip: int = -1000
     ppvrip: int = -1000
@@ -295,31 +295,31 @@ class DefaultRanking(BaseRankingModel):
     sdr: int = 0
 
     # audio
-    aac: int = 100
-    ac3: int = 50
-    atmos: int = 100
+    aac: int = 250
+    ac3: int = 30
+    atmos: int = 400
     dolby_digital: int = 0
     dolby_digital_plus: int = 0
-    dts_lossy: int = 100
+    dts_lossy: int = 600
     dts_lossless: int = 0
-    eac3: int = 40
+    eac3: int = 250
     flac: int = 0
-    mono: int = -1000
-    mp3: int = -1000
+    mono: int = -10000
+    mp3: int = -10000
     stereo: int = 0
     surround: int = 0
     truehd: int = -100
 
     # extras
     three_d: int = -10000
-    converted: int = -1000
+    converted: int = -1250
     documentary: int = -250
     dubbed: int = 0
     edition: int = 100
     hardcoded: int = 0
-    network: int = 100
-    proper: int = 20
-    repack: int = 20
+    network: int = 300
+    proper: int = 1000
+    repack: int = 1000
     retail: int = 0
     site: int = -10000
     subbed: int = 0
