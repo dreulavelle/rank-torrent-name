@@ -102,3 +102,15 @@ def test_trash_handler(settings, raw_title, expected_result, expected_overall):
     overall_fetch_result = check_fetch(data, settings) # False if trash is detected
     assert trash_handler_result == expected_result, f"Expected trash result: {expected_result}, Actual result: {trash_handler_result}"
     assert overall_fetch_result == expected_overall, f"Expected overall trash result: {expected_overall}, Actual result: {overall_fetch_result}"
+
+
+@pytest.mark.parametrize("raw_title, expected_result, expected_seasons, expected_episodes", [
+    ("Mad.Max.Fury.Road.2015.1080p.BluRay.DDP5.1.x265.10bit-GalaxyRG265[TGx]", "movie", [], []),
+    ("Furiosa A Mad Max Saga (2024) [1080p] [WEBRip] [x265] [10bit] [5.1] [YTS.MX]", "movie", [], []),
+    ("The Walking Dead S05E03 720p x264-ASAP", "show", [5], [3]),
+])
+def test_type_check_on_item(raw_title, expected_result, expected_seasons, expected_episodes):
+    data = parse(raw_title)
+    # assert data.type == expected_result, f"Expected type check result: {expected_result}, Actual result: {data.type}"
+    assert data.seasons == expected_seasons, f"Expected seasons check result: {expected_seasons}, Actual result: {data.seasons}"
+    assert data.episodes == expected_episodes, f"Expected episodes check result: {expected_episodes}, Actual result: {data.episodes}"

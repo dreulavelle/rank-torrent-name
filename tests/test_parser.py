@@ -17,7 +17,7 @@ from RTN.models import ParsedData
             "seasons": [1],
             "episodes": [1, 2],
             "codec": "hevc",
-            "audio": ["AAC"],
+            "audio": ["AC3", "AAC"],
             "languages": [],
             "bit_depth": "10bit"
         }

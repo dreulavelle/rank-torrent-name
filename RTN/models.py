@@ -253,7 +253,6 @@ class BaseRankingModel(BaseModel):
     size: int = 0
     telecine: int = 0
     telesync: int = 0
-    workprint: int = 0
 
 
 class DefaultRanking(BaseRankingModel):
