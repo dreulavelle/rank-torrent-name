@@ -1,0 +1,129 @@
+.md-typeset .headerlink {
+    font-family: sans-serif;
+    font-size: 0.8em;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.md-typeset .headerlink::after {
+    content: " Read Below 🔥";
+    animation: beat-fade 1s infinite;
+}
+
+.md-typeset h1:hover .headerlink,
+.md-typeset h2:hover .headerlink,
+.md-typeset h3:hover .headerlink,
+.md-typeset h4:hover .headerlink,
+.md-typeset h5:hover .headerlink,
+.md-typeset h6:hover .headerlink {
+    opacity: 1;
+}
+
+.md-typeset .headerlink:hover {
+    opacity: 1;
+}
+
+@keyframes beat-fade {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+.md-header__button.md-logo {
+    color: #f54d0a;
+    font-size: 1.125em; /* Equivalent to fa-lg */
+    animation: beat-fade 1s infinite;
+}
+
+.md-header.md-header--lifted.md-header--shadow {
+    background-color: #f54d0a13;
+}
+
+.md-header__title {
+    color: #ffd16d;
+}
+
+/* Header styles */
+.md-header {
+    background-color: #f54d0a13;
+    transition: background-color 0.3s ease;
+}
+
+.md-header__inner {
+    padding: 0.5rem;
+}
+
+/* Logo styles */
+.md-header__button.md-logo {
+    margin: 0.2rem;
+    padding: 0.2rem;
+}
+
+.md-header__button.md-logo svg {
+    fill: #d76e19;
+    transition: fill 0.3s ease;
+}
+
+/* Title styles */
+.md-header__title {
+    font-weight: 700;
+    color: #dbdbdb;
+    transition: color 0.3s ease;
+}
+
+/* Navigation styles */
+.md-tabs {
+    background-color: #f54d0a26;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.md-tabs__link {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    color: #fff;
+}
+
+.md-tabs__link:hover,
+.md-tabs__link--active {
+    opacity: 1;
+    color: #fff;
+}
+
+/* Search styles */
+.md-search__input {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #dbdbdb;
+    transition: background-color 0.3s ease;
+}
+
+.md-search__input:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Repository link styles */
+.md-header__source {
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    color: #dbdbdb
+}
+
+.md-header__source:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 76.1875em) {
+    .md-header__title {
+        font-size: 1.2rem;
+    }
+    
+    .md-header__button.md-logo {
+        display: none;
+    }
+}
