@@ -75,6 +75,7 @@ mkdocs = "^1.6.1"
 mkdocs-material = "^9.5.34"
 pymdown-extensions = "^10.9"
 
+mkdocstrings = {extras = ["python"], version = "^0.26.1"}
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
