@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rank-torrent-name"
-version = "1.0.4"
+version = "1.1.0"
 description = "Rank filenames based on user-defined rules!"
 authors = ["Spoked <dreu.lavelle@gmail.com>"]
 license = "MIT"
@@ -63,7 +63,6 @@ parsett = "^1.2.5"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.3"
-pyright = "^1.1.352"
 pyperf = "^2.2.0"
 ruff = "^0.3.0"
 isort = "^5.10.1"
@@ -74,8 +73,8 @@ pytest-cov = "^5.0.0"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.6.1"
 mkdocs-material = "^9.5.34"
-
 pymdown-extensions = "^10.9"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

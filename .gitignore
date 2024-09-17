@@ -1,6 +1,8 @@
 # Project specific files
 .vscode
 *.txt
+mkgendocs.yml
+sources/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

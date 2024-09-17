@@ -16,12 +16,28 @@ nav:
     - Parsing: Developers/Parsing.md
     - Settings Model: Developers/Settings.md
     - Ranking Model: Developers/Ranking.md
+    - Models: Developers/Models.md
+    - Sorting: Developers/Sorting Torrents.md
     - Extras: Developers/Extras.md
+  - Modules: 
+    - Parser: Developers/Modules/parser.md
+    - Ranker: Developers/Modules/ranker.md
+    - Fetch: Developers/Modules/fetch.md
+    - Models: Developers/Modules/models.md
+    - Exceptions: Developers/Modules/exceptions.md
+    - Patterns: Developers/Modules/patterns.md
+    - Extras: Developers/Modules/extras.md
   - Contributing: contributing.md
   - License: license.md
 
 plugins:
-  search:
+  - search  
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [RTN]
+          # options:
+          #   heading_slug_func: 'slugify'
 
 theme:
   name: 'material'
@@ -38,7 +54,6 @@ theme:
       - navigation.pruning
       - navigation.path
       - search.suggest
-      - search.highlight
       - search.share
       - content.code.annotate
       - content.code.copy
@@ -58,7 +73,7 @@ theme:
       primary: indigo
       accent: red
       toggle:
-        icon: material/brightness-7
+        icon: material/brightness-5
         name: Set fire to my eyes!
 
     - media: "(prefers-color-scheme: dark)"
@@ -94,10 +109,9 @@ markdown_extensions:
       linenums: false
   - toc:
       permalink: true
-      toc_depth: 3
+      toc_depth: 2
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.blocks.admonition

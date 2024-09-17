@@ -1,3 +1,21 @@
+# Why? 
+
+Here are the key points about how ranking works in Rank Torrent Name (RTN):
+
+1. RTN uses a customizable ranking system that allows users to define their preferences for filtering and ranking torrents.
+2. The ranking process involves parsing the torrent name and evaluating it based on defined criteria.
+3. Users can modify the `SettingsModel` to specify their preferences, including patterns to look for, attributes to exclude, and preferences for features like resolution and audio quality.
+4. The ranking system uses a `RankingModel` to compute scores based on user-defined preferences, allowing for a nuanced scoring system.
+5. The process includes parsing the torrent title, extracting metadata, and calculating a rank based on the settings and ranking model.
+6. RTN can sort multiple torrents based on their calculated ranks to help users choose the best option.
+7. The ranking takes into account various factors like resolution, audio quality, and other user-defined criteria.
+8. The system allows for dynamic adjustment of ranking criteria at runtime, giving users flexibility in how torrents are evaluated.
+9. RTN uses a Levenshtein ratio in tangent with normalization to ensure accuracy by comparing parsed titles with original titles.
+
+In summary, Rank Torrent Name provides a flexible and customizable system for ranking torrents based on user-defined criteria, allowing for detailed analysis and sorting of torrent metadata to find the best quality options.
+
+---
+
 ## Installation
 
 You can install `rank-torrent-name` using pip:
@@ -22,19 +40,27 @@ poetry add rank-torrent-name
 
 ```python
 from RTN import RTN
-from RTN.models import DefaultRanking
+from RTN.models import DefaultRanking, SettingsModel
 
-# Using the settings model you created above,
+settings = SettingsModel() # you can modify the settings model to your liking.
 rtn = RTN(settings=settings, ranking_model=DefaultRanking())
-torrent = rtn.rank("Example.Movie.2020.1080p.BluRay.x264-Example", "infohash123456")
+torrent = rtn.rank("Example.Movie.2020.1080p.BluRay.x264-Example", "1231231231231231231231231231231231231231")
+
+print(torrent.data.parsed_title) # "Example Movie"
+print(torrent.rank) # 600
+print(torrent.fetch) # True
+print(torrent.data.trash) # False
 ```
 
-3. **Inspecting the Torrent Object:** The returned `Torrent` object includes parsed data and a rank. Access its properties to understand its quality:
+1. **Inspecting the Torrent Object:** The returned `Torrent` object includes parsed data and a rank. Access its properties to understand its quality:
 
 ```python
 print(f"Title: {torrent.data.parsed_title}, Rank: {torrent.rank}")
 ```
 
+!!! warning Ratio
+    To get a ratio you must provide the `correct_title` parameter in `.rank()`. This is what's used to calculate the ratio. This needs to be the metadata title, not the raw title.
+    If you don't have the metadata title, you can provide the query from the user instead.
 ---
 
 ## Torrent Object
@@ -111,73 +137,6 @@ class MyRankingModel(BaseRankingModel):
 
 This separation allows for flexible configuration and a powerful, customizable ranking system tailored to individual user preferences.
 
-### BaseRankingModel
-
-Here is the default BaseRankingModel that RTN uses, and it's attributes.
-
-```py
-class BaseRankingModel(BaseModel):
-    """
-    A base class for ranking models used in the context of media quality and attributes.
-    The ranking values are used to determine the quality of a media item based on its attributes.
-
-    Attributes:
-        uhd (int): The ranking value for Ultra HD (4K) resolution.
-        fhd (int): The ranking value for Full HD (1080p) resolution.
-        hd (int): The ranking value for HD (720p) resolution.
-        sd (int): The ranking value for SD (480p) resolution.
-        bluray (int): The ranking value for Blu-ray quality.
-        hdr (int): The ranking value for HDR quality.
-        hdr10 (int): The ranking value for HDR10 quality.
-        dolby_video (int): The ranking value for Dolby video quality.
-        dts_x (int): The ranking value for DTS:X audio quality.
-        dts_hd (int): The ranking value for DTS-HD audio quality.
-        dts_hd_ma (int): The ranking value for DTS-HD Master Audio audio quality.
-        atmos (int): The ranking value for Dolby Atmos audio quality.
-        truehd (int): The ranking value for Dolby TrueHD audio quality.
-        ddplus (int): The ranking value for Dolby Digital Plus audio quality.
-        ac3 (int): The ranking value for AC3 audio quality.
-        aac (int): The ranking value for AAC audio quality.
-        remux (int): The ranking value for remux attribute.
-        webdl (int): The ranking value for web-dl attribute.
-        repack (int): The ranking value for repack attribute.
-        proper (int): The ranking value for proper attribute.
-        dubbed (int): The ranking value for dubbed attribute.
-        subbed (int): The ranking value for subbed attribute.
-        av1 (int): The ranking value for AV1 attribute.
-    """
-    # resolution
-    uhd: int = 0
-    fhd: int = 0
-    hd: int = 0
-    sd: int = 0
-    # quality
-    bluray: int = 0
-    hdr: int = 0
-    hdr10: int = 0
-    dolby_video: int = 0
-    # audio
-    dts_x: int = 0
-    dts_hd: int = 0
-    dts_hd_ma: int = 0
-    atmos: int = 0
-    truehd: int = 0
-    ddplus: int = 0
-    ac3: int = 0
-    aac: int = 0
-    # other
-    remux: int = 0
-    webdl: int = 0
-    repack: int = 5
-    proper: int = 4
-    # extras
-    dubbed: int = 4
-    subbed: int = 2
-    av1: int = 0
-```
-
-Keep in mind that these are explicitly set within RTN and are needed in order for RTN to work. You can add new attributes, but it will be up to you to handle them.
-
 Create as many `SettingsModel` and `RankingModel` as you like to use anywhere in your code. They are mean't to be used as a way to version settings for your users. 
 
 ---
@@ -197,26 +156,25 @@ rtn = RTN(settings=settings, ranking_model=DefaultRanking())
     if response.ok:
         torrents = set()
         for stream in response.streams:
-            if not stream.infohash or not title_match(correct_title, stream.title):
-                # Skip results that don't match the query.
-                # We want to do this first to weed out torrents
-                # that are below the 90% match criteria. (Default is 90%)
-                continue
             try:
-                torrent: Torrent = rtn.rank(stream.title, stream.infohash)
+                torrent: Torrent = rtn.rank(
+                    stream.title,
+                    infohash=stream.infohash
+                    correct_title=correct_title_or_query,
+                    remove_trash=True
+                )
             except GarbageTorrent:
                 # One thing to note is that as we parse titles, we also get rid of garbage.
                 # Feel free to add your own logic when this happens!
-                # You can bypass this by setting `remove_trash` to `False` in `rank` or `parse`.
-                pass
+                # You can bypass this by setting `remove_trash` to `False` in the `rank` method.
+                continue
             if torrent and torrent.fetch:
                 # If torrent.fetch is True, then it's a good torrent,
                 # as considered by your ranking profile and settings model.
                 torrents.add(torrent)
 
-        # Sort the list of torrents based on their rank in descending order
-        sorted_torrents = sorted(list(torrents), key=lambda x: x.rank, reverse=True)
-        return sorted_torrents
+        # Sort the list of torrents based on their rank in descending order, and resolution buckets intact.
+        return sort_torrents(torrents)
     ...
 
 # Example usage
@@ -230,40 +188,12 @@ for torrent in sorted_torrents:
 
 Here is all of the attributes of `data` from the `Torrent` object, along with their default values.
 
-This is accessible at `torrent.data` in the `Torrent` object. Ex: `torrent.data.resolution`
+This is accessible at `torrent.data` in the `Torrent` object. 
+Example: 
 
-```py
-class ParsedData(BaseModel):
-    """Parsed data model for a torrent title."""
-
-    raw_title: str
-    parsed_title: str
-    fetch: bool = False
-    is_4k: bool = False
-    is_multi_audio: bool = False
-    is_multi_subtitle: bool = False
-    is_complete: bool = False
-    year: int = 0
-    resolution: List[str] = []
-    quality: List[str] = []
-    season: List[int] = []
-    episode: List[int] = []
-    codec: List[str] = []
-    audio: List[str] = []
-    subtitles: List[str] = []
-    language: List[str] = []
-    bitDepth: List[int] = []
-    hdr: str = ""
-    proper: bool = False
-    repack: bool = False
-    remux: bool = False
-    upscaled: bool = False
-    remastered: bool = False
-    directorsCut: bool = False
-    extended: bool = False
+```python
+print(torrent.data.resolution) # '1080p'
 ```
-
-This will continue to grow though as we expand on functionality, so keep checking back for this list!
 
 !!! tip "Missing something?"
     Don't see something you want in the list? Submit a [Feature Request](https://github.com/dreulavelle/rank-torrent-name/issues/new?assignees=dreulavelle&labels=kind%2Ffeature%2Cstatus%2Ftriage&projects=&template=---feature-request.yml) to have it added!
@@ -275,6 +205,7 @@ Here, we dive into the heart of RTN's efficiency, showcasing how it performs und
 ### Benchmark Categories
 
 We categorize benchmarks into two main processes:
+
 - **Parsing**: Measures the time to parse a title and return a `ParsedData` object. This process focuses solely on extracting information from the torrent title.
 - **Ranking**: A comprehensive process that includes parsing and then evaluates the title based on defined criteria. It outputs a `Torrent` model, which includes a `data` attribute containing the `ParsedData` and additional ranking information. This represents a more "real-world" scenario and is crucial for developers looking to integrate RTN effectively.
 
@@ -282,20 +213,22 @@ We categorize benchmarks into two main processes:
 
 To facilitate comparison, we've compiled the results into a single table:
 
-| Operation                                    | Items Count | Mean Time    | Standard Deviation |
-|----------------------------------------------|-------------|--------------|--------------------|
-| **Parsing Benchmark (Single item)**          | 1           | 583 us       | 10 us              |
-| **Batch Parse Benchmark (Small batch)**      | 10          | 6.24 ms      | 0.16 ms            |
-| **Batch Parse Benchmark (Large batch)**      | 1000        | 1.57 s       | 0.06 s             |
-| **Batch Parse Benchmark (XLarge batch)**     | 2000        | 3.62 s       | 0.11 s             |
-| **Ranking Benchmark (Single item)**          | 1           | 616 us       | 11 us              |
-| **Batch Rank Benchmark (Small batch)**       | 10          | 24.6 ms      | 2.4 ms             |
-| **Batch Rank Benchmark (Large batch)**       | 1000        | 3.13 s       | 0.15 s             |
-| **Batch Rank Benchmark (XLarge batch)**      | 2000        | 6.27 s       | 0.13 s             |
+!!! warning "Benchmarks Comparisons"
+
+    | Operation                                    | Items Count | Mean Time    | Standard Deviation |
+    |----------------------------------------------|-------------|--------------|--------------------|
+    | **Parsing Benchmark (Single item)**          | 1           | 779 us       | 36 us              |
+    | **Batch Parse Benchmark (Small batch)**      | 10          | 7.67 ms      | 0.38 ms            |
+    | **Batch Parse Benchmark (Large batch)**      | 1000        | 776 ms       | 24 ms              |
+    | **Batch Parse Benchmark (XLarge batch)**     | 2000        | 1.55 s       | 0.04 s             |
+    | **Ranking Benchmark (Single item)**          | 1           | 796 us       | 15 us              |
+    | **Batch Rank Benchmark (Small batch)**       | 10          | 7.98 ms      | 0.19 ms            |
+    | **Batch Rank Benchmark (Large batch)**       | 1000        | 806 ms       | 11 ms              |
+    | **Batch Rank Benchmark (XLarge batch)**      | 2000        | 1.65 s       | 0.05 s             |
 
 !!! note "Test Bench Specs"
     Test Bench consisted of **R9 5900X CPU** and **64GB DDR4 RAM** - Your mileage may vary.
 
 This data shows RTN's robust capability to efficiently process both small and extensive datasets.
-To run your own benchmark, you can clone the repo and run `make benchmark` from inside the root of the repository.
 
+* To run your own benchmark, you can clone the repo and run `make benchmark` from inside the root of the repository.

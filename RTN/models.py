@@ -75,6 +75,7 @@ class ParsedData(BaseModel):
     country: Optional[str] = None
     container: Optional[str] = None
     extension: Optional[str] = None
+    extras: List[str] = []
     torrent: bool = False
 
     class Config:
@@ -441,22 +442,22 @@ class SettingsModel(BaseModel):
     advanced customization and fine-grained control over the ranking process.
 
     Attributes:
-    - `profile` (str): Identifier for the settings profile, allowing for multiple configurations.
-    - `require` (List[str | Pattern]]): Patterns torrents must match to be considered.
-    - `exclude` (List[str | Pattern]]): Patterns that, if matched, result in torrent exclusion.
-    - `preferred` (List[str | Pattern]]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
-    - `custom_ranks` (Dict[str, Dict[str, CustomRank]]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
+        profile (str): Identifier for the settings profile, allowing for multiple configurations.
+        require (List[str | Pattern]): Patterns torrents must match to be considered.
+        exclude (List[str | Pattern]): Patterns that, if matched, result in torrent exclusion.
+        preferred (List[str | Pattern]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
+        custom_ranks (Dict[str, Dict[str, CustomRank]]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
 
     Methods:
         __init__(**kwargs): Initializes the settings model with user-defined preferences. Automatically compiles string regex patterns into Patterns, taking into account case sensitivity based on the pattern syntax.
         __getitem__(item: str) -> CustomRank: Access custom rank settings via attribute keys.
 
     Note:
-    - The `profile` attribute allows users to define multiple settings profiles for different use cases.
-    - The `require`, `exclude`, and `preferred` attributes are optional!
-    - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
-    - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
-    - Patterns not enclosed are compiled as case-insensitive by default.
+        - The `profile` attribute allows users to define multiple settings profiles for different use cases.
+        - The `require`, `exclude`, and `preferred` attributes are optional!
+        - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
+        - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
+        - Patterns not enclosed are compiled as case-insensitive by default.
 
     This model supports advanced regex features, enabling powerful and precise filtering and ranking based on torrent titles and attributes.
 

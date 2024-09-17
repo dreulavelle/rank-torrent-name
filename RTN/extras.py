@@ -2,11 +2,11 @@
 Extras module for additional functionality related to RTN processing.
 
 Functions:
-- `title_match`: Compare two titles using the Levenshtein ratio to determine similarity.
-- `sort_torrents`: Sort a set of Torrent objects by their resolution and rank in descending order.
-- `extract_seasons`: Extract season numbers from the title.
-- `extract_episodes`: Extract episode numbers from the title.
-- `episodes_from_season`: Extract episode numbers for a specific season from the title.
+    - `title_match`: Compare two titles using the Levenshtein ratio to determine similarity.
+    - `sort_torrents`: Sort a set of Torrent objects by their resolution and rank in descending order.
+    - `extract_seasons`: Extract season numbers from the title.
+    - `extract_episodes`: Extract episode numbers from the title.
+    - `episodes_from_season`: Extract episode numbers for a specific season from the title.
 
 For more details, please refer to the documentation.
 """
@@ -67,14 +67,14 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
     Returns a dictionary with infohash as keys and Torrent objects as values.
 
     Args:
-    - torrents (Set[Torrent]): A set of Torrent objects.
+        `torrents` (Set[Torrent]): A set of Torrent objects.
 
     Raises:
-    - TypeError: If the input is not a set of Torrent objects.
+        `TypeError`: If the input is not a set of Torrent objects.
 
     Returns:
-    - Dict[str, Torrent]: A dictionary of Torrent objects sorted by resolution and rank in descending order,
-    with the torrent's infohash as the key.
+        `Dict[str, Torrent]`: A dictionary of Torrent objects sorted by resolution and rank in descending order,
+        with the torrent's infohash as the key.
     """
 
     if not isinstance(torrents, set) or not all(isinstance(t, Torrent) for t in torrents):
@@ -120,11 +120,11 @@ def extract_seasons(raw_title: str) -> List[int]:
     """
     Extract season numbers from the title or filename.
 
-    Parameters:
-    - `raw_title` (str): The original title of the torrent to analyze.
+    Args:
+        `raw_title` (str): The original title of the torrent to analyze.
 
     Returns:
-    - List[int]: A list of extracted season numbers from the title.
+        `List[int]`: A list of extracted season numbers from the title.
     """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
@@ -135,11 +135,11 @@ def extract_episodes(raw_title: str) -> List[int]:
     """
     Extract episode numbers from the title or filename.
 
-    Parameters:
-    - `raw_title` (str): The original title of the torrent to analyze.
+    Args:
+        `raw_title` (str): The original title of the torrent to analyze.
 
     Returns:
-    - List[int]: A list of extracted episode numbers from the title.
+        `List[int]`: A list of extracted episode numbers from the title.
     """
     if not raw_title or not isinstance(raw_title, str):
         raise TypeError("The input title must be a non-empty string.")
@@ -151,12 +151,12 @@ def episodes_from_season(raw_title: str, season_num: int) -> List[int]:
     Only return episode numbers if the season number is found in the title
     and the season number matches the input season number.
 
-    Parameters:
-    - `raw_title` (str): The original title of the torrent to analyze.
-    - `season_num` (int): The season number to extract episodes for.
+    Args:
+        `raw_title` (str): The original title of the torrent to analyze.
+        `season_num` (int): The season number to extract episodes for.
 
     Returns:
-    - List[int]: A list of extracted episode numbers for the specified season.
+        `List[int]`: A list of extracted episode numbers for the specified season.
     """
     if not season_num:
         raise ValueError("The season number must be provided.")

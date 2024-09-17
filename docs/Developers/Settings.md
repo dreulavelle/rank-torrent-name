@@ -1,4 +1,61 @@
-# Settings Model
+## SettingsModel
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/models.py/#L437)
+```python 
+from RTN.models import SettingsModel
+settings = SettingsModel()
+```
+
+---
+Represents user-defined settings for ranking torrents, including preferences for filtering torrents
+based on regex patterns and customizing ranks for specific torrent attributes. This model allows for
+advanced customization and fine-grained control over the ranking process.
+
+**Attributes**
+
+* **profile** (str) : Identifier for the settings profile, allowing for multiple configurations.
+* **require** (List[str | Pattern]) : Patterns torrents must match to be considered.
+* **exclude** (List[str | Pattern]) : Patterns that, if matched, result in torrent exclusion.
+* **preferred** (List[str | Pattern]) : Patterns indicating preferred attributes in torrents. Given +5000 points by default.
+* **custom_ranks** (Dict[str, Dict[str, CustomRank]]) : Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
+
+---
+
+Methods:
+
+    __getitem__(item: str) -> CustomRank: Access custom rank settings via attribute keys.
+
+
+**Note**
+
+- The `profile` attribute allows users to define multiple settings profiles for different use cases.
+- The `require`, `exclude`, and `preferred` attributes are optional!
+- The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
+- Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
+- Patterns not enclosed are compiled as case-insensitive by default.
+
+This model supports advanced regex features, enabling powerful and precise filtering and ranking based on torrent titles and attributes.
+
+----
+
+## CustomRank
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/models.py/#L430)
+```python 
+CustomRank()
+```
+
+Custom Ranks used in SettingsModel.
+
+---
+
+### SettingsModel
+
+`SettingsModel` is designed to be fully customizable by __users__, allowing you to define your own filtering criteria, including patterns to require, exclude, and prefer in torrent names. This model empowers you to dynamically configure torrent selection based on your specific patterns and preferences.
+
+Key functionalities:
+
+- **Filtering Torrents:** You have the control to determine which torrents to consider or ignore based on your matching patterns.
+- **Prioritizing Torrents:** Indicate your preferred attributes to give certain torrents higher precedence according to your needs.
+- **Custom Ranks Usage:** Decide how specific attributes influence the overall ranking, enabling or disabling custom ranks as you see fit.
 
 !!! warning 
     The `SettingsModel` is only used when ranking torrents, you do not need it if you are just wanting to `parse()` torrents.

@@ -1,55 +1,158 @@
-# Extras
-
-## Torrent Parser
-
-You can also parse a torrent title similar to how PTN works. This is an enhanced version of PTN that combines RTN's parsing as well. This also includes enhanced episode parsing as well that covers a much better range of titles.
-
-Using the example above:
-
-```py
-from RTN import parse
-parsed = parse("Example.Movie.2020.1080p.BluRay.x264-Example")
-
-print(parsed.data.raw_title)    # Output: "Example.Movie.2020.1080p.BluRay.x264-Example"
-print(parsed.data.parsed_title) # Output: "Example Movie"
-print(parsed.data.year)         # Output: [2020]
+## get_lev_ratio
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/extras.py/#L39)
+```python
+.get_lev_ratio(
+   correct_title: str, parsed_title: str, threshold: float = 0.85
+)
 ```
 
-## Checking Title Similarity
+---
+Compares two titles using the Levenshtein ratio to determine similarity.
 
-Sometimes, you might just want to check if two titles match closely enough, without going through the entire ranking process. RTN provides a simple function, title_match, for this purpose:
 
-```py
-from RTN import title_match
+**Args**
 
-# Check if two titles are similar above a threshold of 0.9
-match = title_match("Correct Movie Title 2020", "Correct Movie Title (2020)")
-print(match)  # Output: True if similarity is above 0.9, otherwise False
->>> True
+* The reference title to compare against.
+* The title to compare with the reference title.
+* The similarity threshold to consider the titles as matching.
+
+
+**Returns**
+
+* The Levenshtein ratio between the two titles.
+
+
+----
+
+
+## title_match
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/extras.py/#L23)
+```python
+.title_match(
+   correct_title: str, parsed_title: str, threshold: float = 0.85
+)
 ```
 
-This functionality is especially useful when you have a list of potential titles and want to find the best match for a given reference title.
+---
+Compares two titles using the Levenshtein ratio to determine similarity.
 
-## Trash Check
 
-Maybe you just want to use our own garbage collector to weed out bad titles in your current scraping setup?
+**Args**
 
-```py
-from RTN import check_trash
+* The reference title to compare against.
+* The title to compare with the reference title.
+* The similarity threshold to consider the titles as matching.
 
-if check_trash(raw_title):
-    # You can safely remove any title or item from being scraped if this returns True!
-    ...
+
+**Returns**
+
+* True if the titles match, False otherwise.
+
+
+----
+
+
+## sort_torrents
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/extras.py/#L64)
+```python
+.sort_torrents(
+   torrents: Set[Torrent]
+)
 ```
 
-## Movie Check
+---
+Sorts a set of Torrent objects by their resolution bucket and then by their rank in descending order.
+Returns a dictionary with infohash as keys and Torrent objects as values.
 
-Now you can check if a raw torrent title is a `movie` or a `show` type!
 
-```py
-from RTN.parser import get_type, parse
+**Args**
 
-parsed_data = parse("Joker.2019.PROPER.mHD.10Bits.1080p.BluRay.DD5.1.x265-TMd", remove_trash = False)
-print(parsed_data.type)
->>> "movie"
+* A set of Torrent objects.
+
+
+**Raises**
+
+* If the input is not a set of Torrent objects.
+
+
+**Returns**
+
+* A dictionary of Torrent objects sorted by resolution and rank in descending order,
+with the torrent's infohash as the key.
+
+----
+
+
+## extract_seasons
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/extras.py/#L119)
+```python
+.extract_seasons(
+   raw_title: str
+)
 ```
+
+---
+Extract season numbers from the title or filename.
+
+
+**Args**
+
+* The original title of the torrent to analyze.
+
+
+**Returns**
+
+* A list of extracted season numbers from the title.
+
+
+----
+
+
+## extract_episodes
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/extras.py/#L134)
+```python
+.extract_episodes(
+   raw_title: str
+)
+```
+
+---
+Extract episode numbers from the title or filename.
+
+
+**Args**
+
+* The original title of the torrent to analyze.
+
+
+**Returns**
+
+* A list of extracted episode numbers from the title.
+
+
+----
+
+
+## episodes_from_season
+[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/extras.py/#L149)
+```python
+.episodes_from_season(
+   raw_title: str, season_num: int
+)
+```
+
+---
+Only return episode numbers if the season number is found in the title
+and the season number matches the input season number.
+
+
+**Args**
+
+* The original title of the torrent to analyze.
+* The season number to extract episodes for.
+
+
+**Returns**
+
+* A list of extracted episode numbers for the specified season.
+

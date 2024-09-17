@@ -72,4 +72,4 @@ RTN offers a comprehensive toolkit for torrent management:
 - `parse_extras`: Extract additional torrent metadata.
 - `episodes_from_season`: Generate episode titles for entire seasons.
 
-📘 For a deeper dive, check out our [Getting Started](./Users/FAQ.md) guide for users or the [Developers](./Developers/Developers.md) section for technical insights.
+📘 For a deeper dive, check out our [Getting Started](./Users/FAQ.md) guide for users or the [Developers](./Developers/Introduction.md) section for technical insights.
