@@ -16,6 +16,7 @@ include = [
 ]
 
 exclude = [
+    "site",
     "tests",
     "docs",
     ".github",
