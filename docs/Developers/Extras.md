@@ -15,12 +15,12 @@ Compares two titles using the Levenshtein ratio to determine similarity.
 * The reference title to compare against.
 * The title to compare with the reference title.
 * The similarity threshold to consider the titles as matching.
+* A dictionary of aliases for the correct title. (default: {}, optional)
 
 
 **Returns**
 
 * The Levenshtein ratio between the two titles.
-
 
 ----
 
