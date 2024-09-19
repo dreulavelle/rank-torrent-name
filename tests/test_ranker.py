@@ -130,7 +130,7 @@ def test_valid_torrent_from_title(settings_model, ranking_model, raw_title, expe
     (None, None, None, ValueError),  # Missing title and infohash
     (123, "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", None, TypeError),  # Invalid title type
     ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", 123, None, TypeError),  # Invalid infohash type
-    ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c0886", None, TypeError),  # Invalid infohash length
+    ("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]", "c08a9ee8ce3a5c2c0886", None, GarbageTorrent),  # Invalid infohash length
     ("", "c08a9ee8ce3a5c2c08865e2b05406273cabc97e7", None, ValueError),  # Empty title
 ])
 def test_invalid_torrent_from_title(settings_model, ranking_model, raw_title, infohash, correct_title, exception_type):

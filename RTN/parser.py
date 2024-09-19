@@ -72,18 +72,11 @@ class RTN:
             rtn = RTN(settings_model, ranking_model, lev_threshold=0.94)
             ```
         """
-        if not settings or not ranking_model:
-            raise ValueError("Both settings and a ranking model must be provided.")
-        if not isinstance(settings, SettingsModel):
-            raise TypeError("The settings must be an instance of SettingsModel.")
-        if not isinstance(ranking_model, BaseRankingModel):
-            raise TypeError("The ranking model must be an instance of BaseRankingModel.")
-
         self.settings = settings
         self.ranking_model = ranking_model
         self.lev_threshold = self.settings.options.get("title_similarity", 0.85)
 
-    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False) -> Torrent:
+    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False, **kwargs) -> Torrent:
         """
         Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
 
@@ -124,10 +117,7 @@ class RTN:
         """
         if not raw_title or not infohash:
             raise ValueError("Both the title and infohash must be provided.")
-        if not isinstance(raw_title, str) or not isinstance(infohash, str):
-            raise TypeError("The title and infohash must be strings.")
-        if not isinstance(correct_title, str):
-            raise TypeError("The correct title must be a string.")
+
         if len(infohash) != 40:
             raise GarbageTorrent("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
@@ -135,7 +125,8 @@ class RTN:
 
         lev_ratio = 0.0
         if correct_title:
-            lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold)
+            aliases = kwargs.get("aliases", {})
+            lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold, aliases)
 
         fetch: bool = check_fetch(parsed_data, self.settings)
         rank: int = get_rank(parsed_data, self.settings, self.ranking_model)

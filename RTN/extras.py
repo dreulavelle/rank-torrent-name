@@ -20,7 +20,7 @@ from .models import Resolution, Torrent
 from .patterns import normalize_title
 
 
-def title_match(correct_title: str, parsed_title: str, threshold: float = 0.85) -> bool:
+def title_match(correct_title: str, parsed_title: str, threshold: float = 0.85, aliases: dict = {}) -> bool:
     """
     Compares two titles using the Levenshtein ratio to determine similarity.
 
@@ -28,15 +28,15 @@ def title_match(correct_title: str, parsed_title: str, threshold: float = 0.85) 
         `correct_title` (str): The reference title to compare against.
         `parsed_title` (str): The title to compare with the reference title.
         `threshold` (float): The similarity threshold to consider the titles as matching.
-
+        `aliases` (dict, optional): A dictionary of aliases for the correct title.
     Returns:
         `bool`: True if the titles match, False otherwise.
     """
-    check = get_lev_ratio(correct_title, parsed_title, threshold)
+    check = get_lev_ratio(correct_title, parsed_title, threshold, aliases)
     return check >= threshold
 
 
-def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85) -> float:
+def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85, aliases: dict = {}) -> float:
     """
     Compares two titles using the Levenshtein ratio to determine similarity.
 
@@ -44,21 +44,34 @@ def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85
         `correct_title` (str): The reference title to compare against.
         `parsed_title` (str): The title to compare with the reference title.
         `threshold` (float): The similarity threshold to consider the titles as matching.
+        `aliases` (dict, optional): A dictionary of aliases for the correct title.
 
     Returns:
-        `float`: The Levenshtein ratio between the two titles.
+        `float`: The highest Levenshtein ratio between the parsed title and any of the correct titles (including aliases if provided).
     """
-    if not (correct_title or parsed_title):
+    if not (correct_title and parsed_title):
         raise ValueError("Both titles must be provided.")
-    if not isinstance(correct_title, str) or not isinstance(parsed_title, str):
-        raise TypeError("Both titles must be strings.")
     if not isinstance(threshold, (int, float)) or not 0 <= threshold <= 1:
         raise ValueError("The threshold must be a number between 0 and 1.")
 
-    normalized_correct_title = normalize_title(correct_title)
     normalized_parsed_title = normalize_title(parsed_title)
-    lev_ratio: float = ratio(normalized_correct_title, normalized_parsed_title, score_cutoff=threshold)
-    return round(lev_ratio, 3)
+    
+    # Check correct_title first
+    lev_ratio = ratio(normalize_title(correct_title), normalized_parsed_title, score_cutoff=threshold)
+    if lev_ratio == 1.0:
+        return 1.0
+    highest_ratio = lev_ratio
+
+    # Only check aliases if necessary
+    if highest_ratio < 1.0 and aliases:
+        for alias_list in aliases.values():
+            for alias in alias_list:
+                lev_ratio = ratio(normalize_title(alias), normalized_parsed_title, score_cutoff=threshold)
+                if lev_ratio == 1.0:
+                    return 1.0
+                highest_ratio = max(highest_ratio, lev_ratio)
+
+    return round(highest_ratio, 3)
 
 
 def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:

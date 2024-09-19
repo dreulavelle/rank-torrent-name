@@ -1,8 +1,8 @@
 import pytest
 
 from RTN import parse
-from RTN.extras import episodes_from_season, extract_episodes, title_match
-from RTN.models import ParsedData
+from RTN.extras import episodes_from_season, extract_episodes, get_lev_ratio, title_match
+from RTN.models import ParsedData, Torrent
 
 
 @pytest.mark.parametrize("test_string, expected_data", [
@@ -101,7 +101,7 @@ def test_random_releases_parse(release_name, expected):
 
 
 @pytest.mark.parametrize("title, query, threshold, expected_exception", [
-    ("The Simpsons", 12345, None, TypeError),  # test not correct_title or not raw_title
+    ("The Simpsons", 12345, None, ValueError),  # test not correct_title or not raw_title
     ("The Simpsons", "The Simpsons", 0.9, None),  # test valid threshold
     ("The Simpsons", "The Simpsons", 1.1, ValueError),  # test invalid threshold
     (None, None, None, ValueError),  # test not correct_title or not raw_title
@@ -271,3 +271,13 @@ def test_season_episode_extraction(test_string, expected_season, expected_episod
     assert isinstance(item, ParsedData), f"Failed for '{test_string}', expected ParsedData object"
     assert item.seasons == expected_season, f"Failed for '{test_string}' with expected {expected_season}"
     assert item.episodes == expected_episode, f"Failed for '{test_string}' with expected {expected_episode}"
+
+
+@pytest.mark.parametrize("correct_title, parsed_title, aliases, expected", [
+    ("The Way of the Househusband", "The Way of the House Husband", {'jp': ['Gokushufudō', 'Gokushufudou'], 'us': ['The Way of the Househusband', 'The Way of the House Husband'], 'cn': ['极道主夫']}, 1),
+    ("The Way of the Househusband", "极道主夫", {'jp': ['Gokushufudō', 'Gokushufudou'], 'us': ['The Way of the Househusband', 'The Way of the House Husband'], 'cn': ['极道主夫']}, 1),
+    ("The Simpsons", "The Simpsons", {}, 1),
+])
+def test_default_title_matching(correct_title, parsed_title, aliases, expected):
+    """Test the title_match function"""
+    assert get_lev_ratio(correct_title, parsed_title, aliases=aliases) == expected, f"Failed for {correct_title} and {parsed_title}"
