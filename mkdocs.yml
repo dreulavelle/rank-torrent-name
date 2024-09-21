@@ -9,24 +9,25 @@ repo_url: 'https://github.com/dreulavelle/rank-torrent-name'
 nav:
   - Home: index.md
   - Users: 
-    - Getting Started: Users/FAQ.md
-    - Languages: Users/Languages.md
+    - Getting Started: users/faq.md
+    - Languages: users/languages.md
+    - Profiles: users/profiles.md
   - Developers: 
-    - Introduction: Developers/Introduction.md
-    - Parsing: Developers/Parsing.md
-    - Settings Model: Developers/Settings.md
-    - Ranking Model: Developers/Ranking.md
-    - Models: Developers/Models.md
-    - Sorting: Developers/Sorting Torrents.md
-    - Extras: Developers/Extras.md
+    - Introduction: devs/introduction.md
+    - Parsing: devs/parsing.md
+    - Settings Model: devs/settings.md
+    - Ranking Model: devs/ranking.md
+    - Models: devs/models.md
+    - Sorting: devs/sorting.md
+    - Extras: devs/extras.md
   - Modules: 
-    - Parser: Developers/Modules/parser.md
-    - Ranker: Developers/Modules/ranker.md
-    - Fetch: Developers/Modules/fetch.md
-    - Models: Developers/Modules/models.md
-    - Exceptions: Developers/Modules/exceptions.md
-    - Patterns: Developers/Modules/patterns.md
-    - Extras: Developers/Modules/extras.md
+    - Parser: devs/modules/parser.md
+    - Ranker: devs/modules/ranker.md
+    - Fetch: devs/modules/fetch.md
+    - Models: devs/modules/models.md
+    - Exceptions: devs/modules/exceptions.md
+    - Patterns: devs/modules/patterns.md
+    - Extras: devs/modules/extras.md
   - Contributing: contributing.md
   - License: license.md
 
