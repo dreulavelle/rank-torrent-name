@@ -340,7 +340,7 @@ class BestRanking(BaseRankingModel):
     """Ranking model preset that covers the highest qualities like 4K HDR."""
 
     # quality
-    av1: int = 0
+    av1: int = 500
     avc: int = 500
     bluray: int = 100
     dvd: int = -5000
@@ -369,9 +369,9 @@ class BestRanking(BaseRankingModel):
 
     # hdr
     bit_10: int = 100
-    dolby_vision: int = 1000
-    hdr: int = 500
-    hdr10plus: int = 1000
+    dolby_vision: int = 3000
+    hdr: int = 2000
+    hdr10plus: int = 2100
     sdr: int = 0
 
     # audio
@@ -381,14 +381,14 @@ class BestRanking(BaseRankingModel):
     dolby_digital: int = 0
     dolby_digital_plus: int = 0
     dts_lossy: int = 100
-    dts_lossless: int = 1000
+    dts_lossless: int = 2000
     eac3: int = 150
     flac: int = 0
     mono: int = -1000
     mp3: int = -1000
     stereo: int = 0
     surround: int = 0
-    truehd: int = 1000
+    truehd: int = 2000
 
     # extras
     three_d: int = -10000
