@@ -584,21 +584,20 @@ class SettingsModel(BaseModel):
     @model_validator(mode="before")
     def compile_and_validate_patterns(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Compile string patterns to regex.Pattern, keeping compiled patterns unchanged."""
+        
+        def compile_pattern(pattern: Any) -> regex.Pattern:
+            """Helper function to compile a single pattern."""
+            if isinstance(pattern, str):
+                if pattern.startswith("/") and pattern.endswith("/"):  # case-sensitive
+                    return regex.compile(pattern[1:-1])
+                return regex.compile(pattern, regex.IGNORECASE)  # case-insensitive
+            elif isinstance(pattern, regex.Pattern):
+                return pattern  # Keep already compiled patterns as is
+            raise ValueError(f"Invalid pattern type: {type(pattern)}")
+        
         for field in ("require", "exclude", "preferred"):
-            raw_patterns = values.get(field, [])
-            compiled_patterns = []
-            for pattern in raw_patterns:
-                if isinstance(pattern, str):
-                    if pattern.startswith("/") and pattern.endswith("/"):  # case-sensitive
-                        compiled_patterns.append(regex.compile(pattern[1:-1]))
-                    else:  # case-insensitive by default
-                        compiled_patterns.append(regex.compile(pattern, regex.IGNORECASE))
-                elif isinstance(pattern, regex.Pattern):
-                    # Keep already compiled patterns as is
-                    compiled_patterns.append(pattern)
-                else:
-                    raise ValueError(f"Invalid pattern type: {type(pattern)}")
-            values[field] = compiled_patterns
+            values[field] = [compile_pattern(p) for p in values.get(field, [])]
+        
         return values
 
     class Config:
