@@ -499,7 +499,7 @@ class SettingsModel(BaseModel):
     }
     languages: Dict[str, Any] = {
         "required": [],
-        "exclude": ["common"],
+        "exclude": [],
         "preferred": [],
     }
     custom_ranks: Dict[str, Dict[str, CustomRank]] = {
