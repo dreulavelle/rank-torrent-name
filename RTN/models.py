@@ -500,7 +500,8 @@ class SettingsModel(BaseModel):
         "remove_ranks_under": -10000,
         "remove_unknown_languages": False,
         "allow_english_in_languages": False,
-        "enable_fetch_speed_mode": True
+        "enable_fetch_speed_mode": True,
+        "remove_adult_content": True
     }
     languages: Dict[str, Any] = {
         "required": [],
@@ -583,8 +584,7 @@ class SettingsModel(BaseModel):
             "screener": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "size": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "telecine": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "adult": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0)
         },
     }
 

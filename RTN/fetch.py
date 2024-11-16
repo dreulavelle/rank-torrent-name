@@ -112,7 +112,7 @@ def trash_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -
 
 def adult_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the title is adult based on user settings."""
-    if data.adult and not settings.custom_ranks["trash"]["adult"].fetch:
+    if data.adult and settings.options.get("remove_adult_content", True):
         failed_keys.add("trash_adult")
         return True
     return False
