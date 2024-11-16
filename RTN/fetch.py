@@ -32,7 +32,7 @@ COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh", "ar", "fr"}
 ALL = ANIME | NON_ANIME
 
 
-def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = True) -> bool:
+def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = False) -> bool:
     """
     Check user settings and unwanted quality to determine if torrent should be fetched.
     
@@ -57,6 +57,8 @@ def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = Tr
     if speed_mode:
         if trash_handler(data, settings, failed_keys):
             raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if adult_handler(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
         if check_required(data, settings):
             return True
         if check_exclude(data, settings, failed_keys):
@@ -77,6 +79,7 @@ def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = Tr
             raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
     else:
         trash_handler(data, settings, failed_keys)
+        adult_handler(data, settings, failed_keys)
         check_required(data, settings)
         check_exclude(data, settings, failed_keys)
         language_handler(data, settings, failed_keys)
@@ -104,6 +107,14 @@ def trash_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -
         if hasattr(data, "trash") and data.trash:
             failed_keys.add("trash_flag")
             return True
+    return False
+
+
+def adult_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
+    """Check if the title is adult based on user settings."""
+    if data.adult and not settings.custom_ranks["trash"]["adult"].fetch:
+        failed_keys.add("trash_adult")
+        return True
     return False
 
 
@@ -154,7 +165,7 @@ def check_exclude(data: ParsedData, settings: SettingsModel, failed_keys: set) -
 def fetch_quality(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the quality is fetchable based on user settings."""
     if not data.quality:
-        return True
+        return False
 
     quality_map = {
         # parse result, (settings location, settings key)
@@ -187,7 +198,6 @@ def fetch_quality(data: ParsedData, settings: SettingsModel, failed_keys: set) -
     category, key = quality_map.get(data.quality, (None, None))
     if category and key:
         if not settings.custom_ranks[category][key].fetch:
-            print(f"{category}_{key}, {settings.custom_ranks[category][key]}, {settings.custom_ranks[category][key].fetch}")
             failed_keys.add(f"{category}_{key}")
             return True
     return False

@@ -338,6 +338,7 @@ class DefaultRanking(BaseRankingModel):
     size: int = -10000
     telecine: int = -10000
     telesync: int = -10000
+    adult: int = -10000
 
 
 class BestRanking(BaseRankingModel):
@@ -503,7 +504,7 @@ class SettingsModel(BaseModel):
     }
     languages: Dict[str, Any] = {
         "required": [],
-        "exclude": [],
+        "exclude": ["ar", "hi", "fr", "es", "de", "ru", "pt", "it"],  # Arabic, Hindi, French, Spanish, German, Russian, Portuguese, Italian
         "preferred": [],
     }
     custom_ranks: Dict[str, Dict[str, CustomRank]] = {
@@ -582,7 +583,8 @@ class SettingsModel(BaseModel):
             "screener": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "size": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "telecine": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0)
+            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "adult": CustomRank(fetch=False, use_custom_rank=False, rank=0),
         },
     }
 

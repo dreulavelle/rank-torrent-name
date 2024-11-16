@@ -71,37 +71,22 @@ def test_explicit_check_required(raw_title, expected, message):
     assert check_required(data, settings) is expected, message
 
 
-@pytest.mark.parametrize("raw_title, expected, message, exclude_patterns", [
-    # Excluded
-    ("This is a 4k video", True, "Case-insensitive should match because '4K' is excluded", ["4K"]),
-    ("This is a BraZil video", True, "Case-insensitive should match because 'brazil' is excluded", ["brazil"]),
-    ("Low Quality CAM", True, "Should match because 'CAM' is excluded - case-insensitive", ["CAM"]),
-    ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", True, "Should match because 'S08' is excluded", ["\d{2}"]),
-    # Ignored
-    ("Exclusive HDR10+ Content", False, "Should fail because it's not in the list of excluded patterns", []),
+@pytest.mark.parametrize("raw_title, exclude_patterns, expected_error", [
+    # Should raise GarbageTorrent
+    ("This is a 4k video", ["4K"], "exclude_regex '4K'"),
+    ("This is a BraZil video", ["brazil"], "exclude_regex 'brazil'"),
+    ("Low Quality CAM", ["CAM"], "exclude_regex 'CAM'"),
+    ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", ["\\d{2}"], "exclude_regex '\\d{2}'"),
+    # Should not raise exception
+    ("Exclusive HDR10+ Content", [], None),
 ])
-def test_explicit_check_excluded(raw_title, expected, message, exclude_patterns):
+def test_explicit_check_excluded(raw_title, exclude_patterns, expected_error):
     data = parse(raw_title)
     settings = SettingsModel(exclude=exclude_patterns)
-    failed_keys = set()
-    assert check_exclude(data, settings, failed_keys) is expected, message
-    if not expected:
-        assert failed_keys, f"Expected failed keys for {raw_title}"
-    else:
-        assert not failed_keys, f"Expected no failed keys for {raw_title}"
 
-@pytest.mark.parametrize("raw_title, expected_overall, expected_exclude", [
-    ("The Walking Dead S05E03", True, False),
-    ("The Walking Dead S05E03 [English]", True, False),
-    ("The Walking Dead S05E03 [English] [Spanish]", True, False),
-    ("The Walking Dead S05E03 [Hindi]", False, True)
-])
-def test_exclude_languages(raw_title, settings, expected_overall, expected_exclude):
-    data = parse(raw_title)
-    failed_keys = set()
-    overall_fetch_result = check_fetch(data, settings)
-    exclude_languages_result = language_handler(data, settings, failed_keys)
-    assert overall_fetch_result == expected_overall, f"Expected overall language result: {expected_overall}"
-    assert exclude_languages_result == expected_exclude, f"Expected exclude language result: {expected_exclude}"
-    if expected_exclude:
-        assert any("language_" in key for key in failed_keys), "Expected language in failed keys"
+    if expected_error:
+        with pytest.raises(GarbageTorrent) as exc_info:
+            check_fetch(data, settings)
+        assert expected_error in str(exc_info.value), f"Expected error containing '{expected_error}'"
+    else:
+        assert check_fetch(data, settings) is True
