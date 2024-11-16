@@ -76,7 +76,7 @@ class RTN:
         self.ranking_model = ranking_model
         self.lev_threshold = self.settings.options.get("title_similarity", 0.85)
 
-    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False, **kwargs) -> Torrent:
+    def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False, speed_mode: bool = True, **kwargs) -> Torrent:
         """
         Parses a torrent title, computes its rank, and returns a Torrent object with metadata and ranking.
 
@@ -85,6 +85,7 @@ class RTN:
             `infohash` (str): The SHA-1 hash identifier of the torrent.
             `correct_title` (str): The correct title to compare against for similarity. Defaults to an empty string.
             `remove_trash` (bool): Whether to check for trash patterns and raise an error if found. Defaults to True.
+            `speed_mode` (bool): Whether to use speed mode for fetching. Defaults to True.
 
         Returns:
             Torrent: A Torrent object with metadata and ranking information.
@@ -128,7 +129,7 @@ class RTN:
             aliases = kwargs.get("aliases", {})
             lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold, aliases)
 
-        fetch: bool = check_fetch(parsed_data, self.settings)
+        fetch: bool = check_fetch(parsed_data, self.settings, speed_mode)
         rank: int = get_rank(parsed_data, self.settings, self.ranking_model)
 
         if remove_trash:

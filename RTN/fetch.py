@@ -15,6 +15,7 @@ Parameters:
 For more information on each function, refer to the respective docstrings.
 """
 
+from .exceptions import GarbageTorrent
 from .models import ParsedData, SettingsModel
 
 ANIME = {"ja", "zh", "ko"}
@@ -31,7 +32,7 @@ COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh", "ar", "fr"}
 ALL = ANIME | NON_ANIME
 
 
-def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
+def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = False) -> bool:
     """
     Check user settings and unwanted quality to determine if torrent should be fetched.
     
@@ -51,41 +52,76 @@ def check_fetch(data: ParsedData, settings: SettingsModel) -> bool:
     if not isinstance(settings, SettingsModel):
         raise TypeError("Settings must be an instance of SettingsModel.")
 
-    if trash_handler(data, settings):
-        return False
-    if check_required(data, settings):
-        return True
-    if check_exclude(data, settings):
-        return False
-    if language_handler(data, settings):
-        return False
+    failed_keys = set()
 
-    return all(
-        [
-            fetch_resolution(data, settings),
-            fetch_quality(data, settings),
-            fetch_audio(data, settings),
-            fetch_codec(data, settings),
-            fetch_other(data, settings),
-        ]
-    )
+    if speed_mode:
+        if trash_handler(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if adult_handler(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if check_required(data, settings):
+            return True
+        if check_exclude(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if language_handler(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if fetch_resolution(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if fetch_quality(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if fetch_audio(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if fetch_hdr(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if fetch_codec(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        if fetch_other(data, settings, failed_keys):
+            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+    else:
+        trash_handler(data, settings, failed_keys)
+        adult_handler(data, settings, failed_keys)
+        check_required(data, settings)
+        check_exclude(data, settings, failed_keys)
+        language_handler(data, settings, failed_keys)
+        fetch_resolution(data, settings, failed_keys)
+        fetch_quality(data, settings, failed_keys)
+        fetch_audio(data, settings, failed_keys)
+        fetch_hdr(data, settings, failed_keys)
+        fetch_codec(data, settings, failed_keys)
+        fetch_other(data, settings, failed_keys)
 
+    if failed_keys:
+        raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
 
-def trash_handler(data: ParsedData, settings: SettingsModel) -> bool:
-    """Check if the title is trash based on user settings, return True if trash is detected."""
+    return True
+
+def trash_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
+    """Check if the title is trash based on user settings."""
     if settings.options["remove_all_trash"]:
         if data.quality in ["CAM", "PDTV", "R5", "SCR", "TeleCine", "TeleSync"]:
+            failed_keys.add("trash_quality")
             return True
         if "HQ Clean Audio" in data.audio:
+            failed_keys.add("trash_audio")
             return True
         if hasattr(data, "trash") and data.trash:
+            failed_keys.add("trash_flag")
             return True
     return False
 
 
-def language_handler(data: ParsedData, settings: SettingsModel) -> bool:
+def adult_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
+    """Check if the title is adult based on user settings."""
+    if data.adult and not settings.custom_ranks["trash"]["adult"].fetch:
+        failed_keys.add("trash_adult")
+        return True
+    return False
+
+
+def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the languages are excluded based on user settings."""
     if not data.languages and settings.options.get("remove_unknown_languages", False):
+        failed_keys.add("unknown_language")
         return True
 
     exclude_languages = set(settings.languages.get("exclude", []))
@@ -101,7 +137,12 @@ def language_handler(data: ParsedData, settings: SettingsModel) -> bool:
     if "en" in data.languages and settings.options.get("allow_english_in_languages", False):
         return False
 
-    return any(language in exclude_languages for language in data.languages)
+    excluded = set(lang for lang in data.languages if lang in exclude_languages)
+    if excluded:
+        for lang in excluded:
+            failed_keys.add(f"lang_{lang}")
+        return True
+    return False
 
 
 def check_required(data: ParsedData, settings: SettingsModel) -> bool:
@@ -111,17 +152,20 @@ def check_required(data: ParsedData, settings: SettingsModel) -> bool:
     return False
 
 
-def check_exclude(data: ParsedData, settings: SettingsModel) -> bool:
+def check_exclude(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the title contains excluded patterns."""
-    if settings.exclude and any(pattern.search(data.raw_title) for pattern in settings.exclude if pattern):  # type: ignore
-        return True
+    if settings.exclude:
+        for pattern in settings.exclude:
+            if pattern and pattern.search(data.raw_title):
+                failed_keys.add(f"exclude_regex '{pattern.pattern}'")
+                return True
     return False
 
 
-def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
+def fetch_quality(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the quality is fetchable based on user settings."""
     if not data.quality:
-        return True
+        return False
 
     quality_map = {
         # parse result, (settings location, settings key)
@@ -152,49 +196,52 @@ def fetch_quality(data: ParsedData, settings: SettingsModel) -> bool:
     }
 
     category, key = quality_map.get(data.quality, (None, None))
-    return settings.custom_ranks[category][key].fetch if category and key else True
+    if category and key:
+        if not settings.custom_ranks[category][key].fetch:
+            failed_keys.add(f"{category}_{key}")
+            return True
+    return False
 
 
-def fetch_resolution(data: ParsedData, settings: SettingsModel) -> bool:
+def fetch_resolution(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the resolution is fetchable based on user settings."""
     if not data.resolution:
-        return settings.resolutions["unknown"]
+        if not settings.resolutions["unknown"]:
+            failed_keys.add("resolution_unknown")
+            return True
+        return False
 
-    match data.resolution.lower():
-        case "2160p" | "4k":
-            return settings.resolutions["2160p"]
-        case "1080p" | "1440p":
-            return settings.resolutions["1080p"]
-        case "720p":
-            return settings.resolutions["720p"]
-        case "480p" | "576p":
-            return settings.resolutions["480p"]
-        case "360p" | "240p":
-            return settings.resolutions["360p"]
-        case _:
-            return settings.resolutions["unknown"]
-
-
-def fetch_codec(data: ParsedData, settings: SettingsModel) -> bool:
-    """Check if the codec is fetchable based on user settings."""
-    if not data.codec:
-        return True
-
-    codec_map = {
-        "avc": settings.custom_ranks["quality"]["avc"].fetch,
-        "hevc": settings.custom_ranks["quality"]["hevc"].fetch,
-        "av1": settings.custom_ranks["quality"]["av1"].fetch,
-        "xvid": settings.custom_ranks["quality"]["xvid"].fetch,
-        "mpeg": settings.custom_ranks["quality"]["mpeg"].fetch,
+    res_map = {
+        "2160p": "2160p", "4k": "2160p",
+        "1080p": "1080p", "1440p": "1080p",
+        "720p": "720p",
+        "480p": "480p", "576p": "480p",
+        "360p": "360p", "240p": "360p"
     }
 
-    return codec_map.get(data.codec, True)
+    res_key = res_map.get(data.resolution.lower(), "unknown")
+    if not settings.resolutions[res_key]:
+        failed_keys.add(f"resolution")
+        return True
+    return False
 
 
-def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
+def fetch_codec(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
+    """Check if the codec is fetchable based on user settings."""
+    if not data.codec:
+        return False
+
+    if data.codec.lower() in ["avc", "hevc", "av1", "xvid", "mpeg"]:
+        if not settings.custom_ranks["quality"][data.codec.lower()].fetch:
+            failed_keys.add(f"codec_{data.codec.lower()}")
+            return True
+    return False
+
+
+def fetch_audio(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the audio is fetchable based on user settings."""
     if not data.audio:
-        return True
+        return False
 
     audio_map = {
         "AAC": "aac",
@@ -213,12 +260,33 @@ def fetch_audio(data: ParsedData, settings: SettingsModel) -> bool:
 
     for audio_format in data.audio:
         category = "trash" if audio_format == "HQ Clean Audio" else "audio"
-        if not settings.custom_ranks[category][audio_map[audio_format]].fetch:
-            return False
-    return True
+        key = audio_map[audio_format]
+        if not settings.custom_ranks[category][key].fetch:
+            failed_keys.add(f"{category}_{key}")
+            return True
+    return False
 
 
-def fetch_other(data: ParsedData, settings: SettingsModel) -> bool:
+def fetch_hdr(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
+    """Check if the HDR is fetchable based on user settings."""
+    if not data.hdr:
+        return False
+
+    hdr_map = {
+        "DV": "dolby_vision",
+        "HDR": "hdr",
+        "HDR10+": "hdr10plus",
+        "SDR": "sdr"
+    }
+
+    for hdr_format in data.hdr:
+        if not settings.custom_ranks["hdr"][hdr_map[hdr_format]].fetch:
+            failed_keys.add(f"hdr_{hdr_map[hdr_format]}")
+            return True
+    return False
+
+
+def fetch_other(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the other data is fetchable based on user settings."""
     fetch_map = {
         "_3d": ("extras", "3d"),
@@ -235,10 +303,12 @@ def fetch_other(data: ParsedData, settings: SettingsModel) -> bool:
         "upscaled": ("extras", "upscaled"),
         "site": ("extras", "site"),
         "size": ("trash", "size"),
-        "bit_depth": ("hdr", "10bit")
+        "bit_depth": ("hdr", "10bit"),
+        "scene": ("extras", "scene")
     }
 
     for attr, (category, key) in fetch_map.items():
         if getattr(data, attr) and not settings.custom_ranks[category][key].fetch:
-            return False
-    return True
+            failed_keys.add(f"{category}_{key}")
+            return True
+    return False

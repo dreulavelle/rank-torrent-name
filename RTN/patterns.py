@@ -11,10 +11,10 @@ Arguments:
 
 For more information on each function, refer to the respective docstrings.
 """
+import unicodedata
+import regex
 
 from typing import Any
-
-import regex
 
 # Translation table for normalizing unicode characters
 translationTable: dict[str, Any] = {
@@ -33,14 +33,13 @@ translationTable: dict[str, Any] = {
     "ž": "z", "ż": "z", "ź": "z", "æ": "ae", "ǎ": "a", "ǧ": "g",
     "ə": "e", "ƒ": "f", "ǐ": "i", "ǒ": "o", "ǔ": "u", "ǚ": "u",
     "ǜ": "u", "ǹ": "n", "ǻ": "a", "ǽ": "ae", "ǿ": "o", "!": None,
-    "?": None, ",": None, ".": None, ":": None, ";": None, "'": None,
-    "&": "and"
+    "?": None, ",": None, ".": " ", ":": None, ";": None, "'": None,
+    "&": "and", "_": " "
 }
 
 
 def normalize_title(raw_title: str, lower: bool = True) -> str:
     """Normalize the title to remove special characters and accents."""
-    import unicodedata
     translation_table = str.maketrans(translationTable)
     lowered = raw_title.lower() if lower else raw_title
     # Normalize unicode characters to their closest ASCII equivalent

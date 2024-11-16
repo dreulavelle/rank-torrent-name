@@ -47,10 +47,27 @@ def test_parsed_data_model(test_string, expected_data):
     ("The Simpsons S01E01", "The Simpsons S01E01", True),
     ("The Simpsons Movie", "The Simpsons Movie", True),
     ("American Horror Story", "American Story Horror", False),
+    ("S W A T", "S.W.A.T.", True),
 ])
 def test_default_title_matching(title, query, expected):
     """Test the title_match function"""
     assert title_match(title, query) == expected, f"Failed for {title} and {query}"
+
+
+@pytest.mark.parametrize("title, query, expected", [
+    ("Damsel", "Damsel (2024)", 0),
+    ("The Simpsons", "The Simpsons", 1),
+    ("The Simpsons", "The Simpsons Movie", 0),
+    ("The Simpsons", "The Simpsons S01E01", 0),
+    ("The Simpsons S01E01", "The Simpsons S01E01", 1),
+    ("The Simpsons Movie", "The Simpsons Movie", 1),
+    ("American Horror Story", "American Story Horror", 0),
+    ("S W A T", "S.W.A.T.", 1),
+])
+def test_levenshtein_ratio(title, query, expected):
+    """Test the get_lev_ratio function"""
+    assert get_lev_ratio(title, query) == expected, f"Failed for {title} and {query}"
+
 
 
 @pytest.mark.parametrize("release_name, expected", [

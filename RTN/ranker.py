@@ -277,4 +277,8 @@ def calculate_extra_ranks(data: ParsedData, settings: SettingsModel, rank_model:
         total_rank += rank_model.site if not settings.custom_ranks["extras"]["site"].use_custom_rank else settings.custom_ranks["extras"]["site"].rank
     if data.size:
         total_rank += rank_model.size if not settings.custom_ranks["trash"]["size"].use_custom_rank else settings.custom_ranks["trash"]["size"].rank
+    if data.scene:
+        total_rank += rank_model.scene if not settings.custom_ranks["extras"]["scene"].use_custom_rank else settings.custom_ranks["extras"]["scene"].rank
+    if data.adult:
+        total_rank += rank_model.adult if not settings.custom_ranks["trash"]["adult"].use_custom_rank else settings.custom_ranks["trash"]["adult"].rank
     return total_rank

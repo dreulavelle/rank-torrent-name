@@ -1,11 +1,13 @@
 import pytest
 
 from RTN import parse
+from RTN.exceptions import GarbageTorrent
 from RTN.fetch import (
     check_exclude,
     check_fetch,
     check_required,
     fetch_resolution,
+    language_handler,
 )
 from RTN.models import SettingsModel
 
@@ -19,11 +21,17 @@ def settings():
     ("The.Lion.King.2019.1080p.BluRay.x264.DTS-HD.MA.7.1-FGT", True),
     ("Guardians of the Galaxy (2014)", True),
     ("The Great Gatsby 2013 1080p BluRay x264 AAC - Ozlem", True),
+    ("Turning.Red.2022.MULTi.VF2.DV.HDR.2160p.DSNP.WEB-DL.DDP5.1.x265.(Alerte.Rouge)-BONBON.mkv", False)
 ])
 def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
-    # This tests the default settings model against torrent titles
     data = parse(raw_title)
-    assert check_fetch(data, settings) is expected, f"Expected {expected} for {raw_title}"
+    if expected:
+        assert check_fetch(data, settings) is expected, f"Expected {expected} for {raw_title}"
+    else:
+        with pytest.raises(GarbageTorrent) as exc_info:
+            check_fetch(data, settings)
+        assert "denied by:" in str(exc_info.value)
+        assert len(str(exc_info.value).split(",")) >= 1
 
 
 @pytest.mark.parametrize("raw_title, expected, expected_resolution", [
@@ -37,8 +45,13 @@ def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
 ])
 def test_fetch_resolution(settings: SettingsModel, raw_title: str, expected: bool, expected_resolution: str):
     data = parse(raw_title)
+    failed_keys = set()
     assert data.resolution == expected_resolution, f"Expected {expected_resolution} for {raw_title}"
-    assert fetch_resolution(data, settings) is expected, f"Expected {expected} for {raw_title}"
+    fetch_resolution(data, settings, failed_keys)
+    if not expected:
+        assert "resolution" in next(iter(failed_keys)), f"Expected resolution in failed keys for {raw_title}"
+    else:
+        assert not failed_keys, f"Expected no failed keys for {raw_title}"
 
 
 @pytest.mark.parametrize("raw_title, expected, message", [
@@ -58,16 +71,22 @@ def test_explicit_check_required(raw_title, expected, message):
     assert check_required(data, settings) is expected, message
 
 
-@pytest.mark.parametrize("raw_title, expected, message, exclude_patterns", [
-    # Excluded
-    ("This is a 4k video", True, "Case-insensitive should match because '4K' is excluded", ["4K"]),
-    ("This is a BraZil video", True, "Case-insensitive should match because 'brazil' is excluded", ["brazil"]),
-    ("Low Quality CAM", True, "Should match because 'CAM' is excluded - case-insensitive", ["CAM"]),
-    ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", True, "Should match because 'S08' is excluded", ["\d{2}"]),
-    # Ignored
-    ("Exclusive HDR10+ Content", False, "Should fail because it's not in the list of excluded patterns", []),
+@pytest.mark.parametrize("raw_title, exclude_patterns, expected_error", [
+    # Should raise GarbageTorrent
+    ("This is a 4k video", ["4K"], "exclude_regex '4K'"),
+    ("This is a BraZil video", ["brazil"], "exclude_regex 'brazil'"),
+    ("Low Quality CAM", ["CAM"], "exclude_regex 'CAM'"),
+    ("Game.of.Thrones.S08E01.1080p.WEB-DL.DDP5.1.H.264-GoT", ["\\d{2}"], "exclude_regex '\\d{2}'"),
+    # Should not raise exception
+    ("Exclusive HDR10+ Content", [], None),
 ])
-def test_explicit_check_excluded(raw_title, expected, message, exclude_patterns):
+def test_explicit_check_excluded(raw_title, exclude_patterns, expected_error):
     data = parse(raw_title)
     settings = SettingsModel(exclude=exclude_patterns)
-    assert check_exclude(data, settings) is expected, message
+
+    if expected_error:
+        with pytest.raises(GarbageTorrent) as exc_info:
+            check_fetch(data, settings)
+        assert expected_error in str(exc_info.value), f"Expected error containing '{expected_error}'"
+    else:
+        assert check_fetch(data, settings) is True
