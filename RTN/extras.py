@@ -54,24 +54,12 @@ def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85
     if not isinstance(threshold, (int, float)) or not 0 <= threshold <= 1:
         raise ValueError("The threshold must be a number between 0 and 1.")
 
-    normalized_parsed_title = normalize_title(parsed_title)
-    
-    # Check correct_title first
-    lev_ratio = ratio(normalize_title(correct_title), normalized_parsed_title, score_cutoff=threshold)
-    if lev_ratio == 1.0:
-        return 1.0
-    highest_ratio = lev_ratio
+    ratio_set = {
+        ratio(normalize_title(title), normalize_title(parsed_title), score_cutoff=threshold)
+        for title in [normalize_title(correct_title)] + [normalize_title(alias) for alias_list in aliases.values() for alias in alias_list]
+    }
 
-    # Only check aliases if necessary
-    if highest_ratio < 1.0 and aliases:
-        for alias_list in aliases.values():
-            for alias in alias_list:
-                lev_ratio = ratio(normalize_title(alias), normalized_parsed_title, score_cutoff=threshold)
-                if lev_ratio == 1.0:
-                    return 1.0
-                highest_ratio = max(highest_ratio, lev_ratio)
-
-    return round(highest_ratio, 3)
+    return max(ratio_set)
 
 
 def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:

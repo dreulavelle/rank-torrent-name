@@ -36,6 +36,7 @@ class ParsedData(BaseModel):
     parsed_title: str = ""
     normalized_title: str = ""
     trash: bool = False
+    adult: bool = False
     year: Optional[int] = None
     resolution: str = "unknown"
     seasons: List[int] = []
@@ -77,6 +78,7 @@ class ParsedData(BaseModel):
     extension: Optional[str] = None
     extras: List[str] = []
     torrent: bool = False
+    scene: bool = False
 
     class Config:
         from_attributes = True
@@ -242,6 +244,7 @@ class BaseRankingModel(BaseModel):
     retail: int = 0
     subbed: int = 0
     upscaled: int = 0
+    scene: int = 0
 
     # trash
     cam: int = 0
@@ -324,6 +327,7 @@ class DefaultRanking(BaseRankingModel):
     site: int = -10000
     subbed: int = 0
     upscaled: int = -10000
+    scene: int = 2000
 
     # trash
     cam: int = -10000
@@ -445,7 +449,7 @@ class SettingsModel(BaseModel):
         profile (str): Identifier for the settings profile, allowing for multiple configurations.
         require (List[str | Pattern]): Patterns torrents must match to be considered.
         exclude (List[str | Pattern]): Patterns that, if matched, result in torrent exclusion.
-        preferred (List[str | Pattern]): Patterns indicating preferred attributes in torrents. Given +5000 points by default.
+        preferred (List[str | Pattern]): Patterns indicating preferred attributes in torrents. Given +10000 points by default.
         custom_ranks (Dict[str, Dict[str, CustomRank]]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
 
     Methods:
@@ -477,7 +481,6 @@ class SettingsModel(BaseModel):
         >>> print(settings.custom_ranks["uhd"].rank)
         150
     """
-
     profile: str = "default"
     require: List[str | Pattern] = []
     exclude: List[str | Pattern] = []
@@ -495,7 +498,8 @@ class SettingsModel(BaseModel):
         "remove_all_trash": True,
         "remove_ranks_under": -10000,
         "remove_unknown_languages": False,
-        "allow_english_in_languages": False
+        "allow_english_in_languages": False,
+        "enable_fetch_speed_mode": True
     }
     languages: Dict[str, Any] = {
         "required": [],
@@ -568,6 +572,7 @@ class SettingsModel(BaseModel):
             "site": CustomRank(fetch=False, use_custom_rank=False, rank=0),
             "subbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
             "upscaled": CustomRank(fetch=False, use_custom_rank=False, rank=0),
+            "scene": CustomRank(fetch=True, use_custom_rank=False, rank=0),
         },
         "trash": {
             "cam": CustomRank(fetch=False, use_custom_rank=False, rank=0),

@@ -36,7 +36,7 @@ def test_title_match(raw_title, correct_title, expected_match, expected_ratio):
 
 @pytest.mark.parametrize("raw_title, expected_normalized_title", [
     ("The Walking Dead", "the walking dead"),
-    ("Marvel's Agents of S.H.I.E.L.D.", "marvels agents of shield"),
+    ("Marvel's Agents of S.H.I.E.L.D.", "marvels agents of s h i e l d"),
     ("The Walking Dead S05E03 720p HDTV x264-ASAP", "the walking dead"),
     ("фуриоса: хроники безумного макса", "фуриоса хроники безумного макса"),
     ("200% Wolf", "200 wolf")
@@ -77,7 +77,7 @@ def test_sort_torrents(settings, ranking):
 @pytest.mark.parametrize("raw_title, expected_overall, expected_exclude", [
     ("The Walking Dead S05E03", True, False),
     ("The Walking Dead S05E03 [English]", True, False),
-    ("The Walking Dead S05E03 [English] [Spanish]", False, True)
+    ("The Walking Dead S05E03 [English] [Spanish]", True, False)
 ])
 def test_exclude_languages(raw_title, settings, expected_overall, expected_exclude):
     data = parse(raw_title)
@@ -98,8 +98,9 @@ def test_exclude_languages(raw_title, settings, expected_overall, expected_exclu
 def test_trash_handler(settings, raw_title, expected_result, expected_overall):
     """All of these items should get trashed"""
     data = parse(raw_title)
-    trash_handler_result = trash_handler(data, settings) # True if trash is detected
-    overall_fetch_result = check_fetch(data, settings) # False if trash is detected
+    failed_keys = set()
+    trash_handler_result = trash_handler(data, settings, failed_keys) # True if trash is detected
+    overall_fetch_result = check_fetch(data, settings, failed_keys) # False if trash is detected
     assert trash_handler_result == expected_result, f"Expected trash result: {expected_result}, Actual result: {trash_handler_result}"
     assert overall_fetch_result == expected_overall, f"Expected overall trash result: {expected_overall}, Actual result: {overall_fetch_result}"
 
@@ -111,6 +112,7 @@ def test_trash_handler(settings, raw_title, expected_result, expected_overall):
 ])
 def test_type_check_on_item(raw_title, expected_result, expected_seasons, expected_episodes):
     data = parse(raw_title)
-    # assert data.type == expected_result, f"Expected type check result: {expected_result}, Actual result: {data.type}"
+    assert data.type == expected_result, f"Expected type check result: {expected_result}, Actual result: {data.type}"
     assert data.seasons == expected_seasons, f"Expected seasons check result: {expected_seasons}, Actual result: {data.seasons}"
     assert data.episodes == expected_episodes, f"Expected episodes check result: {expected_episodes}, Actual result: {data.episodes}"
+

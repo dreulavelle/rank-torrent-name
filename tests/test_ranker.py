@@ -76,6 +76,7 @@ def custom_ranking_model():
         size=1,
         telecine=1,
         telesync=1,
+        scene=1
     )
 
 @pytest.fixture

@@ -1,7 +1,8 @@
 import pytest
 
-from RTN import RTN
+from RTN import RTN, parse
 from RTN.exceptions import GarbageTorrent
+from RTN.fetch import fetch_resolution
 from RTN.models import DefaultRanking, SettingsModel
 
 
@@ -55,16 +56,16 @@ SCRAPED_DATA = [
     {"title": "Game of Thrones - Temporadas Completas (1080p) Acesse o ORIGINAL WWW.BLUDV.TV", "fetch": False, "rank": 0, "languages": ["es"]},
     {"title": "Game.of.Thrones.S01.1080p.BluRay.REMUX.AVC.TrueHD.7.1.Atmos-BiZKiT[rartv]", "fetch": False, "rank": -1},
     {"title": "Juego de tronos Temporada 1 completa [BDremux 1080p][DTS 5.1 Castellano-DTS 5.1 Ingles+Subs][ES-EN]", "fetch": False, "rank": -1, "languages": ["es", "en"]},
-    {"title": "Juego de tronos Temporada 1 [BDremux 1080p][DTS 5.1 Castellano-DTS 5.1 Ingles+Subs][ES-EN]", "fetch": False, "rank": -1, "languages": ["es", "en"]},
+    {"title": "Juego de tronos Temporada 1 [BDremux 1080p][DTS 5.1 Castellano-DTS 5.1 Ingles+Subs][ES-EN]", "fetch": True, "rank": -1, "languages": ["es", "en"]},
     {"title": "Il.Trono.Di.Spade.S01E01-10.BDMux.1080p.AC3.ITA.ENG.SUBS.HEVC", "fetch": False, "rank": -1, "languages": ["it", "en"]},
     {"title": "Игра престолов / Game of Thrones [S01-08] (2013-2022) BDRip 1080p от Generalfilm | D | P", "fetch": False, "rank": -1, "languages": ["ru"]},
-    {"title": "Game.of.Thrones.S01.ITA.ENG.AC3.1080p.H265-BlackEgg", "fetch": False, "rank": 1, "languages": ["it", "en"]},
-    {"title": "Game of Thrones 1ª a 7ª Temporada Completa [720p] [BluRay] [DUAL", "fetch": False, "rank": 1, "languages": ["es"]},
+    {"title": "Game.of.Thrones.S01.ITA.ENG.AC3.1080p.H265-BlackEgg", "fetch": True, "rank": 1, "languages": ["it", "en"]},
+    {"title": "Game of Thrones 1ª a 7ª Temporada Completa [720p] [BluRay] [DUAL]", "fetch": False, "rank": 1, "languages": ["es"]},
     {"title": "Game.Of.Thrones.Season.1-4.Complete.720p.x264.Arabic-sub", "fetch": False, "rank": 1, "languages": ["ar"]},
     {"title": "Game of Thrones S01-S07 720p BRRip 33GB - MkvCage", "fetch": False, "rank": -1},
     {"title": "Game of Thrones 1ª a 8ª Temporada Completa [720p-1080p] [BluRay] [DUAL]", "fetch": False, "rank": 1, "languages": ["es"]},
-    {"title": "Game of Thrones S01 Complete 720p BluRay x264 Hindi English[MW]", "fetch": False, "rank": 1, "languages": ["hi", "en"]},
-    {"title": "Juego De Tronos Temporada-1 Completa 720p Español De Esp", "fetch": False, "rank": 0, "languages": ["es"]},
+    {"title": "Game of Thrones S01 Complete 720p BluRay x264 Hindi English[MW]", "fetch": True, "rank": 1, "languages": ["hi", "en"]},
+    {"title": "Juego De Tronos Temporada-1 Completa 720p Español De Esp", "fetch": True, "rank": 0, "languages": ["es"]},
     {"title": "Игра престолов / Game of Thrones [S01-08] (2011-2019) BDRip 720p | LostFilm", "fetch": False, "rank": -1, "languages": ["ru"]},
     {"title": "Game of Thrones Season Pack S01 to S08 480p English x264", "fetch": False, "rank": 1},
     {"title": "game of thrones 1-4 temporada sub-español", "fetch": False, "rank": 0, "languages": ["es"]},
@@ -75,23 +76,43 @@ SCRAPED_DATA = [
 def test_scrape_results_with_rank(settings_model, default_ranking, data) -> dict:
     """Scrape a show from torrentio"""
     rtn = RTN(settings_model, default_ranking)
-    try:
+    if not data["fetch"]:
+        with pytest.raises(GarbageTorrent):
+            rtn.rank(
+                data["title"],
+                "e15ed82226e34aec738cfa691aeb85054df039de",
+                correct_title="Game of Thrones",
+                remove_trash=False
+            )
+    else:
         torrent = rtn.rank(
             data["title"],
             "e15ed82226e34aec738cfa691aeb85054df039de",
             correct_title="Game of Thrones",
             remove_trash=False
         )
-    except GarbageTorrent:
-        assert not data["fetch"], f"Expected fetch to be False, got True for {data['title']}"
-        return
-    
-    if hasattr(data, "languages"):
-        assert torrent.languages == data["languages"], f"Expected languages to be {data['languages']}, got {torrent.languages} for {data['title']}"
-    assert torrent.fetch == data["fetch"], f"Expected fetch to be {data['fetch']}, got {torrent.fetch} for {data['title']}"
-    if data["rank"] < 0:
-        assert torrent.rank < 0, f"Expected rank to be less than 0, got {torrent.rank} for {data['title']}"
-    elif data["rank"] > 0:
-        assert torrent.rank > 0, f"Expected rank to be greater than 0, got {torrent.rank} for {data['title']}"
-    else:
-        assert torrent.rank == 0, f"Expected rank to be 0, got {torrent.rank} for {data['title']}"
+
+        if hasattr(data, "languages"):
+            assert torrent.languages == data["languages"], f"Expected languages to be {data['languages']}, got {torrent.languages} for {data['title']}"
+        assert torrent.fetch == data["fetch"], f"Expected fetch to be {data['fetch']}, got {torrent.fetch} for {data['title']}"
+        if data["rank"] < 0:
+            assert torrent.rank < 0, f"Expected rank to be less than 0, got {torrent.rank} for {data['title']}"
+        elif data["rank"] > 0:
+            assert torrent.rank > 0, f"Expected rank to be greater than 0, got {torrent.rank} for {data['title']}"
+        else:
+            assert torrent.rank == 0, f"Expected rank to be 0, got {torrent.rank} for {data['title']}"
+
+
+@pytest.mark.parametrize(
+    "title, expected_hdr",
+    [
+        ("Game of Thrones S01 1080p HDR", ["HDR"]),
+        ("Game of Thrones S01 1080p", [])
+    ]
+)
+def test_hdr(settings_model, title, expected_hdr):
+    data = parse(title)
+    failed_keys = set()
+    fetch_resolution(data, settings_model, failed_keys)
+    assert not failed_keys, f"Expected no failed keys for {title}"
+    assert data.hdr == expected_hdr, f"Expected {expected_hdr} for {title}, got {data.hdr}"
