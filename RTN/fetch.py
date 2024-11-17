@@ -32,7 +32,7 @@ COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh", "ar", "fr"}
 ALL = ANIME | NON_ANIME
 
 
-def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = False) -> bool:
+def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = True) -> tuple[bool, set]:
     """
     Check user settings and unwanted quality to determine if torrent should be fetched.
     
@@ -56,27 +56,27 @@ def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = Fa
 
     if speed_mode:
         if trash_handler(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if adult_handler(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if check_required(data, settings):
-            return True
+            return True, failed_keys
         if check_exclude(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if language_handler(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if fetch_resolution(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if fetch_quality(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if fetch_audio(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if fetch_hdr(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if fetch_codec(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
         if fetch_other(data, settings, failed_keys):
-            raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+            return False, failed_keys
     else:
         trash_handler(data, settings, failed_keys)
         adult_handler(data, settings, failed_keys)
@@ -91,9 +91,9 @@ def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = Fa
         fetch_other(data, settings, failed_keys)
 
     if failed_keys:
-        raise GarbageTorrent(f"'{data.raw_title}' denied by: {', '.join(failed_keys)}")
+        return False, failed_keys
 
-    return True
+    return True, failed_keys
 
 def trash_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the title is trash based on user settings."""

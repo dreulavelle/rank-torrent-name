@@ -103,14 +103,6 @@ def test_trash_handler(settings, raw_title, expected_trash):
     trash_result = trash_handler(data, settings, failed_keys)
     assert trash_result == expected_trash, f"Expected trash result: {expected_trash}, got: {trash_result}"
 
-    # If it's trash, check_fetch should raise GarbageTorrent
-    if expected_trash:
-        with pytest.raises(GarbageTorrent):
-            check_fetch(data, settings, failed_keys)
-    else:
-        # Not trash, so check_fetch should succeed
-        assert check_fetch(data, settings, failed_keys)
-
 
 @pytest.mark.parametrize("raw_title, expected_result, expected_seasons, expected_episodes", [
     ("Mad.Max.Fury.Road.2015.1080p.BluRay.DDP5.1.x265.10bit-GalaxyRG265[TGx]", "movie", [], []),

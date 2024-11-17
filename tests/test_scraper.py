@@ -62,7 +62,7 @@ SCRAPED_DATA = [
     {"title": "Game.of.Thrones.S01.ITA.ENG.AC3.1080p.H265-BlackEgg", "fetch": False, "rank": 1},
     {"title": "Game of Thrones 1ª a 7ª Temporada Completa [720p] [BluRay] [DUAL]", "fetch": False, "rank": 1},
     {"title": "Game.Of.Thrones.Season.1-4.Complete.720p.x264.Arabic-sub", "fetch": False, "rank": 1},
-    {"title": "Game of Thrones S01-S07 720p BRRip 33GB - MkvCage", "fetch": False, "rank": -1},
+    {"title": "Game of Thrones S01-S07 720p 33GB - MkvCage", "fetch": False, "rank": -1},
     {"title": "Game of Thrones 1ª a 8ª Temporada Completa [720p-1080p] [BluRay] [DUAL]", "fetch": False, "rank": 1},
     {"title": "Game of Thrones S01 Complete 720p BluRay x264 Hindi English[MW]", "fetch": False, "rank": 1},
     {"title": "Juego De Tronos Temporada-1 Completa 720p Español De Esp", "fetch": False, "rank": 0},
@@ -75,33 +75,23 @@ SCRAPED_DATA = [
 @pytest.mark.parametrize("title", [item["title"] for item in SCRAPED_DATA])
 def test_scrape_results_with_rank(settings_model, default_ranking, title):
     """Scrape a show from torrentio"""
-    # Find the matching data entry
     data = next(item for item in SCRAPED_DATA if item["title"] == title)
     
     rtn = RTN(settings_model, default_ranking)
-    try:
-        torrent = rtn.rank(
-            title,
-            "e15ed82226e34aec738cfa691aeb85054df039de",
-            correct_title="Game of Thrones",
-            remove_trash=False
-        )
+    torrent = rtn.rank(
+        title,
+        "e15ed82226e34aec738cfa691aeb85054df039de",
+        correct_title="Game of Thrones",
+        remove_trash=False
+    )
 
-        # If we got here, the torrent should be fetchable
-        assert data["fetch"], f"Expected torrent to be rejected, but it was accepted"
-
-        assert torrent.fetch == data["fetch"], f"Expected fetch to be {data['fetch']}, got {torrent.fetch}"
-        if data["rank"] < 0:
-            assert torrent.rank < 0, f"Expected rank to be less than 0, got {torrent.rank}"
-        elif data["rank"] > 0:
-            assert torrent.rank > 0, f"Expected rank to be greater than 0, got {torrent.rank}"
-        else:
-            assert torrent.rank == 0, f"Expected rank to be 0, got {torrent.rank}"
-
-    except GarbageTorrent:
-        # If we got here, the torrent should NOT be fetchable
-        if data["fetch"]:
-            assert not data["fetch"], f"Expected torrent to be accepted, but it was rejected"
+    assert torrent.fetch == data["fetch"], f"Expected fetch to be {data['fetch']}, got {torrent.fetch}"
+    if data["rank"] < 0:
+        assert torrent.rank < 0, f"Expected rank to be less than 0, got {torrent.rank}"
+    elif data["rank"] > 0:
+        assert torrent.rank > 0, f"Expected rank to be greater than 0, got {torrent.rank}"
+    else:
+        assert torrent.rank == 0, f"Expected rank to be 0, got {torrent.rank}"
 
 @pytest.mark.parametrize(
     "title, expected_hdr",

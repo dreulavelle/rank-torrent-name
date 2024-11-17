@@ -129,12 +129,12 @@ class RTN:
             aliases = kwargs.get("aliases", {})
             lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold, aliases)
 
-        fetch: bool = check_fetch(parsed_data, self.settings, speed_mode)
+        is_fetchable, failed_keys = check_fetch(parsed_data, self.settings, speed_mode)
         rank: int = get_rank(parsed_data, self.settings, self.ranking_model)
 
         if remove_trash:
-            if not fetch:
-                raise GarbageTorrent(f"'{raw_title}' has been identified as trash based on user settings and will be ignored.")
+            if not is_fetchable:
+                raise GarbageTorrent(f"'{parsed_data.raw_title}' denied by: {', '.join(failed_keys)}")
             if correct_title and lev_ratio < self.lev_threshold:
                 raise GarbageTorrent(f"'{raw_title}' does not match the correct title. correct title: '{correct_title}', parsed title: '{parsed_data.parsed_title}'")
 
@@ -145,7 +145,7 @@ class RTN:
             infohash=infohash,
             raw_title=raw_title,
             data=parsed_data,
-            fetch=fetch,
+            fetch=is_fetchable,
             rank=rank,
             lev_ratio=lev_ratio
         )
