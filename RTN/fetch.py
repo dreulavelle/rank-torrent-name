@@ -289,7 +289,7 @@ def fetch_hdr(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bo
 def fetch_other(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """Check if the other data is fetchable based on user settings."""
     fetch_map = {
-        "_3d": ("extras", "3d"),
+        "_3d": ("extras", "three_d"),
         "converted": ("extras", "converted"),
         "documentary": ("extras", "documentary"),
         "dubbed": ("extras", "dubbed"),

@@ -20,10 +20,12 @@ Note:
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, TypeAlias, TypedDict, Literal, Union
 
 import regex
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from regex import Pattern
 
 from RTN.exceptions import GarbageTorrent
@@ -433,172 +435,263 @@ class Resolution(str, Enum):
     UNKNOWN = "unknown"  # default
 
 
+class ConfigModelBase(BaseModel):
+    """Base class for config models that need dict-like behavior"""
+    def __getitem__(self, key: str) -> Any:
+        return getattr(self, key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        try:
+            return self[key]
+        except (KeyError, AttributeError):
+            return default
+
+
+class ResolutionConfig(ConfigModelBase):
+    """Configuration for which resolutions are enabled."""
+    def __getitem__(self, key: str) -> Any:
+        # Special handling for resolution fields - add 'r' prefix
+        field_name = f"r{key}" if key.endswith('p') else key
+        return getattr(self, field_name)
+
+    r2160p: bool = Field(default=False)
+    r1080p: bool = Field(default=True)
+    r720p: bool = Field(default=True)
+    r480p: bool = Field(default=False)
+    r360p: bool = Field(default=False)
+    unknown: bool = Field(default=True)
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        alias_generator=lambda field_name: field_name[1:] if field_name.startswith('r') and field_name.endswith('p') else field_name
+    )
+
+
+class OptionsConfig(ConfigModelBase):
+    """Configuration for various options."""
+    title_similarity: float = Field(default=0.85)
+    remove_all_trash: bool = Field(default=True)
+    remove_ranks_under: int = Field(default=-10000)
+    remove_unknown_languages: bool = Field(default=False)
+    allow_english_in_languages: bool = Field(default=False)
+    enable_fetch_speed_mode: bool = Field(default=True)
+    remove_adult_content: bool = Field(default=True)
+
+
+class LanguagesConfig(ConfigModelBase):
+    """Configuration for which languages are enabled."""
+    required: List[str] = Field(default_factory=list)
+    exclude: List[str] = Field(default=["ar", "hi", "fr", "es", "de", "ru", "pt", "it"])
+    preferred: List[str] = Field(default_factory=list)
+
+
 class CustomRank(BaseModel):
     """Custom Ranks used in SettingsModel."""
-    fetch: bool = True
-    use_custom_rank: bool = False
-    rank: int = 0
+    fetch: bool = Field(default=True)
+    use_custom_rank: bool = Field(default=False)
+    rank: int = Field(default=0)
+
+
+class QualityRankModel(ConfigModelBase):
+    """Ranking configuration for quality attributes."""
+    av1: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    avc: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    bluray: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dvd: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    hdtv: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    hevc: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    mpeg: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    remux: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    vhs: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    web: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    webdl: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    webmux: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    xvid: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+
+
+class RipsRankModel(ConfigModelBase):
+    """Ranking configuration for rips attributes."""
+    bdrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    brrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dvdrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    hdrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    ppvrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    satrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    tvrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    uhdrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    vhsrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    webdlrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    webrip: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+
+
+class HdrRankModel(ConfigModelBase):
+    """Ranking configuration for HDR attributes."""
+    def __getitem__(self, key: str) -> Any:
+        # Special handling for '10bit' key
+        if key == '10bit':
+            return self.bit10
+        return super().__getitem__(key)
+
+    bit10: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dolby_vision: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    hdr: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    hdr10plus: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    sdr: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+
+
+class AudioRankModel(ConfigModelBase):
+    """Ranking configuration for audio attributes."""
+    aac: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    ac3: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    atmos: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dolby_digital: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dolby_digital_plus: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dts_lossy: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dts_lossless: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    eac3: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    flac: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    mono: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    mp3: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    stereo: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    surround: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    truehd: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+
+
+class ExtrasRankModel(ConfigModelBase):
+    """Ranking configuration for extras attributes."""
+    three_d: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False), alias="3d")
+    converted: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    documentary: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    dubbed: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    edition: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    hardcoded: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    network: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    proper: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    repack: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    retail: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    site: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    subbed: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    upscaled: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    scene: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        alias_generator=lambda field_name: "3d" if field_name == "three_d" else field_name
+    )
+
+
+class TrashRankModel(ConfigModelBase):
+    """Ranking configuration for trash attributes."""
+    cam: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    clean_audio: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    pdtv: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    r5: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    screener: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    size: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    telecine: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+    telesync: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
+
+
+class CustomRanksConfig(ConfigModelBase):
+    """Configuration for custom ranks."""
+    quality: QualityRankModel = Field(default_factory=QualityRankModel)
+    rips: RipsRankModel = Field(default_factory=RipsRankModel)
+    hdr: HdrRankModel = Field(default_factory=HdrRankModel)
+    audio: AudioRankModel = Field(default_factory=AudioRankModel)
+    extras: ExtrasRankModel = Field(default_factory=ExtrasRankModel)
+    trash: TrashRankModel = Field(default_factory=TrashRankModel)
+
+
+PatternType: TypeAlias = Union[Pattern, str]
+ProfileType: TypeAlias = Literal["default", "best", "custom"]
+CustomRankDict: TypeAlias = Dict[str, CustomRank]
 
 
 class SettingsModel(BaseModel):
     """
     Represents user-defined settings for ranking torrents, including preferences for filtering torrents
-    based on regex patterns and customizing ranks for specific torrent attributes. This model allows for
-    advanced customization and fine-grained control over the ranking process.
+    based on regex patterns and customizing ranks for specific torrent attributes.
 
     Attributes:
         profile (str): Identifier for the settings profile, allowing for multiple configurations.
         require (List[str | Pattern]): Patterns torrents must match to be considered.
         exclude (List[str | Pattern]): Patterns that, if matched, result in torrent exclusion.
         preferred (List[str | Pattern]): Patterns indicating preferred attributes in torrents. Given +10000 points by default.
-        custom_ranks (Dict[str, Dict[str, CustomRank]]): Custom ranking configurations for specific attributes, allowing users to define how different torrent qualities and features affect the overall rank.
+        resolutions (ResolutionConfig): Configuration for which resolutions are enabled.
+        options (OptionsConfig): Configuration for various options like title similarity and trash removal.
+        languages (LanguagesConfig): Configuration for which languages are enabled, excluded, and preferred.
+        custom_ranks (CustomRanksConfig): Custom ranking configurations for specific attributes.
 
     Methods:
-        __init__(**kwargs): Initializes the settings model with user-defined preferences. Automatically compiles string regex patterns into Patterns, taking into account case sensitivity based on the pattern syntax.
-        __getitem__(item: str) -> CustomRank: Access custom rank settings via attribute keys.
+        compile_and_validate_patterns: Compiles string patterns to regex.Pattern objects, handling case sensitivity.
 
     Note:
-        - The `profile` attribute allows users to define multiple settings profiles for different use cases.
-        - The `require`, `exclude`, and `preferred` attributes are optional!
-        - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
-        - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.
+        - Patterns enclosed in '/' are compiled as case-sensitive.
         - Patterns not enclosed are compiled as case-insensitive by default.
-
-    This model supports advanced regex features, enabling powerful and precise filtering and ranking based on torrent titles and attributes.
+        - The model supports advanced regex features for precise filtering and ranking.
 
     Example:
         >>> settings = SettingsModel(
-                profile="default",
-                require=["\\b4K|1080p\\b", "720p"],
-                exclude=["CAM", "TS"],
-                preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/"],
-                ...
-                },
-            )
-        >>> print([pattern.pattern for pattern in settings.require])
+        ...     profile="default",
+        ...     require=["\\b4K|1080p\\b", "720p"],
+        ...     exclude=["CAM", "TS"],
+        ...     preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/"],
+        ...     resolutions=ResolutionConfig(r1080p=True, r720p=True),
+        ...     options=OptionsConfig(remove_all_trash=True),
+        ...     languages=LanguagesConfig(required=["en"]),
+        ...     custom_ranks=CustomRanksConfig()
+        ... )
+        >>> print([p.pattern for p in settings.require])
         ['\\b4K|1080p\\b', '720p']
-        >>> print([pattern.pattern for pattern in settings.preferred])
-        ['BluRay', '\\bS\\d+', 'HDR|HDR10']
-        >>> print(settings.custom_ranks["uhd"].rank)
-        150
+        >>> print(settings.resolutions.r1080p)
+        True
+        >>> print(settings.options.remove_all_trash)
+        True
     """
-    profile: str = "default"
-    require: List[str | Pattern] = []
-    exclude: List[str | Pattern] = []
-    preferred: List[str | Pattern] = []
-    resolutions: Dict[str, bool] = {
-        "2160p": False,
-        "1080p": True,
-        "720p": True,
-        "480p": False,
-        "360p": False,
-        "unknown": True
-    }
-    options: Dict[str, Any] = {
-        "title_similarity": 0.85,
-        "remove_all_trash": True,
-        "remove_ranks_under": -10000,
-        "remove_unknown_languages": False,
-        "allow_english_in_languages": False,
-        "enable_fetch_speed_mode": True,
-        "remove_adult_content": True
-    }
-    languages: Dict[str, Any] = {
-        "required": [],
-        "exclude": ["ar", "hi", "fr", "es", "de", "ru", "pt", "it"],  # Arabic, Hindi, French, Spanish, German, Russian, Portuguese, Italian
-        "preferred": [],
-    }
-    custom_ranks: Dict[str, Dict[str, CustomRank]] = {
-        "quality": {
-            "av1": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "avc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "bluray": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dvd": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "hdtv": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "hevc": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "mpeg": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "remux": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "vhs": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "web": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "webdl": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "webmux": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "xvid": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-        },
-        "rips": {
-            "bdrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "brrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "dvdrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "hdrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "ppvrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "satrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "tvrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "uhdrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "vhsrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "webdlrip": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "webrip": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-        },
-        "hdr": {
-            "10bit": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dolby_vision": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "hdr": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "hdr10plus": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "sdr": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-        },
-        "audio": {
-            "aac": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "ac3": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "atmos": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dolby_digital": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dolby_digital_plus": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dts_lossy": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "dts_lossless": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "eac3": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "flac": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "mono": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "mp3": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "stereo": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "surround": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "truehd": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-        },
-        "extras": {
-            "3d": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "converted": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "documentary": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "dubbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "edition": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "hardcoded": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "network": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "proper": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "repack": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "retail": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "site": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "subbed": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-            "upscaled": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "scene": CustomRank(fetch=True, use_custom_rank=False, rank=0),
-        },
-        "trash": {
-            "cam": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "clean_audio": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "pdtv": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "r5": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "screener": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "size": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "telecine": CustomRank(fetch=False, use_custom_rank=False, rank=0),
-            "telesync": CustomRank(fetch=False, use_custom_rank=False, rank=0)
-        },
-    }
+    profile: ProfileType = Field(
+        default="default",
+        description="Identifier for the settings profile"
+    )
+    require: List[PatternType] = Field(
+        default_factory=list,
+        description="Patterns torrents must match to be considered"
+    )
+    exclude: List[PatternType] = Field(
+        default_factory=list,
+        description="Patterns that, if matched, result in torrent exclusion"
+    )
+    preferred: List[PatternType] = Field(
+        default_factory=list,
+        description="Patterns indicating preferred attributes in torrents"
+    )
+    resolutions: ResolutionConfig = Field(
+        default_factory=ResolutionConfig,
+        description="Configuration for enabled resolutions"
+    )
+    options: OptionsConfig = Field(
+        default_factory=OptionsConfig,
+        description="General options for torrent filtering and ranking"
+    )
+    languages: LanguagesConfig = Field(
+        default_factory=LanguagesConfig,
+        description="Language preferences and restrictions"
+    )
+    custom_ranks: CustomRanksConfig = Field(
+        default_factory=CustomRanksConfig,
+        description="Custom ranking configurations for specific attributes"
+    )
 
     @model_validator(mode="before")
-    def compile_and_validate_patterns(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def compile_and_validate_patterns(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Compile string patterns to regex.Pattern, keeping compiled patterns unchanged."""
         
-        def compile_pattern(pattern: Any) -> regex.Pattern:
+        def compile_pattern(pattern: PatternType) -> Pattern:
             """Helper function to compile a single pattern."""
             if isinstance(pattern, str):
                 if pattern.startswith("/") and pattern.endswith("/"):  # case-sensitive
                     return regex.compile(pattern[1:-1])
                 return regex.compile(pattern, regex.IGNORECASE)  # case-insensitive
-            elif isinstance(pattern, regex.Pattern):
+            elif isinstance(pattern, Pattern):
                 return pattern  # Keep already compiled patterns as is
             raise ValueError(f"Invalid pattern type: {type(pattern)}")
         
@@ -607,9 +700,85 @@ class SettingsModel(BaseModel):
         
         return values
 
-    class Config:
-        arbitrary_types_allowed = True
-        from_attributes = True
-        json_encoders = {
-            Pattern: lambda v: v.pattern
+    def __getitem__(self, item: str) -> CustomRankDict:
+        """Access custom rank settings via attribute keys."""
+        return self.custom_ranks[item]
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        from_attributes=True,
+        json_encoders={
+            Pattern: lambda v: f"/{v.pattern}/" if not v.flags & regex.IGNORECASE else v.pattern
         }
+    )
+
+    def save(self, path: Union[str, Path]) -> None:
+        """
+        Save settings to a JSON file.
+
+        Args:
+            path: Path where the settings file should be saved.
+                 Can be either a string or Path object.
+
+        Example:
+            >>> settings = SettingsModel()
+            >>> settings.save("my_settings.json")
+            >>> settings.save(Path("configs/my_settings.json"))
+        """
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with path.open('w', encoding='utf-8') as f:
+            json.dump(self.model_dump(mode='json'), f, indent=4)
+
+    @classmethod
+    def load(cls, path: Union[str, Path]) -> 'SettingsModel':
+        """
+        Load settings from a JSON file.
+
+        Args:
+            path: Path to the settings file.
+
+        Returns:
+            SettingsModel: A new settings instance with the loaded configuration.
+
+        Raises:
+            FileNotFoundError: If the settings file doesn't exist.
+            JSONDecodeError: If the settings file is corrupted or contains invalid JSON.
+            ValidationError: If the settings file contains invalid configuration.
+        """
+        path = Path(path)
+        
+        if not path.exists():
+            raise FileNotFoundError(f"Settings file not found: {path}")
+            
+        with path.open('r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        return cls.model_validate(data)
+
+    @classmethod
+    def load_or_default(cls, path: Optional[Union[str, Path]] = None) -> 'SettingsModel':
+        """
+        Load settings from a file if it exists, otherwise create default settings and save them.
+
+        Args:
+            path: Optional path to the settings file.
+                If None, returns default settings without saving.
+
+        Returns:
+            SettingsModel: Either the loaded settings or default settings.
+
+        Raises:
+            JSONDecodeError: If the settings file is corrupted or contains invalid JSON.
+        """
+        if path is None:
+            return cls()
+            
+        path = Path(path)
+        try:
+            return cls.load(path)
+        except FileNotFoundError:
+            settings = cls()
+            settings.save(path)
+            return settings

@@ -250,7 +250,7 @@ def calculate_extra_ranks(data: ParsedData, settings: SettingsModel, rank_model:
     total_rank = 0
 
     if data._3d:
-        total_rank += rank_model.remux if not settings.custom_ranks["extras"]["3d"].use_custom_rank else settings.custom_ranks["extras"]["3d"].rank
+        total_rank += rank_model.remux if not settings.custom_ranks["extras"]["three_d"].use_custom_rank else settings.custom_ranks["extras"]["three_d"].rank
     if data.converted:
         total_rank += rank_model.converted if not settings.custom_ranks["extras"]["converted"].use_custom_rank else settings.custom_ranks["extras"]["converted"].rank
     if data.documentary:
