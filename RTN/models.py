@@ -694,9 +694,12 @@ class SettingsModel(BaseModel):
             elif isinstance(pattern, Pattern):
                 return pattern  # Keep already compiled patterns as is
             raise ValueError(f"Invalid pattern type: {type(pattern)}")
-        
+
         for field in ("require", "exclude", "preferred"):
-            values[field] = [compile_pattern(p) for p in values.get(field, [])]
+            if field not in values or values[field] is None:
+                values[field] = []
+            elif isinstance(values[field], (list, tuple)):
+                values[field] = [compile_pattern(p) for p in values[field]]
         
         return values
 
