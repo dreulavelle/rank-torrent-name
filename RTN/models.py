@@ -603,7 +603,7 @@ class CustomRanksConfig(ConfigModelBase):
 
 
 PatternType: TypeAlias = Union[Pattern, str]
-ProfileType: TypeAlias = Literal["default", "best", "custom"]
+ProfileType: TypeAlias = str
 CustomRankDict: TypeAlias = Dict[str, CustomRank]
 
 
@@ -702,6 +702,13 @@ class SettingsModel(BaseModel):
                 values[field] = [compile_pattern(p) for p in values[field]]
         
         return values
+
+    @field_validator('profile')
+    def validate_profile(cls, v: str) -> str:
+        """Validate profile field and default to 'custom' if not a standard profile"""
+        if v not in ('default', 'best', 'custom'):
+            return 'custom'
+        return v
 
     def __getitem__(self, item: str) -> CustomRankDict:
         """Access custom rank settings via attribute keys."""

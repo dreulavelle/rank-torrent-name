@@ -136,7 +136,7 @@ class RTN:
             if not fetch:
                 raise GarbageTorrent(f"'{raw_title}' has been identified as trash based on user settings and will be ignored.")
             if correct_title and lev_ratio < self.lev_threshold:
-                raise GarbageTorrent(f"'{raw_title}' does not match the correct title, got ratio of {lev_ratio}")
+                raise GarbageTorrent(f"'{raw_title}' does not match the correct title. correct title: '{correct_title}', parsed title: '{parsed_data.parsed_title}'")
 
         if rank < self.settings.options["remove_ranks_under"]:
             raise GarbageTorrent(f"'{raw_title}' does not meet the minimum rank requirement, got rank of {rank}")
