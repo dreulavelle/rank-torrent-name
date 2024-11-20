@@ -1,0 +1,98 @@
+.md-typeset .headerlink {
+    font-family: sans-serif;
+    font-size: 0.8em;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.md-typeset .headerlink::after {
+    content: " Read Below 🔥";
+    animation: beat-fade 1s infinite;
+}
+
+.md-typeset h1:hover .headerlink,
+.md-typeset h2:hover .headerlink,
+.md-typeset h3:hover .headerlink,
+.md-typeset h4:hover .headerlink,
+.md-typeset h5:hover .headerlink,
+.md-typeset h6:hover .headerlink {
+    opacity: 1;
+    color: #EE6C4D;
+}
+
+.md-typeset .headerlink:hover {
+    opacity: 1;
+}
+
+@keyframes beat-fade {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+body {
+    background-color: #2B2D42;
+}
+
+
+.md-header__button.md-logo {
+    color: #2B2D42;
+    font-size: 1.125em; /* Equivalent to fa-lg */
+    animation: beat-fade 1s infinite;
+}
+
+.md-header.md-header--lifted.md-header--shadow {
+    background-color: #2B2D42;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 850;
+    color: #EDF2F4;
+}
+
+/* Header styles */
+.md-header {
+    background-color: #2B2D42;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 700;
+}
+
+/* Logo styles */
+.md-header__button.md-logo {
+    margin: 0.2rem;
+    padding: 0.2rem;
+}
+
+.md-header__button.md-logo svg {
+    fill: #d76e19;
+    transition: fill 0.3s ease;
+}
+
+/* Title styles */
+.md-header__title {
+    font-weight: 700;
+    color: #dbdbdb;
+    transition: color 0.3s ease;
+}
+
+/* Navigation styles */
+.md-tabs {
+    background-color: #EDF2F4;
+    color: #2B2D42;
+    /* transition: background-color 0.3s ease; */
+}
+
+
+
+@media screen and (max-width: 76.1875em) {
+    .md-header__title {
+        font-size: 1.2rem;
+    }
+    
+    .md-header__button.md-logo {
+        display: none;
+    }
+}
