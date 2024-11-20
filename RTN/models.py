@@ -19,10 +19,10 @@ Note:
 - The `SettingsModel` model allows users to define custom settings for ranking torrents based on quality attributes and regex patterns.
 """
 
-from enum import Enum
 import json
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypeAlias, TypedDict, Literal, Union
+from typing import Any, Dict, List, Optional, TypeAlias, Union
 
 import regex
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -145,7 +145,7 @@ class Torrent(BaseModel):
     torrent: Optional[str] = None
     seeders: Optional[int] = 0
     leechers: Optional[int] = 0
-    trackers: Optional[List[Any]] = []
+    trackers: Optional[List[str]] = []
     data: ParsedData
     fetch: bool = False
     rank: int = 0

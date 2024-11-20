@@ -12,9 +12,9 @@ Arguments:
 For more information on each function, refer to the respective docstrings.
 """
 import unicodedata
-import regex
-
 from typing import Any
+
+import regex
 
 # Translation table for normalizing unicode characters
 translationTable: dict[str, Any] = {
