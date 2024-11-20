@@ -632,13 +632,13 @@ pyyaml = ">=5.1"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.44"
+version = "9.5.45"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.44-py3-none-any.whl", hash = "sha256:47015f9c167d58a5ff5e682da37441fc4d66a1c79334bfc08d774763cacf69ca"},
-    {file = "mkdocs_material-9.5.44.tar.gz", hash = "sha256:f3a6c968e524166b3f3ed1fb97d3ed3e0091183b0545cedf7156a2a6804c56c0"},
+    {file = "mkdocs_material-9.5.45-py3-none-any.whl", hash = "sha256:a9be237cfd0be14be75f40f1726d83aa3a81ce44808dc3594d47a7a592f44547"},
+    {file = "mkdocs_material-9.5.45.tar.gz", hash = "sha256:286489cf0beca4a129d91d59d6417419c63bceed1ce5cd0ec1fc7e1ebffb8189"},
 ]
 
 [package.dependencies]
@@ -752,13 +752,13 @@ lint = ["black"]
 
 [[package]]
 name = "parsett"
-version = "1.5.0"
+version = "1.5.1"
 description = "PTT"
 optional = false
 python-versions = "<4.0,>=3.11"
 files = [
-    {file = "parsett-1.5.0-py3-none-any.whl", hash = "sha256:2c53a757d81ca1de52042c4d320dae05b1013814a8950d7a63d81abf28a2e6dc"},
-    {file = "parsett-1.5.0.tar.gz", hash = "sha256:fb7d37b3697a51f3483096cb121b4598968b8f1ee6478880b3886386d938c7c4"},
+    {file = "parsett-1.5.1-py3-none-any.whl", hash = "sha256:79c7a13e27e28a7975b1a5f3b2da551f86232e5227d424ef43aa12f782c5aab6"},
+    {file = "parsett-1.5.1.tar.gz", hash = "sha256:f9775a536f806d8a6b4fe719b0ee2356e110b629aedb1dc628a151e890168da5"},
 ]
 
 [package.dependencies]
@@ -1502,4 +1502,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "df7b294e7fef1dc73b4001405e21a882e875d68aa58218fdfbab8dbd294f04c2"
+content-hash = "dea4d10f85f15d48e9ee81dbad32dd09f719716d22219e1c98794fb375eb4ce2"

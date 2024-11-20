@@ -57,7 +57,7 @@ def test_fetch_resolution(settings: SettingsModel, raw_title: str, expected: boo
     ("This is a SpiDER test case", True, "Should match because 'spider' is not case-sensitive and required"),
     # Ignored
     ("Awesome BluRay Release", False, "Should not match because 'awesome' is required as case-sensitive"),
-    ("Exclusive HDR10+ Content", False, "Should fail because it's not in the list of required patterns"),
+    ("Exclusive HDR10+ Content", False, "Should fail because it's not in the list of required patterns")
 ])
 def test_explicit_check_required(raw_title, expected, message):
     data = parse(raw_title)
@@ -83,3 +83,14 @@ def test_explicit_check_excluded(raw_title, exclude_patterns, expected_error):
         assert any('exclude_regex' in key for key in failed_keys), f"Expected 'exclude_regex' in failed keys. Got {failed_keys}"
     else:
         assert is_fetchable
+
+
+@pytest.mark.parametrize("raw_title, expected", [
+    ("The Adam Project 2022 1080p NF WEB-DL DDP 5 1 Atmos DoVi HDR HEVC-SiC mkv", False)
+])
+def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
+    data = parse(raw_title)
+    is_fetchable, failed_keys = check_fetch(data, settings)
+    assert is_fetchable is expected, f"Expected {expected} for {raw_title}"
+    if not expected:
+        assert failed_keys, f"Expected no failed keys, got {failed_keys}"

@@ -533,7 +533,7 @@ class HdrRankModel(ConfigModelBase):
         return super().__getitem__(key)
 
     bit10: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
-    dolby_vision: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    dolby_vision: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
     hdr: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     hdr10plus: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     sdr: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))

@@ -14,8 +14,6 @@ Parameters:
 
 For more information on each function, refer to the respective docstrings.
 """
-
-from .exceptions import GarbageTorrent
 from .models import ParsedData, SettingsModel
 
 ANIME = {"ja", "zh", "ko"}
