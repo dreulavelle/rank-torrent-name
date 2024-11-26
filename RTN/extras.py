@@ -62,13 +62,14 @@ def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85
     return max(ratio_set)
 
 
-def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
+def sort_torrents(torrents: Set[Torrent], bucket_limit: int = None) -> Dict[str, Torrent]:
     """
     Sorts a set of Torrent objects by their resolution bucket and then by their rank in descending order.
     Returns a dictionary with infohash as keys and Torrent objects as values.
 
     Args:
         `torrents` (Set[Torrent]): A set of Torrent objects.
+        `bucket_limit` (int, optional): The maximum number of torrents to return from each bucket.
 
     Raises:
         `TypeError`: If the input is not a set of Torrent objects.
@@ -113,6 +114,20 @@ def sort_torrents(torrents: Set[Torrent]) -> Dict[str, Torrent]:
         key=lambda torrent: (get_bucket(torrent), torrent.rank if torrent.rank is not None else float("-inf")),
         reverse=True
     )
+
+    if bucket_limit and bucket_limit > 0:
+        bucket_groups: Dict[int, List[Torrent]] = {}
+        for torrent in sorted_torrents:
+            bucket = get_bucket(torrent)
+            if bucket not in bucket_groups:
+                bucket_groups[bucket] = []
+            bucket_groups[bucket].append(torrent)
+
+        result = {}
+        for bucket_torrents in bucket_groups.values():
+            for torrent in bucket_torrents[:bucket_limit]:
+                result[torrent.infohash] = torrent
+        return result
 
     return {torrent.infohash: torrent for torrent in sorted_torrents}
 

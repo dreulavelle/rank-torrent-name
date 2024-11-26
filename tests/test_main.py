@@ -126,3 +126,41 @@ def test_adult_handler(settings, raw_title, expected_adult):
     failed_keys = set()
     adult_result = adult_handler(data, settings, failed_keys)
     assert adult_result == expected_adult, f"Expected adult result: {expected_adult}, got: {adult_result}"
+
+
+def test_sort_torrents_with_bucket_limit(settings, ranking):
+    rtn = RTN(settings, ranking)
+
+    torrents = [
+        # Unknown resolution torrents
+        ("Movie.2024.1.WEB-DL.mkv", "efe476b52c7f5504042a036bd32adf2af9327e91"),
+        ("Movie.2024.2.WEB-DL.mkv", "a44e8e42dd21212c2da7a7ff5592cb365b10ee5a"), 
+        ("Movie.2024.3.WEB-DL.mkv", "ecb8bd9f5c3682bb08b62264cc53a8fe095946f0"),
+        
+        # 1080p torrents
+        ("Movie.2024.4.1080p.WEB-DL.mkv", "bc10e7a6895ef41633cf4966e880fd7da14bff28"),
+        ("Movie.2024.5.1080p.BluRay.mkv", "d0eb09414bb94152b4ffbe81023894a568118dd7"),
+        ("Movie.2024.6.1080p.WEBDL.mkv", "611df0d2d1fd026896d013ecedeef1c1a4fc16a9"),
+        
+        # 720p torrents
+        ("Movie.2024.720p.WEB-DL.mkv", "e71e1f9d57e17fce640af4410a49e28bba18dd1a"),
+        ("Movie.2024.720p.BluRay.mkv", "d61e9402608769c6a1d02a1705a059f148b439bf"),
+        ("Movie.2024.720p.WEBDL.mkv", "38b640c9b942b95565fb69eb17470b1b8d0e23bc"),
+    ]
+
+    torrent_objs = {rtn.rank(torrent, hash) for torrent, hash in torrents}
+    sorted_torrents = sort_torrents(torrent_objs, bucket_limit=2)
+
+    # Group results by resolution for easier testing
+    unknown_results = [hash for hash, torrent in sorted_torrents.items() if "1080p" not in torrent.raw_title and "720p" not in torrent.raw_title]
+    fhd_results = [hash for hash, torrent in sorted_torrents.items() if "1080p" in torrent.raw_title]
+    hd_results = [hash for hash, torrent in sorted_torrents.items() if "720p" in torrent.raw_title]
+
+    # Verify we get at most 2 torrents per resolution bucket
+    assert len(unknown_results) == 2, f"Expected max 2 unknown torrents, got {len(unknown_results)}"
+    assert len(fhd_results) == 2, f"Expected max 2 1080p torrents, got {len(fhd_results)}"
+    assert len(hd_results) == 2, f"Expected max 2 720p torrents, got {len(hd_results)}"
+
+    # Verify total number of results
+    expected_total = 6  # 2 from each resolution bucket
+    assert len(sorted_torrents) == expected_total, f"Expected {expected_total} total torrents, got {len(sorted_torrents)}"
