@@ -122,6 +122,12 @@ def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set
         failed_keys.add("unknown_language")
         return True
 
+    required_languages = set(settings.languages.get("required", []))
+    if required_languages:
+        if not data.languages or not any(lang in required_languages for lang in data.languages):
+            failed_keys.add("required_language")
+            return True
+
     exclude_languages = set(settings.languages.get("exclude", []))
     if "anime" in exclude_languages:
         exclude_languages.update(ANIME)
