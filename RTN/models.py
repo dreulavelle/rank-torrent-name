@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, TypeAlias, Union
 
 import regex
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 from regex import Pattern
 
 from RTN.exceptions import GarbageTorrent
@@ -462,9 +462,12 @@ class ResolutionConfig(ConfigModelBase):
     unknown: bool = Field(default=True)
 
     model_config = ConfigDict(
-        populate_by_name=True,
-        alias_generator=lambda field_name: field_name[1:] if field_name.startswith('r') and field_name.endswith('p') else field_name
+        populate_by_name=True
     )
+
+    def json(self, **kwargs) -> str:
+        """Ensure alias serialization for JSON output"""
+        return super().model_dump_json(by_alias=True, **kwargs)
 
 
 class OptionsConfig(ConfigModelBase):
@@ -490,6 +493,10 @@ class CustomRank(BaseModel):
     fetch: bool = Field(default=True)
     use_custom_rank: bool = Field(default=False)
     rank: int = Field(default=0)
+
+    def model_dump(self, **kwargs) -> Dict[str, Any]:
+        """Ensure serialization consistency."""
+        return super().model_dump(**kwargs)
 
 
 class QualityRankModel(ConfigModelBase):
@@ -602,7 +609,7 @@ class CustomRanksConfig(ConfigModelBase):
     trash: TrashRankModel = Field(default_factory=TrashRankModel)
 
 
-PatternType: TypeAlias = Union[Pattern, str]
+PatternType: TypeAlias = Union[regex.Pattern[str], str]
 ProfileType: TypeAlias = str
 CustomRankDict: TypeAlias = Dict[str, CustomRank]
 
@@ -653,15 +660,15 @@ class SettingsModel(BaseModel):
         description="Identifier for the settings profile"
     )
     require: List[PatternType] = Field(
-        default_factory=list,
+        default=[],
         description="Patterns torrents must match to be considered"
     )
     exclude: List[PatternType] = Field(
-        default_factory=list,
+        default=[],
         description="Patterns that, if matched, result in torrent exclusion"
     )
     preferred: List[PatternType] = Field(
-        default_factory=list,
+        default=[],
         description="Patterns indicating preferred attributes in torrents"
     )
     resolutions: ResolutionConfig = Field(
@@ -702,6 +709,17 @@ class SettingsModel(BaseModel):
                 values[field] = [compile_pattern(p) for p in values[field]]
         
         return values
+
+    @field_serializer("require", "exclude", "preferred", when_used="always")
+    def serialize_patterns(self, values: List[PatternType]) -> List[str]:
+        """Convert regex patterns to strings for JSON serialization."""
+        return [v.pattern if isinstance(v, regex.Pattern) else v for v in values]
+
+    @field_validator("require", "exclude", "preferred", mode="before")
+    @classmethod
+    def deserialize_patterns(cls, values: List[Union[str, PatternType]]) -> List[PatternType]:
+        """Convert string patterns back to compiled regex."""
+        return [regex.compile(v) if isinstance(v, str) else v for v in values]
 
     @field_validator('profile')
     def validate_profile(cls, v: str) -> str:
