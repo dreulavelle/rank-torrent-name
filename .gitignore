@@ -6,6 +6,8 @@ sources/
 *.log*
 main.py
 settings.json
+tests/video/
+*.mkv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

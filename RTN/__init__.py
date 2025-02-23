@@ -45,7 +45,7 @@ For more information on each module or class, refer to the respective docstrings
 
 from PTT import Parser, add_defaults, parse_title
 
-from RTN import exceptions, fetch, models, parser, patterns, ranker
+from RTN import exceptions, fetch, models, parser, patterns, ranker, file_parser
 
 from .extras import (
     episodes_from_season,
@@ -66,6 +66,7 @@ from .models import (
 from .parser import RTN, Torrent, parse
 from .patterns import check_pattern, normalize_title
 from .ranker import get_rank
+from .file_parser import parse_media_file, MediaMetadata, VideoTrack, AudioTrack, SubtitleTrack
 
 __all__ = [
     # Main
@@ -88,6 +89,7 @@ __all__ = [
     "ranker",
     "fetch",
     "exceptions",
+    "file_parser",
     # Patterns
     "normalize_title",
     "check_pattern",
@@ -100,4 +102,9 @@ __all__ = [
     "extract_seasons",
     "extract_episodes",
     "episodes_from_season",
+    "parse_media_file",
+    "MediaMetadata",
+    "VideoTrack",
+    "AudioTrack",
+    "SubtitleTrack",
 ]

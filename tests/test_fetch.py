@@ -5,8 +5,9 @@ from RTN.fetch import (
     check_fetch,
     check_required,
     fetch_resolution,
+    language_handler,
 )
-from RTN.models import SettingsModel
+from RTN.models import LanguagesConfig, OptionsConfig, SettingsModel
 
 
 @pytest.fixture
@@ -94,3 +95,40 @@ def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
     assert is_fetchable is expected, f"Expected {expected} for {raw_title}"
     if not expected:
         assert failed_keys, f"Expected no failed keys, got {failed_keys}"
+
+
+@pytest.mark.parametrize("raw_title, expected, expected_failed_keys", [
+    ("The Adam Project 2022 1080p", True, {}),
+    ("The Adam Project 2022 1080p French", True, {}),
+    ("The Adam Project 2022 1080p Spanish", False, {'required_language'})
+])
+def test_required_languages(settings: SettingsModel, raw_title: str, expected: bool, expected_failed_keys: list):
+    settings = SettingsModel(
+        options=OptionsConfig(remove_unknown_languages=False),
+        languages=LanguagesConfig(required=["fr"])
+    )
+    data = parse(raw_title)
+    is_fetchable, failed_keys = check_fetch(data, settings)
+    assert is_fetchable is expected, f"Expected {expected} for {raw_title}"
+    if not expected:
+        assert failed_keys == expected_failed_keys, f"Expected failed keys {expected_failed_keys}, got {failed_keys}"
+
+
+@pytest.mark.parametrize("raw_title, expected", [
+    ("The Adam Project 2022 1080p Japanese", False),
+    ("The Adam Project 2022 1080p English", False),
+    ("The Adam Project 2022 1080p Hindi", True),
+])
+def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool):
+    """
+    Test to make sure we are excluding languages properly.
+    True means it should be excluded, False means it should not be excluded.
+    """
+    settings = SettingsModel(
+        options=OptionsConfig(allow_english_in_languages=True),
+        languages=LanguagesConfig(exclude=["common"], required=["anime"])
+    )
+
+    data = parse(raw_title)
+    value = language_handler(data, settings, set())
+    assert value is expected, f"Expected {expected} for {raw_title}"

@@ -473,16 +473,16 @@ class OptionsConfig(ConfigModelBase):
     remove_all_trash: bool = Field(default=True)
     remove_ranks_under: int = Field(default=-10000)
     remove_unknown_languages: bool = Field(default=False)
-    allow_english_in_languages: bool = Field(default=False)
+    allow_english_in_languages: bool = Field(default=True)
     enable_fetch_speed_mode: bool = Field(default=True)
     remove_adult_content: bool = Field(default=True)
 
 
 class LanguagesConfig(ConfigModelBase):
     """Configuration for which languages are enabled."""
-    required: List[str] = Field(default_factory=list)
-    exclude: List[str] = Field(default=["ar", "hi", "fr", "es", "de", "ru", "pt", "it"])
-    preferred: List[str] = Field(default_factory=list)
+    required: List[str] = Field(default=[])
+    exclude: List[str] = Field(default=[])
+    preferred: List[str] = Field(default=[])
 
 
 class CustomRank(BaseModel):

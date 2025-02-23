@@ -4,7 +4,7 @@ from RTN import RTN, parse
 from RTN.exceptions import GarbageTorrent
 from RTN.extras import get_lev_ratio, sort_torrents, title_match
 from RTN.fetch import adult_handler, check_fetch, language_handler, trash_handler
-from RTN.models import DefaultRanking, SettingsModel
+from RTN.models import DefaultRanking, LanguagesConfig, OptionsConfig, SettingsModel
 from RTN.patterns import normalize_title
 
 
@@ -81,10 +81,13 @@ def test_sort_torrents(settings, ranking):
     ("The Walking Dead S05E03 [English] [Spanish]", True)
 ])
 def test_exclude_languages(raw_title, settings, expected_exclude):
+    settings = SettingsModel(
+        options=OptionsConfig(allow_english_in_languages=False),
+        languages=LanguagesConfig(exclude=["es"]))
     data = parse(raw_title)
     failed_keys = set()
     exclude_languages_result = language_handler(data, settings, failed_keys)
-    assert exclude_languages_result == expected_exclude, f"Expected exclude language result: {expected_exclude}, Actual result: {exclude_languages_result}"
+    assert exclude_languages_result == expected_exclude, f"Expected {expected_exclude}, Actual result: {exclude_languages_result}. Failed keys: {failed_keys}"
 
 
 @pytest.mark.parametrize("raw_title, expected_trash", [
