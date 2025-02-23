@@ -128,8 +128,8 @@ def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set
     populate_langs(settings)
 
     remove_unknown = settings.options.get("remove_unknown_languages", False)
-    required_langs = set(settings.languages.get("required", []))
-    exclude_langs = set(settings.languages.get("exclude", []))
+    required_langs = settings.languages.get("required", [])
+    exclude_langs = settings.languages.get("exclude", [])
 
     if not data.languages:
         # If no languages are found, keep if remove_unknown is OFF
@@ -143,12 +143,12 @@ def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set
         return False
 
     if required_langs:
-        # If required languages are found and no required languages are found, fail
+        # If required languages are not found in the torrent, fail
         if not any(lang in required_langs for lang in data.languages):
             failed_keys.add("required_language")
             return True
 
-    excluded = set(lang for lang in data.languages if lang in exclude_langs)
+    excluded = [lang for lang in data.languages if lang in exclude_langs]
     if excluded:
         for lang in excluded:
             failed_keys.add(f"lang_{lang}")
@@ -175,8 +175,8 @@ def populate_langs(settings: SettingsModel) -> None:
         if lang_group in required_langs:
             required_langs.update(lang_set)
 
-    settings.languages.exclude = exclude_langs
-    settings.languages.required = required_langs
+    settings.languages.exclude = list(exclude_langs)
+    settings.languages.required = list(required_langs)
 
 
 def check_required(data: ParsedData, settings: SettingsModel) -> bool:
