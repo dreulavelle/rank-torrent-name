@@ -139,9 +139,6 @@ def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set
         failed_keys.add("unknown_language")
         return True
 
-    if "en" in data.languages and settings.options.get("allow_english_in_languages", False):
-        return False
-
     if required_langs:
         # If required languages are not found in the torrent, fail
         if not any(lang in required_langs for lang in data.languages):
@@ -153,6 +150,9 @@ def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set
         for lang in excluded:
             failed_keys.add(f"lang_{lang}")
         return True
+
+    if "en" in data.languages and settings.options.get("allow_english_in_languages", False):
+        return False
 
     return False
 

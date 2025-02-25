@@ -116,7 +116,7 @@ def test_required_languages(settings: SettingsModel, raw_title: str, expected: b
 
 @pytest.mark.parametrize("raw_title, expected", [
     ("The Adam Project 2022 1080p Japanese", False),
-    ("The Adam Project 2022 1080p English", False),
+    ("The Adam Project 2022 1080p English", True),
     ("The Adam Project 2022 1080p Hindi", True),
 ])
 def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool):
