@@ -87,6 +87,9 @@ build-backend = "poetry.core.masonry.api"
 [[tool.poetry.packages]]
 include = "RTN"
 
+[tool.poetry.scripts]
+rtn = "RTN.cli:main"
+
 [tool.isort]
 profile = "black"
 
