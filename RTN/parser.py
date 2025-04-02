@@ -128,6 +128,9 @@ class RTN:
         if correct_title:
             aliases = kwargs.get("aliases", {})
             lev_ratio: float = get_lev_ratio(correct_title, parsed_data.parsed_title, self.lev_threshold, aliases)
+            if remove_trash:
+                if lev_ratio < self.lev_threshold:
+                    raise GarbageTorrent(f"'{raw_title}' does not match the correct title. correct title: '{correct_title}', parsed title: '{parsed_data.parsed_title}'")
 
         is_fetchable, failed_keys = check_fetch(parsed_data, self.settings, speed_mode)
         rank: int = get_rank(parsed_data, self.settings, self.ranking_model)
@@ -135,11 +138,9 @@ class RTN:
         if remove_trash:
             if not is_fetchable:
                 raise GarbageTorrent(f"'{parsed_data.raw_title}' denied by: {', '.join(failed_keys)}")
-            if correct_title and lev_ratio < self.lev_threshold:
-                raise GarbageTorrent(f"'{raw_title}' does not match the correct title. correct title: '{correct_title}', parsed title: '{parsed_data.parsed_title}'")
 
-        if rank < self.settings.options["remove_ranks_under"]:
-            raise GarbageTorrent(f"'{raw_title}' does not meet the minimum rank requirement, got rank of {rank}")
+            if rank < self.settings.options["remove_ranks_under"]:
+                raise GarbageTorrent(f"'{raw_title}' does not meet the minimum rank requirement, got rank of {rank}")
 
         return Torrent(
             infohash=infohash,

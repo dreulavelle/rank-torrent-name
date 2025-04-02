@@ -132,21 +132,16 @@ def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set
     exclude_langs = settings.languages.get("exclude", [])
 
     if not data.languages:
-        # If no languages are found, keep if remove_unknown is OFF
-        if not remove_unknown:
-            return False
-        # If no languages are found and unknown languages are removed, fail
-        failed_keys.add("unknown_language")
-        return True
+        if remove_unknown:
+            failed_keys.add("unknown_language")
+            return True
+        return False
 
     if "en" in data.languages and settings.options.get("allow_english_in_languages", False):
         return False
 
-    if required_langs:
-        # If required languages are not found in the torrent, fail
-        if not any(lang in required_langs for lang in data.languages):
-            failed_keys.add("required_language")
-            return True
+    if required_langs and any(lang in required_langs for lang in data.languages):
+        return False
 
     excluded = [lang for lang in data.languages if lang in exclude_langs]
     if excluded:

@@ -99,13 +99,20 @@ def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
 
 @pytest.mark.parametrize("raw_title, expected, expected_failed_keys", [
     ("The Adam Project 2022 1080p", True, {}),
-    ("The Adam Project 2022 1080p French", True, {}),
-    ("The Adam Project 2022 1080p Spanish", False, {'required_language'})
+    ("The Adam Project 2022 1080p VOSTFR", False, {"lang_fr"}),
+    ("The Adam Project 2022 1080p Spanish", True, {})
 ])
 def test_required_languages(settings: SettingsModel, raw_title: str, expected: bool, expected_failed_keys: list):
+    """
+    Test to make sure we are keeping required languages properly.
+    True means it should be kept, False means it should not be kept.
+    """
     settings = SettingsModel(
-        options=OptionsConfig(remove_unknown_languages=False),
-        languages=LanguagesConfig(required=["fr"])
+        options=OptionsConfig(
+            remove_unknown_languages=False,
+            remove_all_trash=True
+        ),
+        languages=LanguagesConfig(exclude=["fr"])
     )
     data = parse(raw_title)
     is_fetchable, failed_keys = check_fetch(data, settings)
@@ -115,9 +122,12 @@ def test_required_languages(settings: SettingsModel, raw_title: str, expected: b
 
 
 @pytest.mark.parametrize("raw_title, expected", [
-    ("The Adam Project 2022 1080p Japanese", False),
+    ("The Adam Project 2022 1080p", True),
+    ("The Adam Project 2022 1080p Japanese", True),
     ("The Adam Project 2022 1080p English", False),
     ("The Adam Project 2022 1080p Hindi", True),
+    ("The Adam Project 2022 1080p VOSTFR", False),
+    ("The Adam Project 2022 1080p Spanish", False),
 ])
 def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool):
     """
@@ -125,8 +135,12 @@ def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool)
     True means it should be excluded, False means it should not be excluded.
     """
     settings = SettingsModel(
-        options=OptionsConfig(allow_english_in_languages=True),
-        languages=LanguagesConfig(exclude=["common"], required=["anime"])
+        options=OptionsConfig(
+            remove_all_trash=True,
+            # allow_english_in_languages=False,
+            remove_unknown_languages=True
+        ),
+        languages=LanguagesConfig(exclude=["hi", "ja"], required=["fr"])
     )
 
     data = parse(raw_title)

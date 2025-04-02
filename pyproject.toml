@@ -67,12 +67,12 @@ orjson = "^3.10.15"
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.3"
 pyperf = "^2.2.0"
-ruff = "^0.3.0"
 isort = "^5.10.1"
 codecov = "^2.1.13"
 pytest = "^8.1.1"
 pytest-cov = "^5.0.0"
 pyright = "^1.1.389"
+ruff = "^0.11.2"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.6.1"
