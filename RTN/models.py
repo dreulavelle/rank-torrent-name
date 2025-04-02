@@ -423,18 +423,6 @@ class BestRanking(BaseRankingModel):
     telesync: int = -10000
 
 
-class Resolution(str, Enum):
-    UHD = "4k"
-    UHD_2160P = "2160p"
-    UHD_1440P = "1440p"
-    FHD = "1080p"
-    HD = "720p"
-    SD_576P = "576p"
-    SD_480P = "480p"
-    SD_360P = "360p"
-    UNKNOWN = "unknown"  # default
-
-
 class ConfigModelBase(BaseModel):
     """Base class for config models that need dict-like behavior"""
     def __getitem__(self, key: str) -> Any:

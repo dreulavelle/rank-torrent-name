@@ -11,13 +11,51 @@ Functions:
 For more details, please refer to the documentation.
 """
 
+from enum import Enum
 from typing import Any, Dict, List, Set
 
 from Levenshtein import ratio
 from PTT import parse_title
 
-from .models import Resolution, Torrent
+from .models import Torrent
 from .patterns import normalize_title
+
+
+class Resolution(Enum):
+    UHD_2160P = 9
+    UHD_1440P = 7
+    FHD_1080P = 6
+    HD_720P = 5
+    SD_576P = 4
+    SD_480P = 3
+    SD_360P = 2
+    UNKNOWN = 1
+
+
+RESOLUTION_MAP: dict[str, Resolution] = {
+    "4k": Resolution.UHD_2160P,
+    "2160p": Resolution.UHD_2160P,
+    "1440p": Resolution.UHD_1440P,
+    "1080p": Resolution.FHD_1080P,
+    "720p": Resolution.HD_720P,
+    "576p": Resolution.SD_576P,
+    "480p": Resolution.SD_480P,
+    "360p": Resolution.SD_360P,
+    "unknown": Resolution.UNKNOWN,
+}
+
+
+def get_resolution(torrent: Torrent) -> Resolution:
+    """
+    Get the resolution of a torrent.
+
+    Args:
+        `torrent` (Torrent): The torrent object to get the resolution of.
+
+    Returns:
+        `Resolution`: The resolution of the torrent.
+    """
+    return RESOLUTION_MAP.get(torrent.data.resolution.lower(), Resolution.UNKNOWN)
 
 
 def title_match(correct_title: str, parsed_title: str, threshold: float = 0.85, aliases: dict = {}) -> bool:
@@ -62,7 +100,7 @@ def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85
     return max(ratio_set)
 
 
-def sort_torrents(torrents: Set[Torrent], bucket_limit: int = None) -> Dict[str, Torrent]:
+def sort_torrents(torrents: Set[Torrent], bucket_limit: int = None, resolutions: list[Resolution] = []) -> Dict[str, Torrent]:
     """
     Sorts a set of Torrent objects by their resolution bucket and then by their rank in descending order.
     Returns a dictionary with infohash as keys and Torrent objects as values.
@@ -70,6 +108,7 @@ def sort_torrents(torrents: Set[Torrent], bucket_limit: int = None) -> Dict[str,
     Args:
         `torrents` (Set[Torrent]): A set of Torrent objects.
         `bucket_limit` (int, optional): The maximum number of torrents to return from each bucket.
+        `resolutions` (list[Resolution], optional): A list of resolutions to include in the sorting.
 
     Raises:
         `TypeError`: If the input is not a set of Torrent objects.
@@ -82,46 +121,22 @@ def sort_torrents(torrents: Set[Torrent], bucket_limit: int = None) -> Dict[str,
     if not isinstance(torrents, set) or not all(isinstance(t, Torrent) for t in torrents):
         raise TypeError("The input must be a set of Torrent objects.")
 
-    buckets = {
-        Resolution.UHD: 4,
-        Resolution.UHD_2160P: 4,
-        Resolution.UHD_1440P: 4,
-        Resolution.FHD: 3,
-        Resolution.HD: 2,
-        Resolution.SD_576P: 1,
-        Resolution.SD_480P: 1,
-        Resolution.SD_360P: 1,
-        Resolution.UNKNOWN: 0,
-    }
-
-    def get_bucket(torrent: Torrent) -> int:
-        resolution_map = {
-            "4k": Resolution.UHD,
-            "2160p": Resolution.UHD_2160P,
-            "1440p": Resolution.UHD_1440P,
-            "1080p": Resolution.FHD,
-            "720p": Resolution.HD,
-            "576p": Resolution.SD_576P,
-            "480p": Resolution.SD_480P,
-            "360p": Resolution.SD_360P,
-            "unknown": Resolution.UNKNOWN,
-        }
-        resolution = resolution_map.get(torrent.data.resolution, Resolution.UNKNOWN)
-        return buckets[resolution]
+    if resolutions:
+        torrents = {t for t in torrents if get_resolution(t) in resolutions}
 
     sorted_torrents: List[Torrent] = sorted(
         torrents,
-        key=lambda torrent: (get_bucket(torrent), torrent.rank if torrent.rank is not None else float("-inf")),
+        key=lambda torrent: (get_resolution(torrent).value, torrent.rank),
         reverse=True
     )
 
     if bucket_limit and bucket_limit > 0:
-        bucket_groups: Dict[int, List[Torrent]] = {}
+        bucket_groups: Dict[Resolution, List[Torrent]] = {}
         for torrent in sorted_torrents:
-            bucket = get_bucket(torrent)
-            if bucket not in bucket_groups:
-                bucket_groups[bucket] = []
-            bucket_groups[bucket].append(torrent)
+            resolution = get_resolution(torrent)
+            if resolution not in bucket_groups:
+                bucket_groups[resolution] = []
+            bucket_groups[resolution].append(torrent)
 
         result = {}
         for bucket_torrents in bucket_groups.values():

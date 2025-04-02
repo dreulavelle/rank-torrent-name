@@ -54,6 +54,8 @@ from .extras import (
     get_lev_ratio,
     sort_torrents,
     title_match,
+    get_resolution,
+    Resolution,
 )
 from .fetch import check_fetch
 from .models import (
@@ -107,4 +109,6 @@ __all__ = [
     "VideoTrack",
     "AudioTrack",
     "SubtitleTrack",
+    "Resolution",
+    "get_resolution",
 ]
