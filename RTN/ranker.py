@@ -194,8 +194,6 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
         match audio_format:
             case "AAC":
                 total_rank += rank_model.aac if not settings.custom_ranks["audio"]["aac"].use_custom_rank else settings.custom_ranks["audio"]["aac"].rank
-            case "AC3":
-                total_rank += rank_model.ac3 if not settings.custom_ranks["audio"]["ac3"].use_custom_rank else settings.custom_ranks["audio"]["ac3"].rank
             case "Atmos":
                 total_rank += rank_model.atmos if not settings.custom_ranks["audio"]["atmos"].use_custom_rank else settings.custom_ranks["audio"]["atmos"].rank
             case "Dolby Digital":
@@ -206,8 +204,10 @@ def calculate_audio_rank(data: ParsedData, settings: SettingsModel, rank_model: 
                 total_rank += rank_model.dts_lossy if not settings.custom_ranks["audio"]["dts_lossy"].use_custom_rank else settings.custom_ranks["audio"]["dts_lossy"].rank
             case "DTS Lossless":
                 total_rank += rank_model.dts_lossless if not settings.custom_ranks["audio"]["dts_lossless"].use_custom_rank else settings.custom_ranks["audio"]["dts_lossless"].rank
-            case "EAC3":
-                total_rank += rank_model.eac3 if not settings.custom_ranks["audio"]["eac3"].use_custom_rank else settings.custom_ranks["audio"]["eac3"].rank
+            # case "OPUS":
+            #     total_rank += rank_model.opus if not settings.custom_ranks["audio"]["opus"].use_custom_rank else settings.custom_ranks["audio"]["opus"].rank
+            # case "PCM":
+            #     total_rank += rank_model.pcm if not settings.custom_ranks["audio"]["pcm"].use_custom_rank else settings.custom_ranks["audio"]["pcm"].rank
             case "FLAC":
                 total_rank += rank_model.flac if not settings.custom_ranks["audio"]["flac"].use_custom_rank else settings.custom_ranks["audio"]["flac"].rank
             case "MP3":
@@ -279,4 +279,6 @@ def calculate_extra_ranks(data: ParsedData, settings: SettingsModel, rank_model:
         total_rank += rank_model.size if not settings.custom_ranks["trash"]["size"].use_custom_rank else settings.custom_ranks["trash"]["size"].rank
     if data.scene:
         total_rank += rank_model.scene if not settings.custom_ranks["extras"]["scene"].use_custom_rank else settings.custom_ranks["extras"]["scene"].rank
+    if data.uncensored:
+        total_rank += rank_model.uncensored if not settings.custom_ranks["extras"]["uncensored"].use_custom_rank else settings.custom_ranks["extras"]["uncensored"].rank
     return total_rank

@@ -48,14 +48,14 @@ SCRAPED_DATA = [
     {"title": "Game of Thrones S01 Complete 720p BluRay x264 Hindi English[MW]", "fetch": True, "rank": 1},
     {"title": "Game of Thrones Temporada 1 Español Latino", "fetch": True, "rank": 0},
     {"title": "Game of Thrones 1ª a 7ª Temporada Completa [720p] [BluRay] [DUAL]", "fetch": True, "rank": 1},
+    {"title": "Game of Thrones (2011) Complete [2160p] [HDR] [5.1] [ger eng] [Vio]", "fetch": False, "rank": 1},
+    {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265.10bit.HDR.TrueHD.7.1.Atmos-DON[rartv]", "fetch": False, "rank": 1},
+    {"title": "Game of Thrones Season 1 (S01) 2160p HDR 5.1 x265 10bit Phun Psyz", "fetch": False, "rank": 1},
 
     # These items will NOT be fetched based on default settings
     {"title": "Game.of.Thrones.S01-07.BDRip.1080p", "fetch": False, "rank": -1},
     {"title": "Game of Thrones S01-S07 720p 33GB - MkvCage", "fetch": False, "rank": -1},
     {"title": "Game Of Thrones - The Complete Collection (2011-2019) BDRip 1080p", "fetch": False, "rank": -1},
-    {"title": "Game of Thrones (2011) Complete [2160p] [HDR] [5.1 5.1] [ger eng] [Vio]", "fetch": False, "rank": -1},
-    {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265.10bit.HDR.TrueHD.7.1.Atmos-DON[rartv]", "fetch": False, "rank": 1},
-    {"title": "Game of Thrones Season 1 (S01) 2160p HDR 5.1 x265 10bit Phun Psyz", "fetch": False, "rank": 1},
     {"title": "Game.of.Thrones.S01.2160p.DoVi.HDR.BluRay.REMUX.HEVC.DTS-HD.MA.TrueHD.7.1.Atmos-PB69", "fetch": False, "rank": -1},
     {"title": "Game.of.Thrones.S01.2160p.BluRay.REMUX.HEVC.DTS-HD.MA.TrueHD.7.1.Atmos-FGT", "fetch": False, "rank": -1},
     {"title": "Game.of.Thrones.S01.2160p.UHD.BluRay.x265-SCOTLUHD", "fetch": False, "rank": 1},
@@ -69,7 +69,7 @@ SCRAPED_DATA = [
     {"title": "Il.Trono.Di.Spade.S01E01-10.BDMux.1080p.AC3.ITA.ENG.SUBS.HEVC", "fetch": False, "rank": -1},
     {"title": "Игра престолов / Game of Thrones [S01-08] (2013-2022) BDRip 1080p от Generalfilm | D | P", "fetch": False, "rank": -1},
     {"title": "Игра престолов / Game of Thrones [S01-08] (2011-2019) BDRip 720p | LostFilm", "fetch": False, "rank": -1},
-    {"title": "Game of Thrones Season Pack S01 to S08 480p English x264", "fetch": False, "rank": 1},
+    {"title": "Game of Thrones Season Pack S01 to S08 480p English x264.UNCENSORED", "fetch": False, "rank": 1},
 ]
 
 @pytest.mark.parametrize("title", [item["title"] for item in SCRAPED_DATA])

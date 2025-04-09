@@ -17,7 +17,7 @@ from RTN.models import ParsedData, Torrent
             "seasons": [1],
             "episodes": [1, 2],
             "codec": "hevc",
-            "audio": ["AC3", "AAC"],
+            "audio": ["AAC"],
             "languages": [],
             "bit_depth": "10bit"
         }

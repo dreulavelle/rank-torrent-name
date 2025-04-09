@@ -61,13 +61,11 @@ We have 3 profiles built in that are named `default`, `best`, and `custom`. The 
 | Attribute | Default | Best | Custom |
 |:----------|--------:|-----:|-------:|
 | aac | 250 | 100 | 0 |
-| ac3 | 30 | 50 | 0 |
 | atmos | 400 | 1000 | 0 |
-| dolby_digital | 0 | 0 | 0 |
-| dolby_digital_plus | 0 | 0 | 0 |
+| dolby_digital | 30 | 50 | 0 |
+| dolby_digital_plus | 250 | 150 | 0 |
 | dts_lossy | 600 | 100 | 0 |
 | dts_lossless | 0 | 1000 | 0 |
-| eac3 | 250 | 150 | 0 |
 | flac | 0 | 0 | 0 |
 | mono | -10000 | -1000 | 0 |
 | mp3 | -10000 | -1000 | 0 |

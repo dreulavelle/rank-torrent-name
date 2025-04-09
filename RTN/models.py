@@ -20,7 +20,6 @@ Note:
 """
 
 import json
-from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TypeAlias, Union
 
@@ -73,7 +72,9 @@ class ParsedData(BaseModel):
     upscaled: bool = False
     remastered: bool = False
     unrated: bool = False
+    uncensored: bool = False
     documentary: bool = False
+    commentary: bool = False
     episode_code: Optional[str] = None
     country: Optional[str] = None
     container: Optional[str] = None
@@ -219,13 +220,13 @@ class BaseRankingModel(BaseModel):
 
     # audio
     aac: int = 0
-    ac3: int = 0
     atmos: int = 0
     dolby_digital: int = 0
     dolby_digital_plus: int = 0
     dts_lossy: int = 0
     dts_lossless: int = 0
-    eac3: int = 0
+    # opus: int = 0
+    # pcm: int = 0
     flac: int = 0
     mono: int = 0
     mp3: int = 0
@@ -237,6 +238,8 @@ class BaseRankingModel(BaseModel):
     three_d: int = 0
     converted: int = 0
     documentary: int = 0
+    commentary: int = 0
+    uncensored: int = 0
     dubbed: int = 0
     edition: int = 0
     hardcoded: int = 0
@@ -301,13 +304,11 @@ class DefaultRanking(BaseRankingModel):
 
     # audio
     aac: int = 250
-    ac3: int = 30
     atmos: int = 400
-    dolby_digital: int = 0
-    dolby_digital_plus: int = 0
+    dolby_digital: int = 30
+    dolby_digital_plus: int = 250
     dts_lossy: int = 600
     dts_lossless: int = 0
-    eac3: int = 250
     flac: int = 0
     mono: int = -10000
     mp3: int = -10000
@@ -330,6 +331,8 @@ class DefaultRanking(BaseRankingModel):
     subbed: int = 0
     upscaled: int = -10000
     scene: int = 2000
+    uncensored: int = 50
+    commentary: int = 0
 
     # trash
     cam: int = -10000
@@ -383,18 +386,14 @@ class BestRanking(BaseRankingModel):
 
     # audio
     aac: int = 100
-    ac3: int = 50
     atmos: int = 1000
-    dolby_digital: int = 0
-    dolby_digital_plus: int = 0
+    dolby_digital: int = 50
+    dolby_digital_plus: int = 150
     dts_lossy: int = 100
     dts_lossless: int = 2000
-    eac3: int = 150
-    flac: int = 0
-    mono: int = -1000
+    # opus: int = 100
+    # mono: int = -1000
     mp3: int = -1000
-    stereo: int = 0
-    surround: int = 0
     truehd: int = 2000
 
     # extras
@@ -411,6 +410,7 @@ class BestRanking(BaseRankingModel):
     site: int = -10000
     subbed: int = 0
     upscaled: int = -10000
+    uncensored: int = 70
 
     # trash
     cam: int = -10000
@@ -537,13 +537,13 @@ class HdrRankModel(ConfigModelBase):
 class AudioRankModel(ConfigModelBase):
     """Ranking configuration for audio attributes."""
     aac: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
-    ac3: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     atmos: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     dolby_digital: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     dolby_digital_plus: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     dts_lossy: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     dts_lossless: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
-    eac3: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    # opus: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    # pcm: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     flac: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     mono: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
     mp3: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
@@ -568,6 +568,7 @@ class ExtrasRankModel(ConfigModelBase):
     subbed: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
     upscaled: CustomRank = Field(default_factory=lambda: CustomRank(fetch=False))
     scene: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
+    uncensored: CustomRank = Field(default_factory=lambda: CustomRank(fetch=True))
 
     model_config = ConfigDict(
         populate_by_name=True,

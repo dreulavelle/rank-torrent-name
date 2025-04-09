@@ -43,13 +43,13 @@ def custom_ranking_model():
         hdr10plus=1,
         sdr=1,
         aac=1,
-        ac3=1,
+        opus=1,
         atmos=1,
         dolby_digital=1,
         dolby_digital_plus=1,
         dts_lossy=1,
         dts_lossless=1,
-        eac3=1,
+        pcm=1,
         flac=1,
         mono=1,
         mp3=1,
@@ -76,7 +76,9 @@ def custom_ranking_model():
         size=1,
         telecine=1,
         telesync=1,
-        scene=1
+        scene=1,
+        uncensored=1,
+        commentary=1
     )
 
 @pytest.fixture
@@ -219,3 +221,4 @@ def test_manual_fetch_check_from_user(settings_model, ranking_model):
 
     assert item.fetch is True, "Fetch should be True"
     assert item.lev_ratio > 0.0, "Levenshtein ratio should be greater than 0.0"
+

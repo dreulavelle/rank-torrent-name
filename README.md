@@ -70,7 +70,6 @@ settings = SettingsModel(
         "truehd": CustomRank(enable=False, fetch=True, rank=0),
         "ddplus": CustomRank(enable=False, fetch=True, rank=0),
         "aac": CustomRank(enable=False, fetch=True, rank=70),
-        "ac3": CustomRank(enable=False, fetch=True, rank=50),
         "remux": CustomRank(enable=False, fetch=True, rank=-1000),
         "webdl": CustomRank(enable=False, fetch=True, rank=90),
         "repack": CustomRank(enable=False, fetch=True, rank=5),

@@ -274,13 +274,13 @@ def fetch_audio(data: ParsedData, settings: SettingsModel, failed_keys: set) -> 
 
     audio_map = {
         "AAC": "aac",
-        "AC3": "ac3",
+        "OPUS": "opus",
         "Atmos": "atmos",
         "Dolby Digital": "dolby_digital",
         "Dolby Digital Plus": "dolby_digital_plus",
         "DTS Lossy": "dts_lossy",
         "DTS Lossless": "dts_lossless",
-        "EAC3": "eac3",
+        "PCM": "pcm",
         "FLAC": "flac",
         "MP3": "mp3",
         "TrueHD": "truehd",
@@ -333,7 +333,8 @@ def fetch_other(data: ParsedData, settings: SettingsModel, failed_keys: set) -> 
         "site": ("extras", "site"),
         "size": ("trash", "size"),
         "bit_depth": ("hdr", "10bit"),
-        "scene": ("extras", "scene")
+        "scene": ("extras", "scene"),
+        "uncensored": ("extras", "uncensored")
     }
 
     for attr, (category, key) in fetch_map.items():
