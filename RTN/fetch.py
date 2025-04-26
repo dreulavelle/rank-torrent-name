@@ -274,13 +274,13 @@ def fetch_audio(data: ParsedData, settings: SettingsModel, failed_keys: set) -> 
 
     audio_map = {
         "AAC": "aac",
-        "OPUS": "opus",
+        # "OPUS": "opus",
         "Atmos": "atmos",
         "Dolby Digital": "dolby_digital",
         "Dolby Digital Plus": "dolby_digital_plus",
         "DTS Lossy": "dts_lossy",
         "DTS Lossless": "dts_lossless",
-        "PCM": "pcm",
+        # "PCM": "pcm",
         "FLAC": "flac",
         "MP3": "mp3",
         "TrueHD": "truehd",

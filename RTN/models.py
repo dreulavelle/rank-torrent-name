@@ -30,6 +30,8 @@ from regex import Pattern
 from RTN.exceptions import GarbageTorrent
 
 
+INFOHASH_PATTERN: Pattern = regex.compile(r"^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$")
+
 class ParsedData(BaseModel):
     """Parsed data model for a torrent title."""
 
@@ -160,7 +162,7 @@ class Torrent(BaseModel):
     @field_validator("infohash")
     def validate_infohash(cls, v):
         """Validates infohash length and format (MD5 or SHA-1)."""
-        if len(v) not in (32, 40) or not regex.match(r"^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$", v):
+        if len(v) not in (32, 40) or not INFOHASH_PATTERN.match(v):
             raise GarbageTorrent("Infohash must be a 32-character MD5 hash or a 40-character SHA-1 hash.")
         return v
 
@@ -331,7 +333,7 @@ class DefaultRanking(BaseRankingModel):
     subbed: int = 0
     upscaled: int = -10000
     scene: int = 2000
-    uncensored: int = 50
+    uncensored: int = 0
     commentary: int = 0
 
     # trash
@@ -410,7 +412,7 @@ class BestRanking(BaseRankingModel):
     site: int = -10000
     subbed: int = 0
     upscaled: int = -10000
-    uncensored: int = 70
+    uncensored: int = 0
 
     # trash
     cam: int = -10000
