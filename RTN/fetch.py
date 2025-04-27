@@ -289,8 +289,8 @@ def fetch_audio(data: ParsedData, settings: SettingsModel, failed_keys: set) -> 
 
     for audio_format in data.audio:
         category = "trash" if audio_format == "HQ Clean Audio" else "audio"
-        key = audio_map[audio_format]
-        if not settings.custom_ranks[category][key].fetch:
+        key = audio_map.get(audio_format)
+        if key and not settings.custom_ranks[category][key].fetch:
             failed_keys.add(f"{category}_{key}")
             return True
     return False
