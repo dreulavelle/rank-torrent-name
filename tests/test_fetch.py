@@ -54,7 +54,7 @@ def test_fetch_resolution(settings: SettingsModel, raw_title: str, expected: boo
     ("Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv", False, ["DTS Lossless", "Dolby Digital Plus"]),
     ("Oppenheimer 2023 Bluray 2160p AV1 HDR10 EN/FR/ES OPUS 5.1-UH", False, ["OPUS"]),
 ])
-def test_fetch_audio(settings: SettingsModel, raw_title: str, expected: bool, expected_audio: str):
+def test_fetch_audio(settings: SettingsModel, raw_title: str, expected: bool, expected_audio: list):
     data = parse(raw_title)
     failed_keys = set()
     assert data.audio == expected_audio, f"Expected {expected_audio} for {raw_title}"
