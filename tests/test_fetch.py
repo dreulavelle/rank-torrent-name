@@ -6,6 +6,7 @@ from RTN.fetch import (
     check_required,
     fetch_resolution,
     language_handler,
+    fetch_audio
 )
 from RTN.models import LanguagesConfig, OptionsConfig, SettingsModel
 
@@ -146,3 +147,17 @@ def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool)
     data = parse(raw_title)
     value = language_handler(data, settings, set())
     assert value is expected, f"Expected {expected} for {raw_title}"
+
+@pytest.mark.parametrize("raw_title, expected, expected_audio", [
+    ("Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv", False, ["DTS Lossless", "Dolby Digital Plus"]),
+    ("Oppenheimer 2023 Bluray 2160p AV1 HDR10 EN/FR/ES OPUS 5.1-UH", False, ["OPUS"]),
+])
+def test_fetch_audio(settings: SettingsModel, raw_title: str, expected: bool, expected_audio: list):
+    """
+    RTN doesn't support PCM or OPUS that PTN parses.
+    """
+    data = parse(raw_title)
+    failed_keys = set()
+    assert data.audio == expected_audio, f"Expected {expected_audio} for {raw_title}"
+    fetch = fetch_audio(data, settings, failed_keys)
+    assert fetch == expected

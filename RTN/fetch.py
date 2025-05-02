@@ -288,6 +288,10 @@ def fetch_audio(data: ParsedData, settings: SettingsModel, failed_keys: set) -> 
     }
 
     for audio_format in data.audio:
+        if audio_format not in audio_map:
+            # PTN parses other audio formats that RTN doesn't support.
+            continue
+
         category = "trash" if audio_format == "HQ Clean Audio" else "audio"
         key = audio_map[audio_format]
         if not settings.custom_ranks[category][key].fetch:
