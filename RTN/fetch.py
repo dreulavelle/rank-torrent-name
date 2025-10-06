@@ -14,6 +14,7 @@ Parameters:
 
 For more information on each function, refer to the respective docstrings.
 """
+import regex
 from .models import ParsedData, SettingsModel
 
 ANIME = {"ja", "zh", "ko"}
@@ -30,7 +31,7 @@ COMMON = {"de", "es", "hi", "ta", "ru", "ua", "th", "it", "zh", "ar", "fr"}
 ALL = ANIME | NON_ANIME
 
 
-def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = True) -> tuple[bool, set]:
+def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = True) -> tuple[bool, list]:
     """
     Check user settings and unwanted quality to determine if torrent should be fetched.
     
@@ -50,31 +51,31 @@ def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = Tr
     if not isinstance(settings, SettingsModel):
         raise TypeError("Settings must be an instance of SettingsModel.")
 
-    failed_keys = set()
+    failed_keys: set[str] = set()
 
     if speed_mode: # Fail as soon as possible
         if trash_handler(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if adult_handler(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if check_required(data, settings):
-            return True, failed_keys
+            return True, list(failed_keys)
         if check_exclude(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if language_handler(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if fetch_resolution(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if fetch_quality(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if fetch_audio(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if fetch_hdr(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if fetch_codec(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
         if fetch_other(data, settings, failed_keys):
-            return False, failed_keys
+            return False, list(failed_keys)
     else: # Gather all failed keys for more information
         trash_handler(data, settings, failed_keys)
         adult_handler(data, settings, failed_keys)
@@ -89,7 +90,7 @@ def check_fetch(data: ParsedData, settings: SettingsModel, speed_mode: bool = Tr
         fetch_other(data, settings, failed_keys)
 
     if failed_keys:
-        return False, failed_keys
+        return False, list(failed_keys)
 
     return True, list(failed_keys)
 
@@ -185,8 +186,8 @@ def check_exclude(data: ParsedData, settings: SettingsModel, failed_keys: set) -
     """Check if the title contains excluded patterns."""
     if settings.exclude:
         for pattern in settings.exclude:
-            if pattern and pattern.search(data.raw_title):
-                failed_keys.add(f"exclude_regex '{pattern.pattern}'")
+            if pattern and pattern.search(data.raw_title): # type: ignore
+                failed_keys.add(f"exclude_regex '{pattern.pattern}'") # type: ignore
                 return True
     return False
 

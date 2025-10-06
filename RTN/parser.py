@@ -19,7 +19,7 @@ from typing import Any, Dict, Optional
 
 from PTT import parse_title
 
-from .exceptions import GarbageTorrent
+from .exceptions import GarbageTorrent, SettingsDisabled
 from .extras import get_lev_ratio
 from .fetch import check_fetch
 from .models import BaseRankingModel, ParsedData, SettingsModel, Torrent, DefaultRanking
@@ -116,6 +116,9 @@ class RTN:
             assert torrent.lev_ratio > 0.0
             ```
         """
+        if not self.settings.enabled:
+            raise SettingsDisabled("Settings are disabled and cannot be used.")
+
         if not raw_title or not infohash:
             raise ValueError("Both the title and infohash must be provided.")
 

@@ -31,7 +31,10 @@ def main():
         if args.filename:
             try:
                 result = parse_media_file(args.filename)
-                print(result.model_dump_json(indent=4, exclude_none=True, exclude_defaults=True))
+                if result:
+                    print(result.model_dump_json(indent=4, exclude_none=True, exclude_defaults=True))
+                else:
+                    print("{}")
             except Exception as e:
                 print(f"Error Parsing File: {e}")
 

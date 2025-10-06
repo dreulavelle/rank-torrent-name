@@ -12,7 +12,7 @@ For more details, please refer to the documentation.
 """
 
 from enum import Enum
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 
 from Levenshtein import ratio
 from PTT import parse_title
@@ -100,7 +100,7 @@ def get_lev_ratio(correct_title: str, parsed_title: str, threshold: float = 0.85
     return max(ratio_set)
 
 
-def sort_torrents(torrents: Set[Torrent], bucket_limit: int = None, resolutions: list[Resolution] = []) -> Dict[str, Torrent]:
+def sort_torrents(torrents: Set[Torrent], bucket_limit: Optional[int] = None, resolutions: list[Resolution] = []) -> Dict[str, Torrent]:
     """
     Sorts a set of Torrent objects by their resolution bucket and then by their rank in descending order.
     Returns a dictionary with infohash as keys and Torrent objects as values.

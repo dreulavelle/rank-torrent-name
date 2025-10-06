@@ -20,7 +20,8 @@ def settings():
     ("The.Lion.King.2019.1080p.BluRay.x264.DTS-HD.MA.7.1-FGT", True),
     ("Guardians of the Galaxy (2014)", True),
     ("The Great Gatsby 2013 1080p BluRay x264 AAC - Ozlem", True),
-    ("Turning.Red.2022.MULTi.DV.HDR.2160p.DSNP.WEB-DL.DDP5.1.x265.(Alerte.Rouge)-BONBON.mkv", False)
+    ("Turning.Red.2022.MULTi.DV.HDR.2160p.DSNP.WEB-DL.DDP5.1.x265.(Alerte.Rouge)-BONBON.mkv", False),
+    ("The Adam Project 2022 1080p NF WEB-DL DDP 5 1 Atmos DoVi HDR HEVC-SiC mkv", False)
 ])
 def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
     data = parse(raw_title)
@@ -87,21 +88,10 @@ def test_explicit_check_excluded(raw_title, exclude_patterns, expected_error):
         assert is_fetchable
 
 
-@pytest.mark.parametrize("raw_title, expected", [
-    ("The Adam Project 2022 1080p NF WEB-DL DDP 5 1 Atmos DoVi HDR HEVC-SiC mkv", False)
-])
-def test_check_fetch(settings: SettingsModel, raw_title: str, expected: bool):
-    data = parse(raw_title)
-    is_fetchable, failed_keys = check_fetch(data, settings)
-    assert is_fetchable is expected, f"Expected {expected} for {raw_title}"
-    if not expected:
-        assert failed_keys, f"Expected no failed keys, got {failed_keys}"
-
-
 @pytest.mark.parametrize("raw_title, expected, expected_failed_keys", [
-    ("The Adam Project 2022 1080p", True, {}),
-    ("The Adam Project 2022 1080p VOSTFR", False, {"lang_fr"}),
-    ("The Adam Project 2022 1080p Spanish", True, {})
+    ("The Adam Project 2022 1080p", True, []),
+    ("The Adam Project 2022 1080p VOSTFR", False, ["lang_fr"]),
+    ("The Adam Project 2022 1080p Spanish", True, [])
 ])
 def test_required_languages(settings: SettingsModel, raw_title: str, expected: bool, expected_failed_keys: list):
     """
