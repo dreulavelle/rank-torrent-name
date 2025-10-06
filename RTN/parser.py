@@ -15,14 +15,14 @@ Methods
 
 For more information on each function or class, refer to the respective docstrings.
 """
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from PTT import parse_title
 
 from .exceptions import GarbageTorrent
 from .extras import get_lev_ratio
 from .fetch import check_fetch
-from .models import BaseRankingModel, ParsedData, SettingsModel, Torrent
+from .models import BaseRankingModel, ParsedData, SettingsModel, Torrent, DefaultRanking
 from .patterns import normalize_title
 from .ranker import get_rank
 
@@ -50,7 +50,7 @@ class RTN:
         ```
     """
 
-    def __init__(self, settings: SettingsModel, ranking_model: BaseRankingModel):
+    def __init__(self, settings: SettingsModel, ranking_model: Optional[BaseRankingModel] = None):
         """
         Initializes the RTN class with settings and a ranking model.
 
@@ -73,7 +73,7 @@ class RTN:
             ```
         """
         self.settings = settings
-        self.ranking_model = ranking_model
+        self.ranking_model = ranking_model if ranking_model else DefaultRanking()
         self.lev_threshold = self.settings.options.get("title_similarity", 0.85)
 
     def rank(self, raw_title: str, infohash: str, correct_title: str = "", remove_trash: bool = False, speed_mode: bool = True, **kwargs) -> Torrent:
@@ -122,7 +122,7 @@ class RTN:
         if len(infohash) != 40:
             raise GarbageTorrent("The infohash must be a valid SHA-1 hash and 40 characters in length.")
 
-        parsed_data: ParsedData = parse(raw_title) # type: ignore
+        parsed_data: ParsedData = parse(raw_title)
 
         lev_ratio = 0.0
         if correct_title:
@@ -152,7 +152,7 @@ class RTN:
         )
 
 
-def parse(raw_title: str, translate_langs: bool = False, json: bool = False) -> ParsedData | Dict[str, Any]:
+def parse(raw_title: str, translate_langs: bool = False) -> ParsedData:
     """
     Parses a torrent title using PTN and enriches it with additional metadata extracted from patterns.
 
@@ -181,7 +181,7 @@ def parse(raw_title: str, translate_langs: bool = False, json: bool = False) -> 
         raise TypeError("The input title must be a non-empty string.")
 
     data: Dict[str, Any] = parse_title(raw_title, translate_langs)
-    item = ParsedData(
+    parsed_data: ParsedData = ParsedData(
         **data,
         raw_title=raw_title,
         parsed_title=data.get("title", ""),
@@ -189,4 +189,4 @@ def parse(raw_title: str, translate_langs: bool = False, json: bool = False) -> 
         _3d=data.get("3d", False)
     )
 
-    return item if not json else item.model_json_schema()
+    return parsed_data

@@ -59,10 +59,10 @@ exclude = [
 python = "^3.11"
 pydantic = "^2.6.3"
 regex = "^2023.12.25"
-parsett = "^1.6.5"
 pymediainfo = "^7.0.1"
 orjson = "^3.10.15"
 levenshtein = "^0.27.1"
+parsett = "^1.7.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.3"

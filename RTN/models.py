@@ -5,8 +5,7 @@ Models:
 - `ParsedData`: Model for storing parsed information from a torrent title.
 - `BaseRankingModel`: Base class for ranking models used in the context of media quality and attributes.
 - `Torrent`: Model for representing a torrent with metadata parsed from its title and additional computed properties.
-- `DefaultRanking`: Default ranking model preset that covers the most common use cases.
-- `BestRanking`: Ranking model preset that prioritizes the highest quality and most desirable attributes.
+- `DefaultRanking`: Ranking model preset that prioritizes the highest quality and most desirable attributes.
 - `CustomRank`: Model used in the `SettingsModel` for defining custom ranks for specific attributes.
 - `SettingsModel`: User-defined settings model for ranking torrents, including preferences for filtering torrents based on regex patterns and customizing ranks for specific torrent attributes.
 
@@ -265,90 +264,7 @@ class BaseRankingModel(BaseModel):
     telecine: int = 0
     telesync: int = 0
 
-
 class DefaultRanking(BaseRankingModel):
-    """Ranking model preset that covers the most common use cases."""
-
-    # quality
-    av1: int = 0
-    avc: int = 500
-    bluray: int = 100
-    dvd: int = -1000
-    hdtv: int = -1000
-    hevc: int = 500
-    mpeg: int = -100
-    remux: int = -10000
-    vhs: int = -10000
-    web: int = 150
-    webdl: int = 5000
-    webmux: int = -10000
-    xvid: int = -10000
-    pdtv: int = -10000
-
-    # rips
-    bdrip: int = -1000
-    brrip: int = -1000
-    dvdrip: int = -1000
-    hdrip: int = -1000
-    ppvrip: int = -1000
-    tvrip: int = -10000
-    uhdrip: int = -1000
-    vhsrip: int = -10000
-    webdlrip: int = -10000
-    webrip: int = 30
-
-    # hdr
-    bit_10: int = 5
-    dolby_vision: int = 50
-    hdr: int = 50
-    hdr10plus: int = 0
-    sdr: int = 0
-
-    # audio
-    aac: int = 250
-    atmos: int = 400
-    dolby_digital: int = 30
-    dolby_digital_plus: int = 250
-    dts_lossy: int = 600
-    dts_lossless: int = 0
-    flac: int = 0
-    mono: int = -10000
-    mp3: int = -10000
-    stereo: int = 0
-    surround: int = 0
-    truehd: int = -100
-
-    # extras
-    three_d: int = -10000
-    converted: int = -1250
-    documentary: int = -250
-    dubbed: int = 0
-    edition: int = 100
-    hardcoded: int = 0
-    network: int = 300
-    proper: int = 1000
-    repack: int = 1000
-    retail: int = 0
-    site: int = -10000
-    subbed: int = 0
-    upscaled: int = -10000
-    scene: int = 2000
-    uncensored: int = 0
-    commentary: int = 0
-
-    # trash
-    cam: int = -10000
-    clean_audio: int = -10000
-    r5: int = -10000
-    satrip: int = -10000
-    screener: int = -10000
-    size: int = -10000
-    telecine: int = -10000
-    telesync: int = -10000
-    adult: int = -10000
-
-
-class BestRanking(BaseRankingModel):
     """Ranking model preset that covers the highest qualities like 4K HDR."""
 
     # quality
@@ -384,7 +300,6 @@ class BestRanking(BaseRankingModel):
     dolby_vision: int = 3000
     hdr: int = 2000
     hdr10plus: int = 2100
-    sdr: int = 0
 
     # audio
     aac: int = 100
@@ -393,8 +308,6 @@ class BestRanking(BaseRankingModel):
     dolby_digital_plus: int = 150
     dts_lossy: int = 100
     dts_lossless: int = 2000
-    # opus: int = 100
-    # mono: int = -1000
     mp3: int = -1000
     truehd: int = 2000
 
@@ -404,15 +317,10 @@ class BestRanking(BaseRankingModel):
     documentary: int = -250
     dubbed: int = -1000
     edition: int = 100
-    hardcoded: int = 0
-    network: int = 0
     proper: int = 20
     repack: int = 20
-    retail: int = 0
     site: int = -10000
-    subbed: int = 0
     upscaled: int = -10000
-    uncensored: int = 0
 
     # trash
     cam: int = -10000
@@ -601,7 +509,7 @@ class CustomRanksConfig(ConfigModelBase):
 
 
 PatternType: TypeAlias = Union[regex.Pattern[str], str]
-ProfileType: TypeAlias = str
+
 CustomRankDict: TypeAlias = Dict[str, CustomRank]
 
 
@@ -611,7 +519,6 @@ class SettingsModel(BaseModel):
     based on regex patterns and customizing ranks for specific torrent attributes.
 
     Attributes:
-        profile (str): Identifier for the settings profile, allowing for multiple configurations.
         require (List[str | Pattern]): Patterns torrents must match to be considered.
         exclude (List[str | Pattern]): Patterns that, if matched, result in torrent exclusion.
         preferred (List[str | Pattern]): Patterns indicating preferred attributes in torrents. Given +10000 points by default.
@@ -630,7 +537,6 @@ class SettingsModel(BaseModel):
 
     Example:
         >>> settings = SettingsModel(
-        ...     profile="default",
         ...     require=["\\b4K|1080p\\b", "720p"],
         ...     exclude=["CAM", "TS"],
         ...     preferred=["BluRay", r"/\\bS\\d+/", "/HDR|HDR10/"],
@@ -646,9 +552,13 @@ class SettingsModel(BaseModel):
         >>> print(settings.options.remove_all_trash)
         True
     """
-    profile: ProfileType = Field(
-        default="default",
-        description="Identifier for the settings profile"
+    name: str = Field(
+        default="example",
+        description="Name of the settings"
+    )
+    enabled: bool = Field(
+        default=True,
+        description="Whether these settings will be used or not"
     )
     require: List[PatternType] = Field(
         default=[],
@@ -711,13 +621,6 @@ class SettingsModel(BaseModel):
     def deserialize_patterns(cls, values: List[Union[str, PatternType]]) -> List[PatternType]:
         """Convert string patterns back to compiled regex."""
         return [regex.compile(v) if isinstance(v, str) else v for v in values]
-
-    @field_validator('profile')
-    def validate_profile(cls, v: str) -> str:
-        """Validate profile field and default to 'custom' if not a standard profile"""
-        if v not in ('default', 'best', 'custom'):
-            return 'custom'
-        return v
 
     def __getitem__(self, item: str) -> CustomRankDict:
         """Access custom rank settings via attribute keys."""
@@ -801,3 +704,15 @@ class SettingsModel(BaseModel):
             settings = cls()
             settings.save(path)
             return settings
+
+    def changed_only(self) -> Dict[str, Any]:
+        """
+        Compare the provided settings with the default settings and return only the changed fields.
+
+        Args:
+            settings: The settings to compare against the default.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing only the changed fields and their values.
+        """
+        return self.model_dump(mode='json', exclude_unset=True, exclude_defaults=True)

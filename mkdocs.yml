@@ -11,7 +11,6 @@ nav:
   - Users: 
     - Getting Started: users/faq.md
     - Languages: users/languages.md
-    - Profiles: users/profiles.md
   - Developers: 
     - Introduction: devs/introduction.md
     - Parsing: devs/parsing.md

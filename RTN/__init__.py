@@ -60,10 +60,9 @@ from .extras import (
 from .fetch import check_fetch
 from .models import (
     BaseRankingModel,
-    BestRanking,
-    DefaultRanking,
     ParsedData,
     SettingsModel,
+    DefaultRanking,
 )
 from .parser import RTN, Torrent, parse
 from .patterns import check_pattern, normalize_title
@@ -77,7 +76,6 @@ __all__ = [
     "parse",
     "ParsedData",
     "DefaultRanking",
-    "BestRanking",
     "SettingsModel",
     "BaseRankingModel",
     # PTT

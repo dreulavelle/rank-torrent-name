@@ -1,53 +1,13 @@
 # Frequently Asked Questions
 
 ## 🚀 Quick Start
-- Use `profile` to select preset configurations
 - Set `require` and `exclude` patterns to filter torrents
 - Adjust `resolutions` and `languages` to match your preferences
 - Fine-tune with `custom_ranks` for advanced control
 
 ---
 
-## 🔍 Profile Settings
-
-#### What is the "profile" setting used for?
-A: The `profile` setting is a powerful feature that allows you to quickly configure RTN for different use cases. It serves two main purposes:
-
-1. **Custom Configuration Naming**: You can name your custom configurations, making it easy to switch between different setups for various scenarios.
-
-2. **Pre-set Profiles**: RTN comes with two built-in profiles that offer ready-to-use configurations:
-
-   - `default`: Optimized for streaming without transcoding
-     - Excludes remuxes
-     - Limits resolutions to 1080p and 720p
-     - Ideal for users who want high-quality content that doesn't require transcoding on most devices
-
-   - `best`: Aimed at obtaining the highest quality content available
-     - Includes all resolutions, including 4K/2160p
-     - Prioritizes remuxes and high-bitrate encodes
-     - Perfect for users with powerful hardware who prioritize quality over compatibility
-
-   - `custom`: This is a custom profile that you can create yourself.
-     - All ranks are set to `0`
-     - This is a blank profile, so you can start from scratch.
-
-!!! tip "One Size Does Not Fit All!"
-    Profiles are **not** meant to be used as a one-size-fits-all solution. They are meant to be a starting point or a quick way to get started. You should always fine-tune the settings to your specific needs.
-
-!!! warning "Fetch Settings Override"
-    Remember, if a torrent attribute is not `fetch` enabled, it will not be processed, regardless of profile settings. Always check your fetch settings when troubleshooting unexpected behavior.
-
-#### How do profiles interact with other settings?
-
-Profiles provide a base configuration, but they can be further customized:
-
-- **Custom Ranks**: You can fine-tune the profile behavior by adjusting custom ranks for specific attributes.
-- **Fetch Settings**: The `fetch` setting for each attribute takes precedence over profile settings. If an attribute is not set to be fetched, it won't be considered even if the profile would normally include it.
-
-!!! tip "Combining Profiles and Custom Settings"
-    Start with a profile that closely matches your needs, then use custom ranks and fetch settings to perfect your configuration. This approach gives you the best of both worlds: quick setup and fine-grained control.
-
-By leveraging profiles effectively, you can quickly switch between different configurations while still maintaining the flexibility to customize RTN to your exact specifications.
+## 🔍 Filtering Settings
 
 #### How do I use the "require", "exclude", and "preferred" settings?
 A: These settings allow you to specify patterns (using simple strings or regular expressions) to filter and prioritize torrents:

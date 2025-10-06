@@ -3,7 +3,7 @@ import pytest
 from RTN import RTN, parse
 from RTN.extras import get_lev_ratio, sort_torrents, title_match, Resolution
 from RTN.fetch import adult_handler, language_handler, trash_handler
-from RTN.models import DefaultRanking, LanguagesConfig, OptionsConfig, SettingsModel
+from RTN.models import CustomRanksConfig, DefaultRanking, LanguagesConfig, OptionsConfig, SettingsModel
 from RTN.patterns import normalize_title
 
 
@@ -65,8 +65,8 @@ def test_sort_torrents(settings, ranking):
     expected_order = [
         "1234567890123456789012345678901234567893",  # Wonder Woman 1984 (2020) [UHDRemux 2160p DoVi P8 Es-DTSHD AC3 En-AC3
         "1234567890123456789012345678901234567890",  # Sprint.2024.S01.COMPLETE.1080p.WEBDL-Rip.h264-EDITH[TGx]
-        "1234567890123456789012345678901234567891",  # Madame Web 2024 1080p WEBRip 1400MB DD 5.1 x264-GalaxyRG[TGx]
         "1234567890123456789012345678901234567895",  # [SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv
+        "1234567890123456789012345678901234567891",  # Madame Web 2024 1080p WEBRip 1400MB DD 5.1 x264-GalaxyRG[TGx]
         "1234567890123456789012345678901234567892",  # Guardians of the Galaxy Vol. 2 (2017) 720p HDTC x264 MKVTV
         "1234567890123456789012345678901234567894",  # ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
     ]

@@ -107,15 +107,6 @@ The ranking values are used to determine the quality of a media item based on it
 ```python 
 DefaultRanking()
 ```
-Ranking model preset that covers the most common use cases.
-
----
-
-## BestRanking
-[source](https://github.com/dreulavelle/rank-torrent-name/blob/main/RTN/models.py/#L338)
-```python 
-BestRanking()
-```
 Ranking model preset that covers the highest qualities like 4K HDR.
 
 ---
@@ -132,7 +123,6 @@ advanced customization and fine-grained control over the ranking process.
 
 **Attributes**
 
-* **profile** (str) : Identifier for the settings profile, allowing for multiple configurations.
 * **require** (List[str | Pattern]) : Patterns torrents must match to be considered.
 * **exclude** (List[str | Pattern]) : Patterns that, if matched, result in torrent exclusion.
 * **preferred** (List[str | Pattern]) : Patterns indicating preferred attributes in torrents. Given +5000 points by default.
@@ -145,7 +135,6 @@ Methods:
 
 **Note**
 
-- The `profile` attribute allows users to define multiple settings profiles for different use cases.
 - The `require`, `exclude`, and `preferred` attributes are optional!
 - The `custom_ranks` attribute contains default values for common torrent attributes, which can be customized by users.
 - Patterns enclosed in '/' without a trailing 'i' are compiled as case-sensitive.

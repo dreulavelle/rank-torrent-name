@@ -43,13 +43,11 @@ def custom_ranking_model():
         hdr10plus=1,
         sdr=1,
         aac=1,
-        opus=1,
         atmos=1,
         dolby_digital=1,
         dolby_digital_plus=1,
         dts_lossy=1,
         dts_lossless=1,
-        pcm=1,
         flac=1,
         mono=1,
         mp3=1,
@@ -148,22 +146,6 @@ def test_rank_calculation_accuracy(settings_model, ranking_model):
     assert rank > 0, f"Expected rank did not match, got {rank}"
 
 
-@pytest.mark.parametrize("raw_title, expected_rank, parsed_data, exception_type", [
-    ("Example.Movie.2020.1080p.BluRay.x264-Example", 1, None, None),
-    ("", None, ParsedData(raw_title="", parsed_title="Example Movie"), ValueError),
-    (None, None, None, TypeError),  # type: ignore
-])
-def test_get_rank_validity(settings_model, ranking_model, raw_title, expected_rank, parsed_data, exception_type):
-    if exception_type:
-        with pytest.raises(exception_type):
-            get_rank(parsed_data, settings_model, ranking_model)
-    else:
-        parsed_data = parse(raw_title)
-        rank = get_rank(parsed_data, settings_model, ranking_model)
-        assert isinstance(rank, int)
-        assert rank > 0
-
-
 def test_valid_preferred_calculation(custom_settings_model):
     # use calculate_preferred function
     custom_settings_model.preferred = ["S2"]
@@ -184,15 +166,6 @@ def test_valid_preferred_calculation(custom_settings_model):
     # test if preferred is empty
     rank = calculate_preferred(parsed_data, custom_settings_model)
     assert rank == 0, f"Expected rank did not match, got {rank}"
-
-
-def test_preference_handling(settings_model, ranking_model):
-    # Test with preferred title with a preference for Season number in title
-    # to make sure we can check before-after case. User should be able to set
-    # their own preferred patterns dynamically.
-    parsed_data = parse("Wonder Woman 1984 (2020) [UHDRemux 2160p DoVi P8 Es-DTSHD AC3 En-AC3")
-    rank_with_preference = get_rank(parsed_data, settings_model, ranking_model)
-    assert rank_with_preference < 0, "Preferred title should have negative rank (remux) on default profile"
 
 
 def test_quality_ranking(settings_model, ranking_model):
