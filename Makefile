@@ -2,6 +2,19 @@
 
 SRC_DIR := ./RTN
 
+help:
+	@echo "Available targets:"
+	@echo "  install     - Install dependencies (with dev deps for development)"
+	@echo "  lint        - Run linters"
+	@echo "  sort        - Sort imports"
+	@echo "  check       - Type checking"
+	@echo "  test        - Run tests"
+	@echo "  coverage    - Run tests with coverage"
+	@echo "  benchmark   - Run performance benchmarks"
+	@echo "  pr-ready    - Run all checks before pushing to remote"
+	@echo "  publish     - Publish to PyPI"
+# 	@echo "  docs        - Build documentation"
+
 # Install dependencies (with dev deps for development)
 install:
 	@poetry install --with dev
