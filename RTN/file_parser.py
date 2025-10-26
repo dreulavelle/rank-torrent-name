@@ -11,7 +11,7 @@ class VideoTrack(BaseModel):
     codec: str = Field(default="", description="Codec of the video track")
     width: int = Field(default=0, description="Width of the video track")
     height: int = Field(default=0, description="Height of the video track")
-    frame_rate: float = Field(default=0.0, round=2, description="Frame rate of the video track")
+    frame_rate: float = Field(default=0.0, description="Frame rate of the video track")
 
 
 class AudioTrack(BaseModel):
@@ -33,7 +33,7 @@ class MediaMetadata(BaseModel):
     filename: str = Field(default="", description="Name of the media file")
     file_size: int = Field(default=0, description="Size of the media file in bytes")
     video: VideoTrack = Field(default=VideoTrack(), description="Video track metadata")
-    duration: float = Field(default=0.0, round=2, description="Duration of the video in seconds")
+    duration: float = Field(default=0.0, description="Duration of the video in seconds")
     format: List[str] = Field(default=[], description="Format of the video")
     bitrate: int = Field(default=0, description="Bitrate of the video in bits per second")
     audio: List[AudioTrack] = Field(default=[], description="Audio tracks in the video")
