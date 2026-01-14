@@ -380,8 +380,18 @@ class OptionsConfig(ConfigModelBase):
 
 
 class LanguagesConfig(ConfigModelBase):
-    """Configuration for which languages are enabled."""
+    """Configuration for which languages are enabled.
+    
+    Attributes:
+        required: Languages that MUST be present in the torrent. If set, torrents without
+                  at least one of these languages will be excluded.
+        allowed: Languages that bypass the exclusion logic. If a torrent contains any of
+                 these languages, it won't be excluded even if it also contains excluded languages.
+        exclude: Languages that should be excluded from results.
+        preferred: Languages that are preferred (used for ranking).
+    """
     required: List[str] = Field(default=[])
+    allowed: List[str] = Field(default=[])
     exclude: List[str] = Field(default=[])
     preferred: List[str] = Field(default=[])
 
