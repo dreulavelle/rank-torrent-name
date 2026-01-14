@@ -120,9 +120,10 @@ def test_required_languages(settings: SettingsModel, raw_title: str, expected: b
     ("The Adam Project 2022 1080p VOSTFR", False),
     ("The Adam Project 2022 1080p Spanish", False),
 ])
-def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool):
+def test_allowed_langs(settings: SettingsModel, raw_title: str, expected: bool):
     """
-    Test to make sure we are excluding languages properly.
+    Test to make sure we are handling allowed languages properly.
+    An allowed language bypasses the exclusion check.
     True means it should be excluded, False means it should not be excluded.
     """
     settings = SettingsModel(
@@ -131,12 +132,40 @@ def test_populate_langs(settings: SettingsModel, raw_title: str, expected: bool)
             # allow_english_in_languages=False,
             remove_unknown_languages=True
         ),
-        languages=LanguagesConfig(exclude=["hi", "ja"], required=["fr"])
+        languages=LanguagesConfig(exclude=["hi", "ja"], allowed=["fr"])
     )
 
     data = parse(raw_title)
     value = language_handler(data, settings, set())
     assert value is expected, f"Expected {expected} for {raw_title}"
+
+
+@pytest.mark.parametrize("raw_title, expected, expected_failed_key", [
+    ("The Adam Project 2022 1080p VOSTFR", False, None),
+    ("The Adam Project 2022 1080p FR EN", False, None),
+    ("The Adam Project 2022 1080p English", True, "missing_required_language"),
+    ("The Adam Project 2022 1080p Spanish", True, "missing_required_language"),
+    ("The Adam Project 2022 1080p", True, "missing_required_language"),
+])
+def test_required_langs_new(raw_title: str, expected: bool, expected_failed_key: str):
+    """
+    Test the new 'required' behavior - torrents MUST have at least one of the required languages.
+    True means it should be excluded, False means it should be kept.
+    """
+    settings = SettingsModel(
+        options=OptionsConfig(
+            remove_all_trash=True,
+            remove_unknown_languages=False
+        ),
+        languages=LanguagesConfig(required=["fr"])
+    )
+
+    data = parse(raw_title)
+    failed_keys = set()
+    value = language_handler(data, settings, failed_keys)
+    assert value is expected, f"Expected {expected} for {raw_title}"
+    if expected_failed_key:
+        assert expected_failed_key in failed_keys, f"Expected '{expected_failed_key}' in failed_keys for {raw_title}, got {failed_keys}"
 
 @pytest.mark.parametrize("raw_title, expected, expected_audio", [
     ("Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv", False, ["DTS Lossless", "Dolby Digital Plus"]),

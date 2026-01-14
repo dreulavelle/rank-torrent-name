@@ -121,27 +121,43 @@ def adult_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -
 def language_handler(data: ParsedData, settings: SettingsModel, failed_keys: set) -> bool:
     """
     Check if the languages are excluded based on user settings.
-    If the languages are not found, it will fail if remove_unknown_languages is True.
+    
+    Logic:
+    1. If no languages detected and remove_unknown_languages is True -> exclude
+    2. If no languages detected and required is set -> exclude
+    3. If required languages are set and torrent has NONE of them -> exclude
+    4. If allow_english_in_languages is True and torrent has English -> accept
+    5. If torrent has any allowed language -> accept (bypass exclusion check)
+    6. If torrent has any excluded language -> exclude
+    7. Otherwise -> accept
 
     Returns:
-        bool: True if the languages are excluded, otherwise False.
+        bool: True if the languages should be excluded, otherwise False.
     """
     populate_langs(settings)
 
     remove_unknown = settings.options.get("remove_unknown_languages", False)
     required_langs = settings.languages.get("required", [])
+    allowed_langs = settings.languages.get("allowed", [])
     exclude_langs = settings.languages.get("exclude", [])
 
     if not data.languages:
         if remove_unknown:
             failed_keys.add("unknown_language")
             return True
+        if required_langs:
+            failed_keys.add("missing_required_language")
+            return True
         return False
+
+    if required_langs and not any(lang in required_langs for lang in data.languages):
+        failed_keys.add("missing_required_language")
+        return True
 
     if "en" in data.languages and settings.options.get("allow_english_in_languages", False):
         return False
 
-    if required_langs and any(lang in required_langs for lang in data.languages):
+    if allowed_langs and any(lang in allowed_langs for lang in data.languages):
         return False
 
     excluded = [lang for lang in data.languages if lang in exclude_langs]
@@ -157,6 +173,7 @@ def populate_langs(settings: SettingsModel) -> None:
     """Populate the languages based on user settings."""
     exclude_langs = set(settings.languages.get("exclude", []))
     required_langs = set(settings.languages.get("required", []))
+    allowed_langs = set(settings.languages.get("allowed", []))
 
     language_groups = {
         "anime": ANIME,
@@ -170,9 +187,12 @@ def populate_langs(settings: SettingsModel) -> None:
             exclude_langs.update(lang_set)
         if lang_group in required_langs:
             required_langs.update(lang_set)
+        if lang_group in allowed_langs:
+            allowed_langs.update(lang_set)
 
     settings.languages.exclude = list(exclude_langs)
     settings.languages.required = list(required_langs)
+    settings.languages.allowed = list(allowed_langs)
 
 
 def check_required(data: ParsedData, settings: SettingsModel) -> bool:
