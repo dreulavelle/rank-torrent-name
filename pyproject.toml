@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rank-torrent-name"
-version = "1.10.0"
+version = "1.11.0"
 description = "Rank filenames based on user-defined rules!"
 authors = ["Spoked <dreu.lavelle@gmail.com>"]
 license = "MIT"
