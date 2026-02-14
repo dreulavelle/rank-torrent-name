@@ -76,7 +76,7 @@ ruff = "^0.11.2"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.6.1"
 mkdocs-material = "^9.5.34"
-mkdocstrings = {extras = ["python"], version = "^0.26.1"}
+mkdocstrings = {extras = ["python"], version = ">=0.26.1,<1.1.0"}
 pymdown-extensions = "^10.9"
 
 [build-system]
