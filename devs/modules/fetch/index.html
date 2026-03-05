@@ -1,0 +1,2770 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Rank Torrent Name is a powerful Python library that revolutionizes the way you handle filenames.">
+      
+      
+        <meta name="author" content="Dreu LaVelle">
+      
+      
+        <link rel="canonical" href="https://ranktorrentname.com/devs/modules/fetch/">
+      
+      
+        <link rel="prev" href="../ranker/">
+      
+      
+        <link rel="next" href="../models/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Fetch - Rank Torrent Name</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CUbuntu+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Ubuntu Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fetch" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Rank Torrent Name" class="md-header__button md-logo" aria-label="Rank Torrent Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" height="20" width="17.5" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#d76e19" d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4 .1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8 .1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3 .1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rank Torrent Name
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Fetch
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Follow system preferences"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Follow system preferences" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="red"  aria-label="Set fire to my eyes!"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Set fire to my eyes!" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-2.69L23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="red"  aria-label="Darken the world!"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Darken the world!" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dreulavelle/rank-torrent-name" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    RTN
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../users/faq/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Users
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../introduction/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Developers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../parser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Modules
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../license/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  License
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Rank Torrent Name" class="md-nav__button md-logo" aria-label="Rank Torrent Name" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" height="20" width="17.5" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#d76e19" d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4 .1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8 .1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3 .1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"/></svg>
+
+    </a>
+    Rank Torrent Name
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dreulavelle/rank-torrent-name" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    RTN
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Users
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Users
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../users/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../users/languages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introduction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parsing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parsing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ranking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ranking Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sorting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sorting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extras/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extras
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Modules
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parser
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ranker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ranker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fetch
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fetch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.adult_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        adult_handler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.check_exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_exclude
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.check_fetch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_fetch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.check_required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_required
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_audio
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_codec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_codec
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_hdr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_hdr
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_other" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_other
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_quality
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.language_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        language_handler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.populate_langs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        populate_langs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.trash_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trash_handler
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exceptions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../patterns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Patterns
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extras/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Extras
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.adult_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        adult_handler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.check_exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_exclude
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.check_fetch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_fetch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.check_required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        check_required
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_audio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_audio
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_codec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_codec
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_hdr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_hdr
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_other" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_other
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_quality
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.fetch_resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        fetch_resolution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.language_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        language_handler
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.populate_langs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        populate_langs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#RTN.fetch.trash_handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trash_handler
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../parser/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Modules
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="fetch">Fetch<a class="headerlink" href="#fetch" title="Permanent link">&para;</a></h1>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="RTN.fetch"></a>
+    <div class="doc doc-contents first">
+
+        <p>This module contains functions to determine if a torrent should be fetched based on user settings.</p>
+<p>Functions:
+- <code>check_fetch</code>: Evaluates user settings and unwanted quality to decide if a torrent should be fetched.
+- <code>check_trash</code>: Identifies if the title contains any unwanted patterns.
+- <code>trash_handler</code>: Checks if the title is trash based on user settings, return True if trash is detected.
+- <code>language_handler</code>: Checks if the languages are excluded based on user settings.</p>
+<p>Parameters:
+- <code>raw_title</code> (str): The raw title string to evaluate.
+- <code>data</code> (ParsedData): The parsed data object containing information about the torrent title.
+- <code>settings</code> (SettingsModel): The user settings object containing custom ranking models.</p>
+<p>For more information on each function, refer to the respective docstrings.</p>
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.adult_handler" class="doc doc-heading">
+            <code class=" language-python"><span class="n">adult_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.adult_handler" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the title is adult based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">adult_handler</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the title is adult based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">adult</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remove_adult_content&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;trash_adult&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.check_exclude" class="doc doc-heading">
+            <code class=" language-python"><span class="n">check_exclude</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.check_exclude" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the title contains excluded patterns.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_exclude</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the title contains excluded patterns.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">exclude</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">exclude</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pattern</span> <span class="ow">and</span> <span class="n">pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">raw_title</span><span class="p">):</span> <span class="c1"># type: ignore</span>
+                <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exclude_regex &#39;</span><span class="si">{</span><span class="n">pattern</span><span class="o">.</span><span class="n">pattern</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span> <span class="c1"># type: ignore</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.check_fetch" class="doc doc-heading">
+            <code class=" language-python"><span class="n">check_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">speed_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.check_fetch" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check user settings and unwanted quality to determine if torrent should be fetched.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>`data`</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="RTN.models.ParsedData" href="../models/#RTN.models.ParsedData">ParsedData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The parsed data object containing information about the torrent title.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>`settings`</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="RTN.models.SettingsModel" href="../models/#RTN.models.SettingsModel">SettingsModel</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The user settings object containing custom ranking models.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code><span title="tuple">tuple</span>[<span title="bool">bool</span>, <span title="list">list</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the torrent should be fetched, otherwise False.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the parsed data is not a ParsedData object.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the settings is not a SettingsModel object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">speed_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check user settings and unwanted quality to determine if torrent should be fetched.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        `data` (ParsedData): The parsed data object containing information about the torrent title.</span>
+<span class="sd">        `settings` (SettingsModel): The user settings object containing custom ranking models.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the torrent should be fetched, otherwise False.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If the parsed data is not a ParsedData object.</span>
+<span class="sd">        TypeError: If the settings is not a SettingsModel object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ParsedData</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parsed data must be an instance of ParsedData.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">SettingsModel</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Settings must be an instance of SettingsModel.&quot;</span><span class="p">)</span>
+
+    <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">speed_mode</span><span class="p">:</span> <span class="c1"># Fail as soon as possible</span>
+        <span class="k">if</span> <span class="n">trash_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">adult_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check_required</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check_exclude</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">language_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fetch_resolution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fetch_quality</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fetch_audio</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fetch_hdr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fetch_codec</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fetch_other</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> <span class="c1"># Gather all failed keys for more information</span>
+        <span class="n">trash_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">adult_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">check_required</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span>
+        <span class="n">check_exclude</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">language_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">fetch_resolution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">fetch_quality</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">fetch_audio</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">fetch_hdr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">fetch_codec</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+        <span class="n">fetch_other</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">failed_keys</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.check_required" class="doc doc-heading">
+            <code class=" language-python"><span class="n">check_required</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.check_required" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the title meets the required patterns.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_required</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the title meets the required patterns.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">require</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">raw_title</span><span class="p">)</span> <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">require</span> <span class="k">if</span> <span class="n">pattern</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.fetch_audio" class="doc doc-heading">
+            <code class=" language-python"><span class="n">fetch_audio</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.fetch_audio" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the audio is fetchable based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_audio</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the audio is fetchable based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">audio</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">audio_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;AAC&quot;</span><span class="p">:</span> <span class="s2">&quot;aac&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;OPUS&quot;: &quot;opus&quot;,</span>
+        <span class="s2">&quot;Atmos&quot;</span><span class="p">:</span> <span class="s2">&quot;atmos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Dolby Digital&quot;</span><span class="p">:</span> <span class="s2">&quot;dolby_digital&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Dolby Digital Plus&quot;</span><span class="p">:</span> <span class="s2">&quot;dolby_digital_plus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;DTS Lossy&quot;</span><span class="p">:</span> <span class="s2">&quot;dts_lossy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;DTS Lossless&quot;</span><span class="p">:</span> <span class="s2">&quot;dts_lossless&quot;</span><span class="p">,</span>
+        <span class="c1"># &quot;PCM&quot;: &quot;pcm&quot;,</span>
+        <span class="s2">&quot;FLAC&quot;</span><span class="p">:</span> <span class="s2">&quot;flac&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;MP3&quot;</span><span class="p">:</span> <span class="s2">&quot;mp3&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;TrueHD&quot;</span><span class="p">:</span> <span class="s2">&quot;truehd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;HQ Clean Audio&quot;</span><span class="p">:</span> <span class="s2">&quot;clean_audio&quot;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">audio_format</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">audio</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">audio_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">audio_map</span><span class="p">:</span>
+            <span class="c1"># PTN parses other audio formats that RTN doesn&#39;t support.</span>
+            <span class="k">continue</span>
+
+        <span class="n">category</span> <span class="o">=</span> <span class="s2">&quot;trash&quot;</span> <span class="k">if</span> <span class="n">audio_format</span> <span class="o">==</span> <span class="s2">&quot;HQ Clean Audio&quot;</span> <span class="k">else</span> <span class="s2">&quot;audio&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">audio_map</span><span class="p">[</span><span class="n">audio_format</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">custom_ranks</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">fetch</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.fetch_codec" class="doc doc-heading">
+            <code class=" language-python"><span class="n">fetch_codec</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.fetch_codec" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the codec is fetchable based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_codec</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the codec is fetchable based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">codec</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;avc&quot;</span><span class="p">,</span> <span class="s2">&quot;hevc&quot;</span><span class="p">,</span> <span class="s2">&quot;av1&quot;</span><span class="p">,</span> <span class="s2">&quot;xvid&quot;</span><span class="p">,</span> <span class="s2">&quot;mpeg&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">custom_ranks</span><span class="p">[</span><span class="s2">&quot;quality&quot;</span><span class="p">][</span><span class="n">data</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="o">.</span><span class="n">fetch</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;codec_</span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.fetch_hdr" class="doc doc-heading">
+            <code class=" language-python"><span class="n">fetch_hdr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.fetch_hdr" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the HDR is fetchable based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_hdr</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the HDR is fetchable based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">hdr</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">hdr_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;DV&quot;</span><span class="p">:</span> <span class="s2">&quot;dolby_vision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;HDR&quot;</span><span class="p">:</span> <span class="s2">&quot;hdr&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;HDR10+&quot;</span><span class="p">:</span> <span class="s2">&quot;hdr10plus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;SDR&quot;</span><span class="p">:</span> <span class="s2">&quot;sdr&quot;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">hdr_format</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">hdr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">custom_ranks</span><span class="p">[</span><span class="s2">&quot;hdr&quot;</span><span class="p">][</span><span class="n">hdr_map</span><span class="p">[</span><span class="n">hdr_format</span><span class="p">]]</span><span class="o">.</span><span class="n">fetch</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hdr_</span><span class="si">{</span><span class="n">hdr_map</span><span class="p">[</span><span class="n">hdr_format</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.fetch_other" class="doc doc-heading">
+            <code class=" language-python"><span class="n">fetch_other</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.fetch_other" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the other data is fetchable based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_other</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the other data is fetchable based on user settings.&quot;&quot;&quot;</span>
+    <span class="n">fetch_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;_3d&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;three_d&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;converted&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;converted&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;documentary&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;documentary&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;dubbed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;dubbed&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;edition&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;edition&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;hardcoded&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;hardcoded&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;network&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;proper&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;proper&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;repack&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;repack&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;retail&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;retail&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;subbed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;subbed&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;upscaled&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;upscaled&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;site&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;bit_depth&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;hdr&quot;</span><span class="p">,</span> <span class="s2">&quot;10bit&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;scene&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;scene&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;uncensored&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;extras&quot;</span><span class="p">,</span> <span class="s2">&quot;uncensored&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fetch_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">custom_ranks</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">fetch</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.fetch_quality" class="doc doc-heading">
+            <code class=" language-python"><span class="n">fetch_quality</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.fetch_quality" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the quality is fetchable based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_quality</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the quality is fetchable based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">quality</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">quality_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># parse result, (settings location, settings key)</span>
+        <span class="s2">&quot;WEB&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;web&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;WEB-DL&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;webdl&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;BluRay&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;bluray&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;HDTV&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;hdtv&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;VHS&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;vhs&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;WEBMux&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;webmux&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;BluRay REMUX&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;remux&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;REMUX&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;quality&quot;</span><span class="p">,</span> <span class="s2">&quot;remux&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;WEBRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;webrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;WEB-DLRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;webdlrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;UHDRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;uhdrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;HDRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;hdrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;DVDRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;dvdrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;BDRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;bdrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;BRRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;brrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;VHSRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;vhsrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;PPVRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;ppvrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;SATRip&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;rips&quot;</span><span class="p">,</span> <span class="s2">&quot;satrip&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;TeleCine&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;telecine&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;TeleSync&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;telesync&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;SCR&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;screener&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;R5&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;r5&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;CAM&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;cam&quot;</span><span class="p">),</span>
+        <span class="s2">&quot;PDTV&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;trash&quot;</span><span class="p">,</span> <span class="s2">&quot;pdtv&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">category</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">quality_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">quality</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">category</span> <span class="ow">and</span> <span class="n">key</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">custom_ranks</span><span class="p">[</span><span class="n">category</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">fetch</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.fetch_resolution" class="doc doc-heading">
+            <code class=" language-python"><span class="n">fetch_resolution</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.fetch_resolution" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the resolution is fetchable based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_resolution</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the resolution is fetchable based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">resolution</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">resolutions</span><span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;resolution_unknown&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">res_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;2160p&quot;</span><span class="p">:</span> <span class="s2">&quot;2160p&quot;</span><span class="p">,</span> <span class="s2">&quot;4k&quot;</span><span class="p">:</span> <span class="s2">&quot;2160p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;1080p&quot;</span><span class="p">:</span> <span class="s2">&quot;1080p&quot;</span><span class="p">,</span> <span class="s2">&quot;1440p&quot;</span><span class="p">:</span> <span class="s2">&quot;1080p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;720p&quot;</span><span class="p">:</span> <span class="s2">&quot;720p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;480p&quot;</span><span class="p">:</span> <span class="s2">&quot;480p&quot;</span><span class="p">,</span> <span class="s2">&quot;576p&quot;</span><span class="p">:</span> <span class="s2">&quot;480p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;360p&quot;</span><span class="p">:</span> <span class="s2">&quot;360p&quot;</span><span class="p">,</span> <span class="s2">&quot;240p&quot;</span><span class="p">:</span> <span class="s2">&quot;360p&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">res_key</span> <span class="o">=</span> <span class="n">res_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">resolutions</span><span class="p">[</span><span class="n">res_key</span><span class="p">]:</span>
+        <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;resolution&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.language_handler" class="doc doc-heading">
+            <code class=" language-python"><span class="n">language_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.language_handler" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the languages are excluded based on user settings.</p>
+<p>Logic:
+1. If no languages detected and remove_unknown_languages is True -&gt; exclude
+2. If no languages detected and required is set -&gt; exclude
+3. If required languages are set and torrent has NONE of them -&gt; exclude
+4. If allow_english_in_languages is True and torrent has English -&gt; accept
+5. If torrent has any allowed language -&gt; accept (bypass exclusion check)
+6. If torrent has any excluded language -&gt; exclude
+7. Otherwise -&gt; accept</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the languages should be excluded, otherwise False.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">language_handler</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if the languages are excluded based on user settings.</span>
+
+<span class="sd">    Logic:</span>
+<span class="sd">    1. If no languages detected and remove_unknown_languages is True -&gt; exclude</span>
+<span class="sd">    2. If no languages detected and required is set -&gt; exclude</span>
+<span class="sd">    3. If required languages are set and torrent has NONE of them -&gt; exclude</span>
+<span class="sd">    4. If allow_english_in_languages is True and torrent has English -&gt; accept</span>
+<span class="sd">    5. If torrent has any allowed language -&gt; accept (bypass exclusion check)</span>
+<span class="sd">    6. If torrent has any excluded language -&gt; exclude</span>
+<span class="sd">    7. Otherwise -&gt; accept</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the languages should be excluded, otherwise False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">populate_langs</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+    <span class="n">remove_unknown</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;remove_unknown_languages&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">required_langs</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">allowed_langs</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;allowed&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">exclude_langs</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;exclude&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">languages</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">remove_unknown</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;unknown_language&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">required_langs</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;missing_required_language&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">required_langs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">lang</span> <span class="ow">in</span> <span class="n">required_langs</span> <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">languages</span><span class="p">):</span>
+        <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;missing_required_language&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="s2">&quot;en&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">languages</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;allow_english_in_languages&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">allowed_langs</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">lang</span> <span class="ow">in</span> <span class="n">allowed_langs</span> <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">languages</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">excluded</span> <span class="o">=</span> <span class="p">[</span><span class="n">lang</span> <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">languages</span> <span class="k">if</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">exclude_langs</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">excluded</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">lang</span> <span class="ow">in</span> <span class="n">excluded</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;lang_</span><span class="si">{</span><span class="n">lang</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.populate_langs" class="doc doc-heading">
+            <code class=" language-python"><span class="n">populate_langs</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.populate_langs" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Populate the languages based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">populate_langs</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate the languages based on user settings.&quot;&quot;&quot;</span>
+    <span class="n">exclude_langs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;exclude&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="n">required_langs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="n">allowed_langs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;allowed&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+
+    <span class="n">language_groups</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;anime&quot;</span><span class="p">:</span> <span class="n">ANIME</span><span class="p">,</span>
+        <span class="s2">&quot;non_anime&quot;</span><span class="p">:</span> <span class="n">NON_ANIME</span><span class="p">,</span>
+        <span class="s2">&quot;common&quot;</span><span class="p">:</span> <span class="n">COMMON</span><span class="p">,</span>
+        <span class="s2">&quot;all&quot;</span><span class="p">:</span> <span class="n">ALL</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">lang_group</span><span class="p">,</span> <span class="n">lang_set</span> <span class="ow">in</span> <span class="n">language_groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">lang_group</span> <span class="ow">in</span> <span class="n">exclude_langs</span><span class="p">:</span>
+            <span class="n">exclude_langs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lang_set</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lang_group</span> <span class="ow">in</span> <span class="n">required_langs</span><span class="p">:</span>
+            <span class="n">required_langs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lang_set</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lang_group</span> <span class="ow">in</span> <span class="n">allowed_langs</span><span class="p">:</span>
+            <span class="n">allowed_langs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lang_set</span><span class="p">)</span>
+
+    <span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">exclude</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">exclude_langs</span><span class="p">)</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">required_langs</span><span class="p">)</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">languages</span><span class="o">.</span><span class="n">allowed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">allowed_langs</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="RTN.fetch.trash_handler" class="doc doc-heading">
+            <code class=" language-python"><span class="n">trash_handler</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">)</span></code>
+
+<a href="#RTN.fetch.trash_handler" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Check if the title is trash based on user settings.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>RTN/fetch.py</code></summary>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">trash_handler</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ParsedData</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">SettingsModel</span><span class="p">,</span> <span class="n">failed_keys</span><span class="p">:</span> <span class="nb">set</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the title is trash based on user settings.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">&quot;remove_all_trash&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">quality</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CAM&quot;</span><span class="p">,</span> <span class="s2">&quot;PDTV&quot;</span><span class="p">,</span> <span class="s2">&quot;R5&quot;</span><span class="p">,</span> <span class="s2">&quot;SCR&quot;</span><span class="p">,</span> <span class="s2">&quot;TeleCine&quot;</span><span class="p">,</span> <span class="s2">&quot;TeleSync&quot;</span><span class="p">]:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;trash_quality&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;HQ Clean Audio&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">audio</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;trash_audio&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;trash&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">trash</span><span class="p">:</span>
+            <span class="n">failed_keys</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;trash_flag&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.gg/rivenmedia" target="_blank" rel="noopener" title="discord.gg" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/dreulavelle/rank-torrent-name" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.instant", "navigation.instant.progress", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.pruning", "navigation.path", "search.suggest", "search.share", "content.code.annotate", "content.code.copy", "announce.dismiss"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../javascripts/extra.js"></script>
+      
+    
+  </body>
+</html>
